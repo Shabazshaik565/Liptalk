@@ -60,6 +60,7 @@ export const COLORS = {
   borderMuted: 'rgba(255, 255, 255, 0.08)',
 
   // Typography
+  text: '#F9FAFB',            // Standard Text
   textPrimary: '#F9FAFB',     // 98% Pure Crisp White
   textSecondary: '#E2E8F0',   // 88% Soft High-Readability Light Grey
   textMuted: '#94A3B8',       // Subtitles, Notes & Secondary Captions

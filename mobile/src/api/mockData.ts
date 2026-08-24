@@ -32,6 +32,11 @@ import {
   AuditLogItem,
   AdminPlatformMetrics,
   FeatureFlags,
+  UserPreferences,
+  LocalizationConfig,
+  AiUserPreference,
+  AiUserMemoryItem,
+  AiUsageSummary,
 } from '../types';
 
 export const CURRENT_USER: User = {
@@ -851,6 +856,118 @@ export const MARKETPLACE_LISTINGS_DATA: MarketplaceListingItem[] = [
       },
     },
   },
+  {
+    id: 'list_gt_01',
+    title: 'Kirana Wholesale FMCG & Staples Direct Distribution',
+    slug: 'kirana-wholesale-fmcg-staples',
+    description: 'Bulk procurement and direct warehouse dispatch for 500+ neighborhood GT Kirana stores with next-morning credit delivery.',
+    category: 'General Trade (GT)',
+    pricingType: 'NEGOTIABLE',
+    price: 45000,
+    currency: 'INR',
+    location: 'Hyderabad & Bangalore',
+    tags: ['General Trade', 'Kirana', 'FMCG Wholesale', 'Daily Dispatch'],
+    imageUrls: ['https://images.unsplash.com/photo-1542838132-92c53300491e?w=600'],
+    status: 'PUBLISHED',
+    promotionType: 'FEATURED',
+    averageRating: 4.9,
+    reviewsCount: 38,
+    requestsCount: 114,
+    isSaved: false,
+    recommendedReason: 'Top-rated General Trade Kirana network supplier',
+    synergyScore: 99,
+    createdAt: '2026-02-18T10:00:00Z',
+    provider: {
+      id: 'usr_gt_01',
+      role: 'BUSINESS',
+      profile: {
+        id: 'prof_gt_01',
+        userId: 'usr_gt_01',
+        firstName: 'Ramesh',
+        lastName: 'Patel',
+        fullName: 'Ramesh Patel',
+        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+        headline: 'Managing Director @ Bharat Kirana Supply',
+        bio: 'Connecting local general trade merchants with direct mills.',
+        city: 'Hyderabad',
+        country: 'India',
+        skills: ['Kirana Distribution', 'FMCG', 'Credit Financing'],
+        interests: ['Retail Tech', 'B2B Trade'],
+        profileCompletionPercentage: 100,
+      },
+      businesses: [
+        {
+          id: 'biz_gt_01',
+          ownerUserId: 'usr_gt_01',
+          businessName: 'Bharat Kirana Wholesale Network',
+          logoUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=150',
+          categoryName: 'General Trade',
+          description: 'Unified Kirana trade distributor.',
+          city: 'Hyderabad',
+          country: 'India',
+          isVerified: true,
+          services: ['Next-day Kirana Delivery', 'Micro-Credit Invoicing'],
+          products: ['Staples', 'Spices', 'Packaged Goods'],
+        },
+      ],
+    },
+  },
+  {
+    id: 'list_mt_01',
+    title: 'Modern Trade Supermarket Shelf Space & Chain Logistics',
+    slug: 'modern-trade-supermarket-shelf-space',
+    description: 'Direct vendor onboarding, automated EDI invoicing, and prime aisle merchandising across 120+ modern trade retail supermarket outlets.',
+    category: 'Modern Trade (MT)',
+    pricingType: 'FIXED',
+    price: 320000,
+    currency: 'INR',
+    location: 'Pan-India (Tier 1 & 2)',
+    tags: ['Modern Trade', 'Supermarket', 'Aisle Merchandising', 'EDI Logistics'],
+    imageUrls: ['https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=600'],
+    status: 'PUBLISHED',
+    promotionType: 'FEATURED',
+    averageRating: 5.0,
+    reviewsCount: 52,
+    requestsCount: 160,
+    isSaved: false,
+    recommendedReason: 'Direct modern trade supermarket enterprise partnership',
+    synergyScore: 97,
+    createdAt: '2026-02-20T10:00:00Z',
+    provider: {
+      id: 'usr_mt_01',
+      role: 'BUSINESS',
+      profile: {
+        id: 'prof_mt_01',
+        userId: 'usr_mt_01',
+        firstName: 'Vikram',
+        lastName: 'Singhania',
+        fullName: 'Vikram Singhania',
+        avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+        headline: 'VP of Commercial Operations @ Apex Retail MT',
+        bio: 'Powering high-velocity modern trade supermarket supply chains.',
+        city: 'Mumbai',
+        country: 'India',
+        skills: ['Modern Trade', 'Supermarket Operations', 'FMCG Distribution'],
+        interests: ['Retail Chains', 'Supply Chain Tech'],
+        profileCompletionPercentage: 100,
+      },
+      businesses: [
+        {
+          id: 'biz_mt_01',
+          ownerUserId: 'usr_mt_01',
+          businessName: 'Apex Modern Trade & Hypermarket Hub',
+          logoUrl: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=150',
+          categoryName: 'Modern Trade',
+          description: 'Tier-1 modern trade retail chain distributor.',
+          city: 'Mumbai',
+          country: 'India',
+          isVerified: true,
+          services: ['Hypermarket Shelf Listing', 'Central Warehouse Supply'],
+          products: ['Packaged Foods', 'Personal Care', 'Home Essentials'],
+        },
+      ],
+    },
+  },
 ];
 
 export const REWARDS_DATA: RewardItem[] = [
@@ -1391,7 +1508,1250 @@ export const FEATURE_FLAGS_DATA: FeatureFlags = {
   trustVerification: true,
   marketplaceMonetization: true,
   realtimeVoiceVideo: true,
+  globalization: true,
 };
+
+export const USER_PREFERENCES_DATA: UserPreferences = {
+  id: 'pref_usr_01',
+  userId: 'usr_curr_01',
+  language: 'en',
+  country: 'India',
+  region: 'Tamil Nadu',
+  city: 'Chennai',
+  timezone: 'Asia/Kolkata',
+  currency: 'INR',
+  locale: 'en-IN',
+  isLocationPublic: false,
+  allowRegionalDiscovery: true,
+  autoDetectTimezone: false,
+};
+
+export const LOCALIZATION_CONFIG_DATA: LocalizationConfig = {
+  defaultLanguage: 'en',
+  defaultCountry: 'India',
+  defaultCurrency: 'INR',
+  defaultTimezone: 'Asia/Kolkata',
+  languages: [
+    { code: 'en', name: 'English', nativeName: 'English', direction: 'ltr', isDefault: true },
+    { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்', direction: 'ltr' },
+    { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', direction: 'ltr' },
+    { code: 'te', name: 'Telugu', nativeName: 'తెలుగు', direction: 'ltr' },
+    { code: 'es', name: 'Spanish', nativeName: 'Español', direction: 'ltr' },
+    { code: 'fr', name: 'French', nativeName: 'Français', direction: 'ltr' },
+    { code: 'de', name: 'German', nativeName: 'Deutsch', direction: 'ltr' },
+    { code: 'ar', name: 'Arabic', nativeName: 'العربية', direction: 'rtl' },
+  ],
+  currencies: [
+    { code: 'INR', name: 'Indian Rupee', symbol: '₹', symbolPosition: 'prefix', decimalPlaces: 2, exchangeRateToINR: 1.0 },
+    { code: 'USD', name: 'US Dollar', symbol: '$', symbolPosition: 'prefix', decimalPlaces: 2, exchangeRateToINR: 86.5 },
+    { code: 'EUR', name: 'Euro', symbol: '€', symbolPosition: 'prefix', decimalPlaces: 2, exchangeRateToINR: 91.2 },
+    { code: 'GBP', name: 'British Pound', symbol: '£', symbolPosition: 'prefix', decimalPlaces: 2, exchangeRateToINR: 109.8 },
+    { code: 'AED', name: 'UAE Dirham', symbol: 'AED', symbolPosition: 'prefix', decimalPlaces: 2, exchangeRateToINR: 23.55 },
+    { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$', symbolPosition: 'prefix', decimalPlaces: 2, exchangeRateToINR: 64.8 },
+    { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', symbolPosition: 'prefix', decimalPlaces: 2, exchangeRateToINR: 56.4 },
+    { code: 'CAD', name: 'Canadian Dollar', symbol: 'CA$', symbolPosition: 'prefix', decimalPlaces: 2, exchangeRateToINR: 61.2 },
+    { code: 'JPY', name: 'Japanese Yen', symbol: '¥', symbolPosition: 'prefix', decimalPlaces: 0, exchangeRateToINR: 0.57 },
+  ],
+  countries: [
+    {
+      code: 'IN',
+      name: 'India',
+      nativeName: 'भारत',
+      defaultLanguage: 'en',
+      defaultCurrency: 'INR',
+      defaultTimezone: 'Asia/Kolkata',
+      regions: ['Tamil Nadu', 'Karnataka', 'Maharashtra', 'Delhi NCR', 'Telangana', 'Kerala', 'Gujarat', 'West Bengal'],
+    },
+    {
+      code: 'US',
+      name: 'United States',
+      nativeName: 'United States',
+      defaultLanguage: 'en',
+      defaultCurrency: 'USD',
+      defaultTimezone: 'America/New_York',
+      regions: ['California', 'New York', 'Texas', 'Washington', 'Florida', 'Illinois', 'Massachusetts'],
+    },
+    {
+      code: 'AE',
+      name: 'United Arab Emirates',
+      nativeName: 'الإمارات',
+      defaultLanguage: 'ar',
+      defaultCurrency: 'AED',
+      defaultTimezone: 'Asia/Dubai',
+      regions: ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman'],
+    },
+    {
+      code: 'GB',
+      name: 'United Kingdom',
+      nativeName: 'United Kingdom',
+      defaultLanguage: 'en',
+      defaultCurrency: 'GBP',
+      defaultTimezone: 'Europe/London',
+      regions: ['Greater London', 'Scotland', 'North West', 'West Midlands'],
+    },
+    {
+      code: 'SG',
+      name: 'Singapore',
+      nativeName: 'Singapore',
+      defaultLanguage: 'en',
+      defaultCurrency: 'SGD',
+      defaultTimezone: 'Asia/Singapore',
+      regions: ['Central', 'East', 'North', 'West'],
+    },
+    {
+      code: 'DE',
+      name: 'Germany',
+      nativeName: 'Deutschland',
+      defaultLanguage: 'de',
+      defaultCurrency: 'EUR',
+      defaultTimezone: 'Europe/Berlin',
+      regions: ['Bavaria', 'Berlin', 'North Rhine-Westphalia', 'Baden-Württemberg', 'Hesse'],
+    },
+    {
+      code: 'FR',
+      name: 'France',
+      nativeName: 'France',
+      defaultLanguage: 'fr',
+      defaultCurrency: 'EUR',
+      defaultTimezone: 'Europe/Paris',
+      regions: ['Île-de-France', 'Auvergne-Rhône-Alpes', 'Provence-Alpes-Côte d\'Azur'],
+    },
+    {
+      code: 'AU',
+      name: 'Australia',
+      nativeName: 'Australia',
+      defaultLanguage: 'en',
+      defaultCurrency: 'AUD',
+      defaultTimezone: 'Australia/Sydney',
+      regions: ['New South Wales', 'Victoria', 'Queensland', 'Western Australia'],
+    },
+    {
+      code: 'CA',
+      name: 'Canada',
+      nativeName: 'Canada',
+      defaultLanguage: 'en',
+      defaultCurrency: 'CAD',
+      defaultTimezone: 'America/Toronto',
+      regions: ['Ontario', 'British Columbia', 'Quebec', 'Alberta'],
+    },
+  ],
+  timezones: [
+    'Asia/Kolkata',
+    'Asia/Dubai',
+    'Asia/Singapore',
+    'Asia/Tokyo',
+    'Europe/London',
+    'Europe/Paris',
+    'Europe/Berlin',
+    'America/New_York',
+    'America/Chicago',
+    'America/Los_Angeles',
+    'America/Toronto',
+    'Australia/Sydney',
+    'UTC',
+  ],
+};
+
+// ==========================================
+// PHASE 9: AI FOUNDATION MOCK DATA
+// ==========================================
+
+export const AI_USER_PREFERENCES_DATA: AiUserPreference = {
+  id: 'pref_ai_01',
+  userId: 'usr_curr_01',
+  aiPersonalizationEnabled: true,
+  aiMemoryEnabled: true,
+  aiContentAssistanceEnabled: true,
+  aiRecommendationsEnabled: true,
+  aiTranslationEnabled: true,
+  aiAutonomousReadEnabled: true,
+  aiAutonomousWriteEnabled: false,
+  aiHighImpactConfirmEnabled: true,
+  dataClassificationLevel: 'STANDARD',
+  allowedScopes: ['ai.read', 'ai.search', 'ai.recommend', 'ai.summarize', 'ai.translate', 'ai.draft'],
+};
+
+export const AI_MEMORIES_DATA: AiUserMemoryItem[] = [
+  {
+    id: 'mem_01',
+    userId: 'usr_curr_01',
+    category: 'INTEREST',
+    key: 'Core Industry Focus',
+    value: 'Cross-border B2B Supply Chain & High-Scale React Native Mobile Tech',
+    confidence: 1.0,
+    isPinned: true,
+    createdAt: '2026-02-15T10:00:00Z',
+    updatedAt: '2026-02-15T10:00:00Z',
+  },
+  {
+    id: 'mem_02',
+    userId: 'usr_curr_01',
+    category: 'PREFERENCE',
+    key: 'Preferred Communication Tone',
+    value: 'Executive professional, concise bullet points, zero spam',
+    confidence: 0.95,
+    isPinned: false,
+    createdAt: '2026-02-18T14:30:00Z',
+    updatedAt: '2026-02-18T14:30:00Z',
+  },
+  {
+    id: 'mem_03',
+    userId: 'usr_curr_01',
+    category: 'SAVED_CONTEXT',
+    key: 'Active Target Regions',
+    value: 'India (Bangalore, Hyderabad) and United Arab Emirates (Dubai)',
+    confidence: 0.98,
+    isPinned: false,
+    createdAt: '2026-02-20T09:15:00Z',
+    updatedAt: '2026-02-20T09:15:00Z',
+  },
+];
+
+export const AI_USAGE_DATA: AiUsageSummary = {
+  userId: 'usr_curr_01',
+  totalRequests: 24,
+  totalTokens: 14820,
+  estimatedCostUsd: 0.0084,
+  recentRequests: [
+    {
+      id: 'req_01',
+      feature: 'ASSISTANT',
+      model: 'gemini-1.5-flash',
+      provider: 'GEMINI',
+      inputTokens: 320,
+      outputTokens: 180,
+      estimatedCostUsd: 0.0001,
+      latencyMs: 340,
+      status: 'SUCCESS',
+      createdAt: '2026-08-23T16:40:00Z',
+    },
+    {
+      id: 'req_02',
+      feature: 'SEARCH',
+      model: 'text-embedding-004',
+      provider: 'GEMINI',
+      inputTokens: 48,
+      outputTokens: 0,
+      estimatedCostUsd: 0.00001,
+      latencyMs: 120,
+      status: 'SUCCESS',
+      createdAt: '2026-08-23T16:42:00Z',
+    },
+    {
+      id: 'req_03',
+      feature: 'SMART_NEED',
+      model: 'gemini-1.5-flash',
+      provider: 'GEMINI',
+      inputTokens: 210,
+      outputTokens: 290,
+      estimatedCostUsd: 0.00012,
+      latencyMs: 410,
+      status: 'SUCCESS',
+      createdAt: '2026-08-23T16:45:00Z',
+    },
+  ],
+};
+
+// ==========================================
+// PHASE 13: GLOBAL COORDINATION MOCK DATA
+// ==========================================
+
+export const GLOBAL_GOALS_DATA = [
+  {
+    id: 'goal_01',
+    ownerId: 'usr_curr_01',
+    scope: 'COMMUNITY' as const,
+    title: 'Open FMCG Supply Chain Gateway',
+    description: 'Global initiative to connect independent Kirana merchants with regional agricultural mills and transparent logistics.',
+    objectives: [
+      'Unify 500+ regional grain mills onto standard open escrow APIs',
+      'Deploy verified B2B price discovery radar across 4 states',
+      'Coordinate decentralized community delivery fleets',
+    ],
+    resources: [
+      { title: 'Open Escrow Architecture Spec v2.1', url: 'https://docs.liptalk.io/escrow', type: 'DOC' },
+      { title: 'Regional Mill Price Index Dataset', url: 'https://data.liptalk.io/mills', type: 'DATASET' },
+    ],
+    assignedAgentIds: ['ag_procure_01', 'ag_logistics_02'],
+    progressPercent: 68,
+    status: 'ACTIVE' as const,
+    targetDate: '2026-11-30',
+    milestones: [
+      {
+        id: 'm_01',
+        goalId: 'goal_01',
+        title: 'Publish open mill API & escrow contracts',
+        dueDate: '2026-09-15',
+        isCompleted: true,
+        verifiedBy: 'usr_curr_01',
+        completedAt: '2026-08-15T10:00:00Z',
+      },
+      {
+        id: 'm_02',
+        goalId: 'goal_01',
+        title: 'Deploy live arbitration dashboard in 10 hubs',
+        dueDate: '2026-10-15',
+        isCompleted: false,
+      },
+    ],
+    participants: [
+      {
+        id: 'p_01',
+        goalId: 'goal_01',
+        userId: 'usr_curr_01',
+        role: 'LEAD' as const,
+        contributionsCount: 14,
+        joinedAt: '2026-08-01T10:00:00Z',
+      },
+      {
+        id: 'p_02',
+        goalId: 'goal_01',
+        userId: 'usr_sarah_02',
+        role: 'CONTRIBUTOR' as const,
+        contributionsCount: 6,
+        joinedAt: '2026-08-05T12:00:00Z',
+      },
+    ],
+    createdAt: '2026-08-01T10:00:00Z',
+  },
+];
+
+export const GLOBAL_INITIATIVES_DATA = [
+  {
+    id: 'init_01',
+    creatorId: 'usr_curr_01',
+    title: 'Decentralized Micro-Grant & Mentorship Coalition',
+    mission: 'Provide seed capital, engineering mentorship, and distribution access to 10,000 independent grassroot innovators.',
+    category: 'Economic Empowerment',
+    targetRegions: ['South Asia', 'Southeast Asia', 'East Africa'],
+    partnerCommunityIds: ['comm_kirana_01', 'comm_dev_india'],
+    partnerOrganizationIds: ['org_nexas_01'],
+    supportersCount: 4280,
+    fundingGoalAmount: 5000000,
+    currency: 'INR',
+    fundingRaisedAmount: 3240000,
+    status: 'ACTIVE' as const,
+    createdAt: '2026-07-15T10:00:00Z',
+  },
+];
+
+export const SHARED_WORKSPACES_DATA = [
+  {
+    id: 'ws_01',
+    creatorId: 'usr_curr_01',
+    name: 'Pan-India FMCG & Kirana Logistics Alliance',
+    description: 'Cross-community workspace coordinating grain millers, warehouse managers, and Kirana merchants across 4 state federations.',
+    type: 'CROSS_COMMUNITY' as const,
+    participatingCommunityIds: ['comm_kirana_01', 'comm_logistics_south', 'comm_mandi_north'],
+    members: [
+      { userId: 'usr_curr_01', role: 'ADMIN' as const, joinedAt: '2026-08-01T10:00:00Z' },
+      { userId: 'usr_sarah_02', role: 'MEMBER' as const, joinedAt: '2026-08-05T12:00:00Z' },
+    ],
+    linkedProjectIds: ['proj_supply_01'],
+    linkedKnowledgeIds: ['know_escrow_01'],
+    assignedAgentTeamIds: ['ag_team_001'],
+    isActive: true,
+    createdAt: '2026-08-01T10:00:00Z',
+  },
+];
+
+export const GOVERNANCE_PROPOSALS_DATA = [
+  {
+    id: 'prop_01',
+    creatorId: 'usr_curr_01',
+    targetEntityId: 'comm_kirana_01',
+    scope: 'COMMUNITY' as const,
+    title: 'Adopt Dynamic Escrow Fee Rebalancing for Small-Volume Farmers',
+    description: 'Reduce standard 5% platform escrow fee to 2.5% for all micro-agricultural lots under ₹50,000 to encourage regional producer onboarding.',
+    options: ['APPROVE', 'REJECT', 'NEED_FURTHER_ANALYSIS'],
+    voteCounts: { APPROVE: 42, REJECT: 3, NEED_FURTHER_ANALYSIS: 5 },
+    aiSummary: 'Proposal recommends a 50% discount on escrow fees for transactions under ₹50,000. Core benefit: Boosts onboarding speed of local farmers. Minor trade-off: Slight reduction in platform treasury revenue.',
+    aiKeyTakeaways: [
+      'Directly benefits 1,200+ micro-suppliers across 4 districts',
+      'Zero risk to settlement safety protocols',
+      'Estimated treasury impact offset by +35% expected trade volume',
+    ],
+    status: 'ACTIVE' as const,
+    votingDeadline: '2026-09-01T23:59:59Z',
+    createdAt: '2026-08-20T10:00:00Z',
+    recentVotes: [
+      { userId: 'usr_sarah_02', selectedOption: 'APPROVE', votedAt: '2026-08-21T11:00:00Z' },
+    ],
+  },
+];
+
+export const DECISION_RECORDS_DATA = [
+  {
+    id: 'dec_01',
+    proposalId: 'prop_001',
+    targetEntityId: 'comm_kirana_01',
+    title: 'Approved Open Grain Pricing Telemetry Standard',
+    decisionOutcome: 'PASSED' as const,
+    finalTally: { APPROVE: 88, REJECT: 4, ABSTAIN: 2 },
+    resolutionSummary: 'Collective members overwhelmingly ratified the open telemetry schema for daily grain auction reporting.',
+    actionItems: [
+      'Publish schema v1.2 to LipTalk Developer portal',
+      'Deploy webhook listener for mill nodes',
+    ],
+    governanceType: 'COMMUNITY_DEMOCRATIC_CONSENSUS',
+    resolvedAt: '2026-08-10T14:00:00Z',
+  },
+];
+
+export const KNOWLEDGE_CONFLICTS_DATA = [
+  {
+    id: 'conf_01',
+    topic: 'Optimal Grain Moisture Tolerance for Long-Distance Bulk Rail Transit',
+    conflictingSources: [
+      {
+        sourceName: 'Punjab Agricultural Logistics Working Paper 2026',
+        claim: 'Recommend max 12.0% moisture content to prevent fungal spore proliferation in non-AC boxcars.',
+        publishedDate: '2026-03-10',
+        authorOrCommunity: 'North India Grain Alliance',
+        confidenceScore: 0.92,
+      },
+      {
+        sourceName: 'South India Warehouse Consortium Standard v3',
+        claim: 'Permits up to 13.5% moisture when combined with silica desiccant tarping in transit.',
+        publishedDate: '2026-06-22',
+        authorOrCommunity: 'Deccan Logistics Hub',
+        confidenceScore: 0.89,
+      },
+    ],
+    aiConflictExplanation: 'Discrepancy originates from regional humidity differentials. North India transit recommendations assume dry northern plains rail routes, whereas southern protocols account for monsoon humidity protection measures.',
+    status: 'CONSENSUS_NOTE_ADDED' as const,
+    detectedAt: '2026-08-18T10:00:00Z',
+  },
+];
+
+export const RESEARCH_PROJECTS_DATA = [
+  {
+    id: 'res_01',
+    leadUserId: 'usr_curr_01',
+    title: 'Micro-Escrow Latency Optimization on Edge Hubs',
+    researchQuestion: 'How can offline Kirana nodes securely validate trade commitments without constant 5G connectivity?',
+    hypotheses: [
+      'Cryptographic time-lock commitments can ensure fraud-proof offline settlement buffers for up to 48 hours.',
+    ],
+    evidenceSources: [
+      { title: 'Zero-Knowledge Trade Receipts on BLE', summary: 'Field tests prove 99.8% verification accuracy across 200 pilot stores.', verified: true },
+    ],
+    findingsNotes: [
+      'Offline peer sync achieves sub-50ms token validation over local Wi-Fi / Bluetooth LE beacons.',
+    ],
+    aiSynthesizedReport: 'Research confirms edge-based cryptographic commitments allow reliable micro-trade settlement with deferred reconciliation once connectivity restores.',
+    status: 'IN_PROGRESS' as const,
+    createdAt: '2026-08-12T10:00:00Z',
+  },
+];
+
+export const AGENT_TEAMS_DATA = [
+  {
+    id: 'team_01',
+    ownerId: 'usr_curr_01',
+    name: 'Autonomous FMCG Procurement & Arbitration Squad',
+    mission: 'Coordinate multi-tier supplier price audits, contract drafting, and SLA compliance verification.',
+    agents: [
+      {
+        agentRole: 'COORDINATOR' as const,
+        agentName: 'Orchestrator-Alpha',
+        allowedTools: ['search', 'summarize'],
+        maxTokensPerStep: 500,
+      },
+      {
+        agentRole: 'RESEARCHER' as const,
+        agentName: 'Market-Radar-Agent',
+        allowedTools: ['search', 'read_content'],
+        maxTokensPerStep: 800,
+      },
+      {
+        agentRole: 'DOCS' as const,
+        agentName: 'Contract-Synthesizer',
+        allowedTools: ['create_draft', 'translate'],
+        maxTokensPerStep: 1000,
+      },
+      {
+        agentRole: 'QA' as const,
+        agentName: 'Quality-Gatekeeper',
+        allowedTools: ['summarize'],
+        maxTokensPerStep: 400,
+      },
+    ],
+    maxDailySteps: 50,
+    budgetUsdPerMonth: 15,
+    requireHumanGateOnActions: true,
+    status: 'ACTIVE' as const,
+    createdAt: '2026-08-05T10:00:00Z',
+  },
+];
+
+export const IDENTITY_CONTEXT_DATA = {
+  id: 'ctx_01',
+  userId: 'usr_curr_01',
+  activeContextType: 'PERSONAL' as const,
+  availableContexts: [
+    {
+      contextType: 'PERSONAL' as const,
+      entityName: 'Personal Identity',
+      role: 'INDIVIDUAL',
+      reputationScore: 92,
+    },
+    {
+      contextType: 'CREATOR' as const,
+      entityName: 'Nexas Cloud & Architecture Studio',
+      role: 'FOUNDER_CREATOR',
+      reputationScore: 88,
+    },
+    {
+      contextType: 'DEVELOPER' as const,
+      entityName: 'B2B Open Trade Gateway Apps',
+      role: 'VERIFIED_DEVELOPER',
+      reputationScore: 94,
+    },
+    {
+      contextType: 'COMMUNITY_MODERATOR' as const,
+      entityName: 'Kirana Wholesale Traders Guild',
+      role: 'LEAD_MODERATOR',
+      reputationScore: 96,
+    },
+  ],
+  scopedPermissions: ['profile.read', 'projects.write', 'governance.vote'],
+};
+
+// ==========================================
+// PHASE 14: GLOBAL INTELLIGENCE FABRIC MOCK DATA
+// ==========================================
+
+export const MOCK_GRAPH_OVERVIEW = {
+  centerNodeId: 'usr_curr_01',
+  nodes: [
+    { id: 'usr_curr_01', type: 'USER', label: 'Alex Morgan (Founder)', domain: 'PEOPLE' },
+    { id: 'comm_kirana_01', type: 'COMMUNITY', label: 'Kirana Wholesale Guild', domain: 'SOCIAL' },
+    { id: 'proj_supply_01', type: 'PROJECT', label: 'Open FMCG Gateway', domain: 'PROJECTS' },
+    { id: 'creator_studio_01', type: 'CREATOR', label: 'Nexas Architecture Studio', domain: 'CREATORS' },
+    { id: 'event_summit_26', type: 'EVENT', label: 'AgTech Summit 2026', domain: 'EVENTS' },
+    { id: 'agent_procure_01', type: 'AI_AGENT', label: 'Procurement Squad Alpha', domain: 'AI_AGENTS' },
+    { id: 'opp_grain_deal', type: 'OPPORTUNITY', label: '100MT Wheat Tender', domain: 'COMMERCE' },
+  ],
+  edges: [
+    { source: 'usr_curr_01', target: 'comm_kirana_01', type: 'MEMBER_OF', weight: 1.0 },
+    { source: 'usr_curr_01', target: 'proj_supply_01', type: 'CONTRIBUTES_TO', weight: 1.0 },
+    { source: 'proj_supply_01', target: 'agent_procure_01', type: 'USES', weight: 0.95 },
+    { source: 'comm_kirana_01', target: 'event_summit_26', type: 'ATTENDS', weight: 0.8 },
+    { source: 'proj_supply_01', target: 'opp_grain_deal', type: 'RELATED_TO', weight: 0.88 },
+    { source: 'usr_curr_01', target: 'creator_studio_01', type: 'CREATED', weight: 1.0 },
+  ],
+  totalEntitiesCount: 7,
+  totalRelationshipsCount: 6,
+  permissionScope: 'AUTHORIZED_ACTIVE_VIEW',
+};
+
+export const MOCK_DIGITAL_TWINS = [
+  {
+    id: 'twin_personal_01',
+    ownerId: 'usr_curr_01',
+    twinType: 'PERSONAL' as const,
+    displayName: 'Alex Morgan Personal Twin',
+    description: 'Represents active personal goals, learning paths, and high-priority Kirana project tasks.',
+    stateSnapshot: {
+      goals: ['Open FMCG Supply Chain Gateway', 'Pan-India AgTech Coordination'],
+      interests: ['AgTech', 'Supply Chain Escrow', 'Decentralized Architecture'],
+      projects: ['proj_supply_01'],
+      knowledgeTopics: ['Grain logistics', 'Micro-escrow protocols'],
+      communities: ['comm_kirana_01'],
+    },
+    preferences: {
+      ambientBriefingsEnabled: true,
+      recommendationAggressiveness: 'BALANCED' as const,
+      allowAutonomousAgentAssistance: true,
+    },
+    privacyControls: {
+      isDiscoverable: true,
+      shareAggregatedMetricsOnly: true,
+      retainEventMemoryDays: 30,
+      allowCrossDomainInference: true,
+    },
+    isActive: true,
+  },
+  {
+    id: 'twin_creator_01',
+    ownerId: 'usr_curr_01',
+    twinType: 'CREATOR' as const,
+    displayName: 'Nexas Cloud & Architecture Twin',
+    description: 'Represents creator content themes, publishing cadence, and audience demand trends.',
+    stateSnapshot: {
+      contentThemes: ['Distributed Systems', 'AgTech Architecture', 'Web3 Escrow Patterns'],
+      publishingCadence: 'BI_WEEKLY',
+      rulesSummary: 'Technical deep-dives with verified open-source benchmarks.',
+    },
+    preferences: {
+      ambientBriefingsEnabled: true,
+      recommendationAggressiveness: 'EXPLORATORY' as const,
+      allowAutonomousAgentAssistance: true,
+    },
+    privacyControls: {
+      isDiscoverable: true,
+      shareAggregatedMetricsOnly: false,
+      retainEventMemoryDays: 90,
+      allowCrossDomainInference: true,
+    },
+    isActive: true,
+  },
+];
+
+export const MOCK_SIMULATIONS = [
+  {
+    id: 'scen_01',
+    creatorId: 'usr_curr_01',
+    title: 'Move AgTech Summit from Friday to Saturday Weekend',
+    hypothesis: 'Moving event to Saturday increases merchant attendance by 35% with minor venue fee increase.',
+    scope: 'COMMUNITY',
+    startingStateSnapshot: { baselineAttendance: 140, venueCostUsd: 1200 },
+    variablePerturbations: [
+      { variableName: 'Event Day', baselineValue: 'FRIDAY', simulatedValue: 'SATURDAY' },
+      { variableName: 'Ticket Price', baselineValue: 499, simulatedValue: 499, unit: 'INR' },
+    ],
+    timeHorizon: 'EVENT_DAY',
+    status: 'COMPLETED' as const,
+    simulationResults: {
+      expectedOutcomes: [
+        { metric: 'Projected Registrations', deltaPercent: 32.4, outcomeSummary: 'Projected 185 participants (+32.4%)' },
+        { metric: 'Community Conversion', deltaPercent: 18.0, outcomeSummary: 'Higher live Q&A engagement (+18%)' },
+      ],
+      riskFactors: [
+        { riskTitle: 'Weekend Speaker Availability', severity: 'LOW' as const, description: '2 keynotes requested morning slots.' },
+      ],
+      estimatedCostDeltaUsd: 150,
+      uncertaintyConfidencePercent: 88,
+      aiSimulationExecutiveSummary: 'Estimated +32.4% net attendance with strong trader participation. Minimal operational friction.',
+    },
+    isIsolatedSnapshotOnly: true,
+  },
+];
+
+export const MOCK_PREDICTIONS = [
+  {
+    id: 'pred_comm_01',
+    domain: 'COMMUNITY_GROWTH',
+    predictionTitle: 'Kirana Wholesale Guild Active Trader Inflow',
+    forecastStatement: 'Community is projected to add 420–580 verified merchants over the next 90 days.',
+    confidenceScore: 0.89,
+    uncertaintyBand: {
+      lowerBound: 420,
+      expectedValue: 510,
+      upperBound: 580,
+      unit: 'New Verified Members',
+    },
+    influencingSignals: [
+      { signalName: 'Regional Mandi harvest cycle', weight: 0.45, observation: 'Peak post-monsoon trading window' },
+      { signalName: 'Open Escrow API adoption', weight: 0.35, observation: '14 new mill partners integrated' },
+    ],
+    aiExplanationRationale: 'Strong historical correlation between regional milling cycles and cooperative network formation.',
+    horizon: 'NEXT_90_DAYS',
+  },
+  {
+    id: 'pred_mkt_01',
+    domain: 'MARKETPLACE_DEMAND',
+    predictionTitle: 'Premium Mysore Wheat Spot Demand Surge',
+    forecastStatement: 'Demand for certified wheat spot lots expected to increase by 28% next month.',
+    confidenceScore: 0.84,
+    uncertaintyBand: {
+      lowerBound: 20,
+      expectedValue: 28,
+      upperBound: 36,
+      unit: 'Percent Demand Delta',
+    },
+    influencingSignals: [
+      { signalName: 'South India flour mill tender tenders', weight: 0.50, observation: 'Institutional bids opened' },
+    ],
+    aiExplanationRationale: 'Escrow settlement speed is accelerating re-order frequency among repeat procurement buyers.',
+    horizon: 'NEXT_30_DAYS',
+  },
+];
+
+export const MOCK_RECOMMENDATIONS = [
+  {
+    id: 'rec_01',
+    itemType: 'PROJECT',
+    itemId: 'proj_supply_01',
+    itemTitle: 'Open FMCG Supply Chain Gateway',
+    explanationReason: 'Recommended because you actively contribute to Kirana Wholesale Traders community and follow Distributed Escrow topics.',
+    relevanceScore: 0.96,
+    category: 'Collaborative Projects',
+  },
+  {
+    id: 'rec_02',
+    itemType: 'CREATOR_COLLECTIVE',
+    itemId: 'col_01',
+    itemTitle: 'Frontier Architecture & Systems Guild',
+    explanationReason: 'Recommended because 4 members in your network joined this creator pass.',
+    relevanceScore: 0.91,
+    category: 'Creator Alliances',
+  },
+];
+
+export const MOCK_SKILL_GRAPH = [
+  {
+    id: 'skill_zk_escrow',
+    skillName: 'Zero-Knowledge Batch Verification',
+    category: 'CRYPTOGRAPHY_AND_SYSTEMS',
+    description: 'Design and verification of privacy-preserving offline batch state transitions.',
+    relatedSkillIds: ['skill_nest_microservices', 'skill_typeorm_architecture'],
+    learningPathIds: ['path_agtech_protocols'],
+    proficiencyLevelCount: 4,
+  },
+  {
+    id: 'skill_agtech_logistics',
+    skillName: 'Cold-Chain & Mandi Grain Logistics',
+    category: 'AGRICULTURAL_COMMERCE',
+    description: 'Real-time telemetry and quality grading standards across regional warehousing hubs.',
+    relatedSkillIds: ['skill_zk_escrow'],
+    learningPathIds: ['path_supply_chain_lead'],
+    proficiencyLevelCount: 5,
+  },
+];
+
+export const MOCK_EXPERTS = [
+  {
+    id: 'expert_01',
+    userId: 'usr_sarah_02',
+    expertName: 'Dr. Sarah Chen',
+    titleHeadline: 'Principal Systems Architect @ AgriFlow Foundation',
+    verifiedDomains: ['AgTech Protocols', 'Distributed Escrow', 'Multi-Agent Systems'],
+    demonstratedPublicContributions: [
+      { title: 'Zero-Knowledge Offline Batch Escrow Core Implementation', contributionType: 'CODE' as const, year: 2026 },
+      { title: 'Mysore Mill Moisture Standards Research Paper', contributionType: 'RESEARCH' as const, year: 2026 },
+    ],
+    availabilityStatus: 'AVAILABLE_FOR_CONSULTATION',
+    reputationIndex: 96.8,
+    consultationsCompletedCount: 42,
+    isPubliclyListed: true,
+  },
+];
+
+export const MOCK_WEEKLY_BRIEF = {
+  userId: 'usr_curr_01',
+  period: 'Week of Aug 24 - Aug 30, 2026',
+  executiveHeadline: '3 Milestones Delivered • High FMCG Tender Activity • 96/100 Trust Score',
+  keyHighlights: [
+    {
+      category: 'PROJECTS',
+      headline: 'Open FMCG Supply Chain reached 68% milestone completion',
+      details: 'Milestone 1 contracts ratified; peer review with Dr. Sarah Chen completed.',
+    },
+    {
+      category: 'COMMUNITY & GOVERNANCE',
+      headline: 'Proposal #01 Approved by 88% Democratic Majority',
+      details: 'Dynamic escrow fee rebalancing for small-volume farmers successfully enacted.',
+    },
+  ],
+  suggestedWeeklyPriorities: [
+    'Review and sign off on regional grain mill arbitration guidelines.',
+    'Evaluate Co-op creator subscription pass launch scenario in Simulation Lab.',
+  ],
+  aiBriefingGeneratedAt: '2026-08-24T12:00:00Z',
+};
+
+// ==========================================
+// PHASE 15: ADAPTIVE GLOBAL OPERATING ECOSYSTEM MOCKS
+// ==========================================
+
+export const MOCK_IMPROVEMENT_PROPOSALS: ImprovementProposalItem[] = [
+  {
+    id: 'prop_imp_01',
+    category: 'WORKFLOW_LATENCY',
+    title: 'Edge Response Caching for Static Mandi Price Sheets',
+    problemDescription: 'Repetitive LLM calls on identical regional grain price data add ~420ms latency on mobile searches.',
+    evidenceMetrics: {
+      slowWorkflowLatencyMs: 420,
+      errorRatePercent: 0.2,
+      observationsCount: 1420,
+    },
+    proposedChange: 'Deploy 5-minute TTL edge cache for unchanged mandi price sheets.',
+    expectedBenefit: 'Reduces search latency by 45% and saves ~$120/mo in inference tokens.',
+    riskLevel: 'LOW',
+    affectedSubsystems: ['Search Intelligence', 'Edge Gateway'],
+    experimentPlan: 'Canary rollout to 10% South Asia mobile users.',
+    rollbackPlan: 'Instant toggle via feature flag "edge_mandi_cache" with zero downtime.',
+    ownerId: 'usr_curr_01',
+    status: 'EXPERIMENTING',
+  },
+  {
+    id: 'prop_imp_02',
+    category: 'UX_FRICTION',
+    title: 'Smart Digest Mode for High-Volume Creator Notifications',
+    problemDescription: 'Creators receive ~80 individual notifications/day during livestream launches, causing alert fatigue.',
+    evidenceMetrics: {
+      uxDropoffPercent: 18.5,
+      observationsCount: 520,
+    },
+    proposedChange: 'Auto-batch low-priority tipping and comment reactions into hourly summaries.',
+    expectedBenefit: 'Maintains creator engagement while cutting notification interrupts by 65%.',
+    riskLevel: 'LOW',
+    affectedSubsystems: ['Notifications', 'Creator Studio'],
+    experimentPlan: 'A/B test with 50 opt-in verified creators.',
+    rollbackPlan: 'Revert to instant notification mode in user settings.',
+    ownerId: 'usr_curr_01',
+    status: 'PROPOSED',
+  },
+];
+
+export const MOCK_PLATFORM_EXPERIMENTS: PlatformExperimentItem[] = [
+  {
+    id: 'exp_01',
+    experimentKey: 'feed_diversity_boost_v2',
+    title: 'Cross-Community Knowledge Discovery Feed Ranking',
+    hypothesis: 'Injecting 1 verified cross-community knowledge card per 5 posts increases meaningful project collaborations without hurting session duration.',
+    ownerId: 'usr_curr_01',
+    targetSurface: 'FEED',
+    targetAudienceSegment: '10%_GLOBAL_ACTIVE_USERS',
+    durationDays: 14,
+    primaryMetric: 'Project Contribution Inquiries (+15% target)',
+    secondaryMetrics: ['Session Duration (Neutral)', 'Feed Interaction Rate (+5%)'],
+    guardrailMetrics: [
+      { metricName: 'User Feed Mutes', thresholdValue: 2.0, operator: 'LT' },
+      { metricName: 'App Crash Rate', thresholdValue: 0.05, operator: 'LT' },
+    ],
+    rollbackCriteria: 'Auto-disable if Feed Mutes exceed 2.0% or Crash Rate exceeds 0.05%.',
+    liveResults: {
+      sampleSize: 8420,
+      primaryMetricLiftPercent: 18.2,
+      guardrailViolationsCount: 0,
+      statisticallySignificant: true,
+    },
+    status: 'ACTIVE',
+  },
+  {
+    id: 'exp_02',
+    experimentKey: 'voice_intent_haptic_feedback',
+    title: 'Haptic Confirmation on Consequential Voice Actions',
+    hypothesis: 'Providing distinct double-haptic vibration on high-impact voice intents reduces accidental action triggers by 80%.',
+    ownerId: 'usr_curr_01',
+    targetSurface: 'VOICE_ASSISTANT',
+    targetAudienceSegment: 'MOBILE_BETA_USERS',
+    durationDays: 7,
+    primaryMetric: 'Accidental Action Undo Rate (-80% target)',
+    secondaryMetrics: ['Voice Completion Latency'],
+    guardrailMetrics: [
+      { metricName: 'Voice Session Abandonment', thresholdValue: 5.0, operator: 'LT' },
+    ],
+    rollbackCriteria: 'Roll back if abandonment exceeds 5.0%.',
+    liveResults: {
+      sampleSize: 3200,
+      primaryMetricLiftPercent: 84.0,
+      guardrailViolationsCount: 0,
+      statisticallySignificant: true,
+    },
+    status: 'CONCLUDED_SUCCESS',
+  },
+];
+
+export const MOCK_FEATURE_FLAGS: FeatureFlagItem[] = [
+  { key: 'edge_mandi_cache', enabled: true, rolloutPercent: 100, owner: 'Infrastructure Team', description: 'Enable edge caching for mandi pricing' },
+  { key: 'feed_diversity_boost_v2', enabled: true, rolloutPercent: 10, owner: 'Product Intelligence', description: 'Cross-community knowledge injection' },
+  { key: 'multimodal_ocr_v2', enabled: true, rolloutPercent: 50, owner: 'AI Team', description: 'Enhanced OCR processing for agricultural certificates' },
+  { key: 'voice_haptic_v1', enabled: true, rolloutPercent: 100, owner: 'Mobile UX', description: 'Haptic confirmation on voice actions' },
+];
+
+export const MOCK_UX_PROFILE: AdaptiveUxProfileItem = {
+  id: 'ux_prof_01',
+  userId: 'usr_curr_01',
+  activeProfile: 'POWER_USER',
+  frequentToolsPriority: ['/intelligence', '/goals', '/collaboration', '/ai-plans', '/simulation'],
+  attentionPreferences: {
+    smartNotificationBatching: true,
+    batchIntervalMinutes: 30,
+    quietHoursStart: '22:00',
+    quietHoursEnd: '07:00',
+    focusModeActive: false,
+    priorityInboxEnabled: true,
+    digestModeFrequency: 'DAILY_MORNING',
+  },
+  adaptiveNavigationOrder: ['Home', 'Intelligence', 'Workspaces', 'Goals', 'Profile'],
+};
+
+export const MOCK_AI_PLANS: AiPlanItem[] = [
+  {
+    id: 'plan_01',
+    userId: 'usr_curr_01',
+    goalTitle: 'Organize Pan-India Mandi AgTech Logistics Summit',
+    goalDescription: 'Multi-agent orchestration to coordinate 4 regional grain hubs, keynote speakers, and draft pilot escrow contracts.',
+    stepsBreakdown: [
+      {
+        stepIndex: 1,
+        stepTitle: 'Regional Supply Chain Research',
+        agentRole: 'RESEARCH_AGENT',
+        actionType: 'QUERY_GRAPH',
+        description: 'Scan connected communities and identify top 10 grain mill operators.',
+        requiresHumanReview: false,
+        status: 'COMPLETED',
+      },
+      {
+        stepIndex: 2,
+        stepTitle: 'Speaker & Contributor Outreach Drafts',
+        agentRole: 'COMMUNICATION_AGENT',
+        actionType: 'DRAFT_INVITATIONS',
+        description: 'Generate personalized invitations for Dr. Sarah Chen and 4 regional mandi leaders.',
+        requiresHumanReview: true,
+        status: 'COMPLETED',
+      },
+      {
+        stepIndex: 3,
+        stepTitle: 'Event Registration & Escrow Terms Draft',
+        agentRole: 'CONTRACT_AGENT',
+        actionType: 'CREATE_DOCUMENT',
+        description: 'Draft SLA agreements and ticketing tiers for verified merchants.',
+        requiresHumanReview: true,
+        status: 'EXECUTING',
+      },
+      {
+        stepIndex: 4,
+        stepTitle: 'Publish Event & Open Registration',
+        agentRole: 'COORDINATOR_AGENT',
+        actionType: 'PUBLISH_EVENT',
+        description: 'Launch event page and notify 4,280 community members.',
+        requiresHumanReview: true,
+        status: 'PENDING',
+      },
+    ],
+    estimatedCostUsd: 0.042,
+    dataAccessScopes: ['communities.read', 'knowledge.search', 'events.draft'],
+    status: 'IN_PROGRESS',
+  },
+];
+
+export const MOCK_SECURITY_THREATS: SecurityThreatItem[] = [
+  {
+    id: 'threat_01',
+    threatType: 'ANOMALOUS_BURST_IP_ACCESS',
+    title: 'High-Frequency API Query Burst on Unverified Mandi Endpoint',
+    description: 'Detected 450 requests/sec from single non-browser IP range targeting public pricing radar.',
+    targetEntityId: 'ip_192_0_2_44',
+    severity: 'MEDIUM',
+    automatedBoundedResponse: {
+      actionTaken: 'RATE_LIMITED',
+      targetId: 'ip_192_0_2_44',
+      reversible: true,
+      executedAt: '2026-08-24T18:30:00Z',
+    },
+    status: 'AUTO_CONTAINED',
+  },
+  {
+    id: 'threat_02',
+    threatType: 'PROMPT_INJECTION_PROBE',
+    title: 'Adversarial Prompt Injection Probe Deflected',
+    description: 'Input attempted delimiter escape to override agent system instruction. Policy filter blocked query.',
+    targetEntityId: 'agent_procure_01',
+    severity: 'LOW',
+    automatedBoundedResponse: {
+      actionTaken: 'SESSION_TERMINATED',
+      targetId: 'sess_probe_09',
+      reversible: false,
+      executedAt: '2026-08-24T19:15:00Z',
+    },
+    status: 'AUTO_CONTAINED',
+  },
+];
+
+export const MOCK_PLATFORM_HEALTH: PlatformHealthModelItem = {
+  region: 'GLOBAL',
+  overallStatus: 'OPTIMAL_HEALTH',
+  dimensions: {
+    availability: { score: 99.98, status: 'EXCELLENT', note: 'All regional edge routes responsive' },
+    performance: { score: 98.2, averageLatencyMs: 42.0, status: 'EXCELLENT' },
+    security: { score: 99.6, activeThreatsContained: 2, status: 'SECURE' },
+    aiQuality: { score: 98.4, promptInjectionResistance: 99.4, status: 'CERTIFIED' },
+    dataQuality: { score: 99.2, brokenReferencesCount: 0, status: 'HEALTHY' },
+    uxSatisfaction: { score: 95.0, userDropoffRate: 1.2, status: 'STABLE' },
+    costEfficiency: { score: 92.5, budgetUtilizationPercent: 68.0, status: 'WITHIN_BOUNDS' },
+    scalability: { score: 96.0, standbyEdgeWorkers: 8, status: 'READY' },
+  },
+  diagnosticWarnings: [],
+  recordedAt: '2026-08-24T20:00:00Z',
+};
+
+export const MOCK_FEEDBACK_CLUSTERS: FeedbackClusterItem[] = [
+  {
+    id: 'cluster_01',
+    clusterCategory: 'FEATURE_REQUEST',
+    clusterTheme: 'Offline Mobile Escrow Signing for Rural Kirana Outposts',
+    feedbackItemsCount: 42,
+    urgencyLevel: 'HIGH',
+    representativeQuotes: [
+      'Need ability to draft trade agreements when connectivity drops in Mandi sheds.',
+      'Offline BLE beacon synchronization with nearby trucks would help tremendously.',
+    ],
+    aiRoadmapRecommendation: 'Prioritize Phase 15.2 offline-first state synchronization protocol for trade commitments.',
+    status: 'ACCEPTED_INTO_ROADMAP',
+  },
+  {
+    id: 'cluster_02',
+    clusterCategory: 'AI_USABILITY',
+    clusterTheme: 'One-Tap Voice Intent Presets for Quick Inventory Checks',
+    feedbackItemsCount: 28,
+    urgencyLevel: 'MEDIUM',
+    representativeQuotes: [
+      'Love voice orb, want custom shortcuts on home screen for daily wheat spot check.',
+    ],
+    aiRoadmapRecommendation: 'Add customizable voice intent widget to Mobile Personal Dashboard.',
+    status: 'UNDER_REVIEW',
+  },
+];
+
+// ==========================================
+// PHASE 16: GLOBAL COLLECTIVE CREATION MOCKS
+// ==========================================
+
+export const MOCK_IDEAS: IdeaItem[] = [
+  {
+    id: 'idea_01',
+    authorId: 'usr_curr_01',
+    title: 'Decentralized Offline Mandi Escrow over Mesh Network',
+    description: 'Enabling agricultural traders in low-connectivity mandi yards to establish cryptographically signed batch escrow agreements over Bluetooth Low Energy (BLE).',
+    problemStatement: 'Rural mandi hubs in Mysore and Punjab face frequent 2G/3G dropouts during high-frequency morning harvest auctions.',
+    proposedSolution: 'Local mesh synchronization storing verifiable ZK commitments on mobile storage until internet connectivity restores.',
+    category: 'AGRICULTURAL_FINTECH',
+    skillsRequired: ['Zero-Knowledge Proofs', 'BLE Mesh Networking', 'Offline State Sync'],
+    resourcesRequired: ['BLE Testing Beacon Rig', 'Mysore Grain Mill Pilot Partner'],
+    relatedCommunityIds: ['comm_kirana_01', 'comm_agtech_guild'],
+    relatedTopicTags: ['Escrow', 'AgTech', 'OfflineSync'],
+    visibility: 'PUBLIC',
+    aiValidationReport: {
+      factualPrecedents: ['EIP-712 structured signing', 'Bluetooth 5.0 Long Range specification'],
+      sourceReferences: ['Mysore Mandi Auction Survey 2026', 'Open FMCG Protocol Spec v1.4'],
+      feasibilityInferences: ['92% feasibility based on local storage cryptographic primitives'],
+      growthPredictions: ['Estimated 35% adoption lift among unbanked grain cart operators'],
+      validationScore: 94.5,
+    },
+    convertedProjectId: 'proj_supply_01',
+    status: 'CONVERTED_TO_PROJECT',
+    createdAt: '2026-08-24T14:00:00Z',
+  },
+  {
+    id: 'idea_02',
+    authorId: 'usr_sarah_02',
+    title: 'Open Source Grain Moisture Optical Scanner ML Model',
+    description: 'Lightweight mobile computer vision model running locally on smartphone cameras to grade grain moisture content instantly.',
+    problemStatement: 'Manual moisture grading leads to unfair quality disputes between farmers and warehouse buyers.',
+    proposedSolution: 'Edge-quantized MobileNet v4 model detecting moisture discoloration and kernel size.',
+    category: 'COMPUTER_VISION',
+    skillsRequired: ['TensorFlow Lite', 'Edge ML Optimization', 'Agricultural Quality Standards'],
+    resourcesRequired: ['Labeled Wheat/Rice Kernel Dataset (10k images)'],
+    relatedCommunityIds: ['comm_agtech_guild'],
+    relatedTopicTags: ['ComputerVision', 'QualityGrading', 'EdgeAI'],
+    visibility: 'PUBLIC',
+    aiValidationReport: {
+      factualPrecedents: ['MobileNetV4 edge benchmarks', 'ISO 712 Grain moisture measurement standards'],
+      sourceReferences: ['Indian Agricultural Research Institute open datasets'],
+      feasibilityInferences: ['Camera macro lens resolution on budget smartphones is sufficient for 95% grading precision'],
+      growthPredictions: ['Potential deployment across 250+ regional cooperatives in 6 months'],
+      validationScore: 91.0,
+    },
+    convertedProjectId: null,
+    status: 'DISCOVERABLE',
+    createdAt: '2026-08-24T15:30:00Z',
+  },
+];
+
+export const MOCK_HUMAN_AI_TEAMS: HumanAiTeamItem[] = [
+  {
+    id: 'team_01',
+    projectId: 'proj_supply_01',
+    teamName: 'Open FMCG Supply Chain Core Squad',
+    missionStatement: 'Deploying high-speed zero-knowledge verifiable escrow gateways across 14 mandi trade routes.',
+    humanMembers: [
+      { userId: 'usr_curr_01', role: 'OWNER', joinedAt: '2026-08-20T10:00:00Z' },
+      { userId: 'usr_sarah_02', role: 'CONTRIBUTOR', joinedAt: '2026-08-21T14:30:00Z' },
+    ],
+    aiMembers: [
+      {
+        agentId: 'agent_procure_01',
+        agentName: 'Procurement Specialist Agent',
+        agentRole: 'RESEARCH_AGENT',
+        toolAllowlist: ['search', 'read_content', 'summarize'],
+        budgetLimitUsd: 15.0,
+      },
+      {
+        agentId: 'agent_qa_02',
+        agentName: 'Schema Quality Gatekeeper',
+        agentRole: 'QA_AGENT',
+        toolAllowlist: ['validate_json', 'check_signature'],
+        budgetLimitUsd: 10.0,
+      },
+      {
+        agentId: 'agent_pm_03',
+        agentName: 'Sprint Orchestrator AI',
+        agentRole: 'COORDINATOR',
+        toolAllowlist: ['task_summary', 'milestone_check'],
+        budgetLimitUsd: 20.0,
+      },
+    ],
+    aiProjectManagerTelemetry: {
+      activeMilestone: 'Milestone 2 — Regional Mandi BLE Node Stress Testing',
+      identifiedBlockers: ['Requires physical testing verification at Mysore depot on Wednesday.'],
+      progressScore: 78.5,
+      lastReportGeneratedAt: '2026-08-24T18:00:00Z',
+    },
+    status: 'ACTIVE',
+  },
+];
+
+export const MOCK_COLLABORATION_ROOMS: CollaborationRoomItem[] = [
+  {
+    id: 'room_01',
+    projectId: 'proj_supply_01',
+    roomName: 'Gateway Protocol & BLE Mesh Sync Lab',
+    topicFocus: 'Evaluating offline batch verification schemas and message serialization overhead.',
+    activeParticipantIds: ['usr_curr_01', 'usr_sarah_02'],
+    assignedAgentIds: ['agent_procure_01', 'agent_qa_02'],
+    realtimeIntelligence: {
+      liveMeetingSummary: 'Dr. Sarah Chen confirmed EIP-712 formatted payloads can compress to <180 bytes for Bluetooth beacon broadcast.',
+      extractedActionItems: [
+        'Alex Morgan: Deploy benchmark test harness to local emulator.',
+        'Agent QA: Generate fuzzing test cases for out-of-order packet arrival.',
+      ],
+      unresolvedQuestions: [
+        'What is the maximum hop count allowed in high-density mandi shed mesh?',
+      ],
+      suggestedKnowledgeResources: [
+        'Zero-Knowledge Offline Batch Escrow Specification (v1.2)',
+        'Mysore Mill Moisture Standards Research Paper (2026)',
+      ],
+    },
+    status: 'ACTIVE',
+  },
+];
+
+export const MOCK_RESOURCE_REQUESTS: ResourceRequestItem[] = [
+  {
+    id: 'res_req_01',
+    projectId: 'proj_supply_01',
+    title: 'Android Bluetooth Low Energy (BLE) Peripheral Specialist',
+    description: 'Need experienced engineer to optimize mobile background beacon scanning on Android 14+.',
+    category: 'PEOPLE_SKILL',
+    matchCriteria: {
+      skills: ['BLE Mesh Networking', 'Android Native C++', 'Kotlin Core'],
+      locationScope: 'Pan-India or Remote',
+      estimatedEffortHours: 25,
+    },
+    matchedEntityIds: ['usr_sarah_02', 'expert_01'],
+    status: 'MATCHES_FOUND',
+  },
+];
+
+export const MOCK_CONTRIBUTION_LISTINGS: ContributionListingItem[] = [
+  {
+    id: 'contrib_01',
+    projectId: 'proj_supply_01',
+    title: 'Implement Zero-Knowledge Batch Verification Module',
+    description: 'Construct cryptographic proof validator for 100 simultaneous mandi trade commitments.',
+    contributionType: 'DEVELOPMENT',
+    deliverablesSummary: [
+      'Groth16 verifier contract and WebAssembly mobile runner',
+      'Unit tests covering malformed signature rejection',
+      'Integration documentation in Knowledge Graph',
+    ],
+    status: 'OPEN_CALL',
+    assignedContributorId: null,
+    attributionRecord: {
+      verifiedByOwner: true,
+      impactScore: 95.0,
+    },
+  },
+  {
+    id: 'contrib_02',
+    projectId: 'proj_supply_01',
+    title: 'Draft Regional Grain Mandi Arbitration Guidelines',
+    description: 'Author structured consensus bylaws for moisture dispute resolution between farmers and millers.',
+    contributionType: 'RESEARCH',
+    deliverablesSummary: [
+      'Arbitration dispute flow chart and penalty formula',
+      'Review by 2 verified community elders',
+    ],
+    status: 'ASSIGNED',
+    assignedContributorId: 'usr_sarah_02',
+    attributionRecord: {
+      verifiedByOwner: true,
+      impactScore: 92.0,
+    },
+  },
+];
+
+export const MOCK_CERTIFIED_AGENTS: AgentCertificationItem[] = [
+  {
+    id: 'cert_ag_01',
+    agentId: 'agent_procure_01',
+    agentName: 'Mandi Procurement Intelligence Agent',
+    developer: 'LipTalk AgTech Core Lab',
+    certificationTier: 'ENTERPRISE_APPROVED',
+    toolAllowlist: ['search', 'read_content', 'summarize', 'calc_spot_rate'],
+    dataAccessScopes: ['marketplace.read', 'communities.public', 'knowledge.search'],
+    sandboxConstraints: {
+      maxExecutionTimeMs: 15000,
+      maxBudgetPerTaskUsd: 0.05,
+      networkOutboundRestricted: true,
+      fileAccessRestrictedToProject: true,
+    },
+    securityAuditSummary: 'Zero prompt-injection vulnerabilities detected across 150 automated red-teaming permutations.',
+    status: 'ACTIVE',
+  },
+  {
+    id: 'cert_ag_02',
+    agentId: 'agent_qa_02',
+    agentName: 'Cryptographic Schema Validator AI',
+    developer: 'Open Source Security Collective',
+    certificationTier: 'SECURITY_REVIEWED',
+    toolAllowlist: ['validate_json', 'check_signature', 'verify_hash'],
+    dataAccessScopes: ['projects.read_artifacts'],
+    sandboxConstraints: {
+      maxExecutionTimeMs: 5000,
+      maxBudgetPerTaskUsd: 0.01,
+      networkOutboundRestricted: true,
+      fileAccessRestrictedToProject: true,
+    },
+    securityAuditSummary: 'Deterministic schema validator running in isolated WebAssembly micro-sandbox.',
+    status: 'ACTIVE',
+  },
+];
+
+export const MOCK_HUMAN_APPROVAL_REQUESTS: HumanApprovalRequestItem[] = [
+  {
+    id: 'appr_01',
+    requesterAgentOrUserId: 'agent_pm_03',
+    actionType: 'PUBLISH_CONTENT',
+    title: 'Publish AgTech Logistics Gateway Pilot Announcement',
+    reasonAndContext: 'Coordinator Agent prepared press release and community forum announcement for the upcoming Mysore pilot.',
+    targetEntityId: 'proj_supply_01',
+    riskRating: 'MEDIUM',
+    dataScopesAccessed: ['projects.read', 'communities.write_draft'],
+    expectedOutcome: 'Posts announcement across 3 regional agricultural communities (Reach ~4,200 members).',
+    status: 'PENDING',
+    reviewedByUserId: null,
+    reviewerComments: null,
+    createdAt: '2026-08-24T19:00:00Z',
+  },
+  {
+    id: 'appr_02',
+    requesterAgentOrUserId: 'agent_procure_01',
+    actionType: 'EXECUTE_PAYMENT',
+    title: 'Release ₹15,000 Milestone 1 Bounty to Developer',
+    reasonAndContext: 'All 12 Groth16 unit tests passed and cryptographic attestation verified.',
+    targetEntityId: 'contrib_01',
+    riskRating: 'HIGH',
+    dataScopesAccessed: ['escrow.release_funds'],
+    expectedOutcome: 'Direct bank transfer of ₹15,000 from project escrow to verified contributor wallet.',
+    status: 'PENDING',
+    reviewedByUserId: null,
+    reviewerComments: null,
+    createdAt: '2026-08-24T19:45:00Z',
+  },
+];
+
+
+
+
+
+
 
 
 

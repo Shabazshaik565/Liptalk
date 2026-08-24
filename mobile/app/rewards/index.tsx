@@ -8,6 +8,7 @@ import {
   RefreshControl,
   Share,
   Alert,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -110,9 +111,16 @@ export default function RewardsScreen() {
         {/* Wallet Balance Card */}
         <View style={styles.walletCard}>
           <View style={styles.walletTopRow}>
-            <View style={styles.pointsBadge}>
-              <Coins size={15} color={COLORS.accent} />
-              <Text style={styles.pointsBadgeText}>AUDITABLE POINTS LEDGER</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm }}>
+              <Image
+                source={require('../../assets/mascot/mascot_default.png')}
+                style={styles.walletMascot}
+                resizeMode="contain"
+              />
+              <View style={styles.pointsBadge}>
+                <Coins size={14} color={COLORS.accent} />
+                <Text style={styles.pointsBadgeText}>POINTS LEDGER</Text>
+              </View>
             </View>
             <Badge label="Verified Balance" variant="success" size="sm" />
           </View>
@@ -276,6 +284,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  walletMascot: {
+    width: 32,
+    height: 32,
   },
   pointsBadge: {
     flexDirection: 'row',

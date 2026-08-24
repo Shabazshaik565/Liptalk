@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
@@ -78,9 +79,11 @@ export function AskLipTalkSheet({ visible, onClose }: AskLipTalkSheetProps) {
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.titleRow}>
-              <View style={styles.sparkleIcon}>
-                <Sparkles size={16} color={COLORS.accent} />
-              </View>
+              <Image
+                source={require('../../../assets/mascot/mascot_default.png')}
+                style={styles.headerMascot}
+                resizeMode="contain"
+              />
               <View>
                 <Text style={styles.title}>Ask LipTalk Assistant</Text>
                 <Text style={styles.sub}>Intelligent Navigation & Ecosystem Discovery</Text>
@@ -95,6 +98,20 @@ export function AskLipTalkSheet({ visible, onClose }: AskLipTalkSheetProps) {
             {/* Suggested Prompt Pills */}
             {!response && (
               <View style={styles.promptSection}>
+                <View style={styles.mascotWelcomeCard}>
+                  <Image
+                    source={require('../../../assets/mascot/mascot_default.png')}
+                    style={styles.welcomeMascotImg}
+                    resizeMode="contain"
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.welcomeMascotTitle}>How can I help you today?</Text>
+                    <Text style={styles.welcomeMascotSub}>
+                      Ask for matches, find regional opportunities, or explore verified services.
+                    </Text>
+                  </View>
+                </View>
+
                 <Text style={styles.sectionLabel}>SUGGESTED DISCOVERY PROMPTS</Text>
                 <View style={styles.pillsWrap}>
                   {suggestedPrompts.map((p, idx) => (
@@ -206,13 +223,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.sm,
   },
-  sparkleIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+  headerMascot: {
+    width: 38,
+    height: 38,
+  },
+  mascotWelcomeCard: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: 'rgba(139, 92, 246, 0.12)',
+    borderColor: 'rgba(139, 92, 246, 0.25)',
+    borderWidth: 1,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    gap: SPACING.md,
+  },
+  welcomeMascotImg: {
+    width: 52,
+    height: 52,
+  },
+  welcomeMascotTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  welcomeMascotSub: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+    marginTop: 2,
+    lineHeight: 16,
   },
   title: {
     color: COLORS.textPrimary,

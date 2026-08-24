@@ -33,3 +33,5 @@ yarn-debug.log*
 Thumbs.db
 .vscode/
 .idea/
+WhatsApp*.jpeg
+WhatsApp*.jpg

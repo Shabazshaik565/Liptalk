@@ -1,20 +1,23 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AIProvider, NaturalLanguageIntent } from './interfaces/ai-provider.interface';
-import { GeminiAIProvider } from './providers/gemini-ai.provider';
 import { User } from '../../database/entities/user.entity';
 import { Need } from '../../database/entities/need.entity';
 import { Offer } from '../../database/entities/offer.entity';
 import { Opportunity } from '../../database/entities/opportunity.entity';
 import { Community } from '../../database/entities/community.entity';
 import { MarketplaceListing } from '../../database/entities/marketplace-listing.entity';
+import { AiGatewayService } from './gateway/ai-gateway.service';
+import { AiPrivacyService } from './privacy/ai-privacy.service';
+import { PromptRegistryService } from './prompts/prompt-registry.service';
+import { AiMemoryService } from './memory/ai-memory.service';
+import { HeuristicFallbackProvider } from './providers/heuristic-fallback.provider';
 
 @Injectable()
 export class AiService {
   private readonly logger = new Logger(AiService.name);
-  private provider: AIProvider = new GeminiAIProvider();
   private embeddingCache = new Map<string, number[]>();
+  private heuristicProvider = new HeuristicFallbackProvider();
 
   constructor(
     @InjectRepository(User)
@@ -29,19 +32,17 @@ export class AiService {
     private readonly commRepo: Repository<Community>,
     @InjectRepository(MarketplaceListing)
     private readonly listingRepo: Repository<MarketplaceListing>,
+    private readonly gatewayService: AiGatewayService,
+    private readonly privacyService: AiPrivacyService,
+    private readonly promptRegistry: PromptRegistryService,
+    private readonly memoryService: AiMemoryService,
   ) {}
 
   /**
-   * Sanitizes untrusted user text against prompt injection
+   * Sanitizes untrusted user text against prompt injection & credential leaks
    */
   private sanitizeInput(input: string): string {
-    if (!input) return '';
-    return input
-      .replace(/ignore\s+previous\s+instructions/gi, '[filtered]')
-      .replace(/system\s*:\s*/gi, '')
-      .replace(/<\/?script>/gi, '')
-      .slice(0, 1000)
-      .trim();
+    return this.privacyService.sanitizeContext(input);
   }
 
   /**
@@ -55,7 +56,7 @@ export class AiService {
       return this.embeddingCache.get(clean)!;
     }
 
-    const vector = await this.provider.generateEmbedding(clean);
+    const vector = await this.heuristicProvider.generateEmbedding(clean);
     this.embeddingCache.set(clean, vector);
     return vector;
   }
@@ -66,7 +67,7 @@ export class AiService {
   async computeSemanticSimilarity(textA: string, textB: string): Promise<number> {
     const vecA = await this.getEmbedding(textA);
     const vecB = await this.getEmbedding(textB);
-    return this.provider.computeSimilarity(vecA, vecB);
+    return this.heuristicProvider.computeSimilarity(vecA, vecB);
   }
 
   /**
@@ -89,7 +90,7 @@ export class AiService {
         const fullName = `${u.profile?.firstName || ''} ${u.profile?.lastName || ''}`.trim();
         const fullText = `${fullName} ${u.profile?.headline || ''} ${u.profile?.skills?.join(' ') || ''} ${u.businesses?.[0]?.businessName || ''} ${u.businesses?.[0]?.services?.join(' ') || ''}`;
         const vec = await this.getEmbedding(fullText);
-        const score = this.provider.computeSimilarity(queryVector, vec);
+        const score = this.heuristicProvider.computeSimilarity(queryVector, vec);
         return { user: u, score: Math.round(score * 100) };
       }),
     );
@@ -99,7 +100,7 @@ export class AiService {
       listings.map(async (l) => {
         const fullText = `${l.title} ${l.description} ${l.category} ${l.tags?.join(' ') || ''}`;
         const vec = await this.getEmbedding(fullText);
-        const score = this.provider.computeSimilarity(queryVector, vec);
+        const score = this.heuristicProvider.computeSimilarity(queryVector, vec);
         return { listing: l, score: Math.round(score * 100) };
       }),
     );
@@ -109,7 +110,7 @@ export class AiService {
       opportunities.map(async (o) => {
         const fullText = `${o.title} ${o.description} ${o.categoryName} ${o.tags?.join(' ') || ''}`;
         const vec = await this.getEmbedding(fullText);
-        const score = this.provider.computeSimilarity(queryVector, vec);
+        const score = this.heuristicProvider.computeSimilarity(queryVector, vec);
         return { opportunity: o, score: Math.round(score * 100) };
       }),
     );
@@ -119,7 +120,7 @@ export class AiService {
       communities.map(async (c) => {
         const fullText = `${c.name} ${c.description} ${c.category}`;
         const vec = await this.getEmbedding(fullText);
-        const score = this.provider.computeSimilarity(queryVector, vec);
+        const score = this.heuristicProvider.computeSimilarity(queryVector, vec);
         return { community: c, score: Math.round(score * 100) };
       }),
     );
@@ -146,39 +147,46 @@ export class AiService {
   }
 
   /**
-   * Smart Need Creation Assistant
+   * Smart Need Creation Assistant via AI Gateway
    */
-  async assistNeedCreation(draftText: string) {
+  async assistNeedCreation(draftText: string, userId = 'usr_curr_01') {
     const clean = this.sanitizeInput(draftText);
-    const schema = `{"title": string, "category": string, "tags": string[], "suggestedSkills": string[], "descriptionOutline": string, "priority": "MEDIUM"|"HIGH"|"URGENT"}`;
-    return this.provider.generateStructuredJson(
-      `Analyze this business requirement: "${clean}". Suggest category, structured tags, and required skills for LipTalk.`,
-      schema,
-    );
+    return this.gatewayService.executeStructuredJson({
+      userId,
+      feature: 'SMART_NEED',
+      scope: 'ai.draft',
+      promptSlug: 'smart_need.v1',
+      promptVariables: { draftText: clean },
+    });
   }
 
   /**
-   * Smart Offer Creation Assistant
+   * Smart Offer Creation Assistant via AI Gateway
    */
-  async assistOfferCreation(draftText: string) {
+  async assistOfferCreation(draftText: string, userId = 'usr_curr_01') {
     const clean = this.sanitizeInput(draftText);
-    const schema = `{"title": string, "category": string, "tags": string[], "skills": string[], "pricingModel": "FIXED"|"HOURLY"|"RETAINER", "description": string}`;
-    return this.provider.generateStructuredJson(
-      `Analyze this service capability offer: "${clean}". Suggest standard category, tags, and deliverable description.`,
-      schema,
-    );
+    return this.gatewayService.executeStructuredJson({
+      userId,
+      feature: 'SMART_OFFER',
+      scope: 'ai.draft',
+      promptSlug: 'smart_offer.v1',
+      promptVariables: { draftText: clean },
+    });
   }
 
   /**
-   * Smart Opportunity Creation Assistant
+   * Smart Opportunity Creation Assistant via AI Gateway
    */
-  async assistOpportunityCreation(draftText: string) {
+  async assistOpportunityCreation(draftText: string, userId = 'usr_curr_01') {
     const clean = this.sanitizeInput(draftText);
     const schema = `{"title": string, "category": string, "tags": string[], "description": string, "suggestedMilestones": string[]}`;
-    return this.provider.generateStructuredJson(
-      `Analyze this business opportunity scope: "${clean}". Generate a structured project brief and key milestone stages.`,
-      schema,
-    );
+    return this.gatewayService.executeStructuredJson({
+      userId,
+      feature: 'SMART_OPPORTUNITY',
+      scope: 'ai.draft',
+      rawPrompt: `Analyze this business opportunity scope: "${clean}". Generate a structured project brief and key milestone stages.`,
+      schemaDescription: schema,
+    });
   }
 
   /**
@@ -197,7 +205,6 @@ export class AiService {
     const missing: string[] = [];
     let score = 0;
 
-    // Real mathematical completeness calculation
     if (user.profile?.avatarUrl) score += 20;
     else missing.push('Profile Avatar');
 
@@ -236,26 +243,41 @@ export class AiService {
   }
 
   /**
-   * Smart Chat Message Assistance & Rephrasing
+   * Smart Chat Message Assistance & Rephrasing via AI Gateway
    */
-  async assistChatMessage(mode: 'PROFESSIONAL' | 'SHORTEN' | 'PROPOSAL_PITCH', originalText: string) {
+  async assistChatMessage(mode: 'PROFESSIONAL' | 'SHORTEN' | 'PROPOSAL_PITCH', originalText: string, userId = 'usr_curr_01') {
     const clean = this.sanitizeInput(originalText);
-    let prompt = `Rephrase this message to be professional and collaborative: "${clean}"`;
+    const result = await this.gatewayService.executeText({
+      userId,
+      feature: 'CHAT_ASSIST',
+      scope: 'ai.draft',
+      promptSlug: 'chat_refine.v1',
+      promptVariables: { mode, originalText: clean },
+    });
 
-    if (mode === 'SHORTEN') {
-      prompt = `Make this message concise and clear in 2 sentences: "${clean}"`;
-    } else if (mode === 'PROPOSAL_PITCH') {
-      prompt = `Draft a high-converting B2B proposal pitch based on: "${clean}"`;
-    }
-
-    const rephrased = await this.provider.generateText(prompt, { maxTokens: 200 });
-    return { original: clean, suggested: rephrased.trim() };
+    return { original: clean, suggested: result.text.trim() };
   }
 
   /**
-   * LipTalk Assistant Handler ("Ask LipTalk")
+   * Multilingual Translation via AI Gateway
    */
-  async executeAssistantQuery(query: string, userId?: string) {
+  async translateText(text: string, targetLanguage: string, locale = 'en', userId = 'usr_curr_01') {
+    const clean = this.sanitizeInput(text);
+    const result = await this.gatewayService.executeText({
+      userId,
+      feature: 'TRANSLATION',
+      scope: 'ai.translate',
+      promptSlug: 'translation.multilingual.v1',
+      promptVariables: { text: clean, targetLanguage, locale },
+    });
+
+    return { original: clean, targetLanguage, translated: result.text.trim() };
+  }
+
+  /**
+   * LipTalk Assistant Handler ("Ask LipTalk") with Memory Context
+   */
+  async executeAssistantQuery(query: string, userId = 'usr_curr_01') {
     const clean = this.sanitizeInput(query);
     const lower = clean.toLowerCase();
 
@@ -287,13 +309,20 @@ export class AiService {
       };
     }
 
-    const naturalText = await this.provider.generateText(
-      `You are LipTalk Assistant. Answer this user inquiry concisely: "${clean}". Guide them on matching, communities, opportunities, and marketplace.`,
-      { maxTokens: 250 },
-    );
+    // Retrieve user memories for context
+    const memories = await this.memoryService.getUserMemories(userId);
+    const memoryContext = memories.map((m) => `${m.key}: ${m.value}`).join('; ');
+
+    const gatewayResult = await this.gatewayService.executeText({
+      userId,
+      feature: 'ASSISTANT',
+      scope: 'ai.read',
+      promptSlug: 'assistant.v1',
+      promptVariables: { query: clean, context: memoryContext || 'Standard LipTalk ecosystem user' },
+    });
 
     return {
-      reply: naturalText.trim(),
+      reply: gatewayResult.text.trim(),
       action: 'GENERAL_REPLY',
       data: null,
     };

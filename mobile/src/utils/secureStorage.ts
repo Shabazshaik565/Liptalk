@@ -80,6 +80,49 @@ export const secureStorage = {
     }
   },
 
+  async setItem(key: string, value: string): Promise<void> {
+    try {
+      if (Platform.OS === 'web') {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem(key, value);
+        }
+      } else {
+        await SecureStore.setItemAsync(key, value);
+      }
+    } catch (e) {
+      console.warn(`Failed to save item ${key}`, e);
+    }
+  },
+
+  async getItem(key: string): Promise<string | null> {
+    try {
+      if (Platform.OS === 'web') {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          return window.localStorage.getItem(key);
+        }
+        return null;
+      }
+      return await SecureStore.getItemAsync(key);
+    } catch (e) {
+      console.warn(`Failed to retrieve item ${key}`, e);
+      return null;
+    }
+  },
+
+  async removeItem(key: string): Promise<void> {
+    try {
+      if (Platform.OS === 'web') {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.removeItem(key);
+        }
+      } else {
+        await SecureStore.deleteItemAsync(key);
+      }
+    } catch (e) {
+      console.warn(`Failed to remove item ${key}`, e);
+    }
+  },
+
   async clearAll(): Promise<void> {
     await this.removeToken();
     try {

@@ -11,6 +11,7 @@ import { UserProfile } from './profile.entity';
 import { Business } from './business.entity';
 import { Need } from './need.entity';
 import { Offer } from './offer.entity';
+import { UserPreference } from './user-preference.entity';
 
 export enum UserRole {
   INDIVIDUAL = 'INDIVIDUAL',
@@ -64,6 +65,9 @@ export class User {
 
   @OneToOne(() => UserProfile, (profile) => profile.user, { cascade: true })
   profile: UserProfile;
+
+  @OneToOne(() => UserPreference, (pref) => pref.user, { cascade: true })
+  preferences: UserPreference;
 
   @OneToMany(() => Business, (biz) => biz.owner)
   businesses: Business[];

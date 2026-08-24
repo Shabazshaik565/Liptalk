@@ -59,6 +59,21 @@ export class Community {
   @Column({ default: false })
   isVerified: boolean;
 
+  @Column({ default: 'GLOBAL' })
+  scope: string; // 'GLOBAL' | 'COUNTRY' | 'REGIONAL' | 'CITY'
+
+  @Column({ nullable: true })
+  country: string;
+
+  @Column({ nullable: true })
+  region: string;
+
+  @Column({ nullable: true })
+  city: string;
+
+  @Column({ default: 'en' })
+  language: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

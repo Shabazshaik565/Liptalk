@@ -17,6 +17,7 @@ import { Input } from '../../src/components/common/Input';
 import { Button } from '../../src/components/common/Button';
 import { authApi } from '../../src/api/auth.api';
 import { useAuthStore } from '../../src/store/auth.store';
+import { CURRENT_USER } from '../../src/api/mockData';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export default function LoginScreen() {
     try {
       if (authMode === 'password') {
         const res = await authApi.login(identifier, password);
-        setAuth(res.user, res.token);
+        await setAuth(res.user, res.token);
         if (res.user.needsOnboarding) {
           router.replace('/(onboarding)/select-role' as any);
         } else {
@@ -45,6 +46,16 @@ export default function LoginScreen() {
           params: { phone },
         } as any);
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setLoading(true);
+    try {
+      await setAuth(CURRENT_USER, 'demo_token_alex_morgan');
+      router.replace('/(tabs)' as any);
     } finally {
       setLoading(false);
     }
@@ -148,6 +159,16 @@ export default function LoginScreen() {
             variant="primary"
             icon={<ArrowRight size={18} color="#FFFFFF" />}
             style={{ marginTop: SPACING.md }}
+          />
+
+          <Button
+            title="1-Tap Demo Sign In (Executive Pro)"
+            onPress={handleDemoLogin}
+            loading={loading}
+            size="md"
+            variant="glass"
+            icon={<Sparkles size={16} color={COLORS.primaryLight} />}
+            style={{ marginTop: SPACING.sm }}
           />
 
           {/* Footer Links */}

@@ -1,8 +1,11 @@
-import { AIProvider, AICompletionOptions } from '../interfaces/ai-provider.interface';
+import {
+  AIProvider,
+  AICompletionOptions,
+  AIGenerateResult,
+  AIModerationResult,
+  AIClassificationResult,
+} from '../interfaces/ai-provider.interface';
 
-/**
- * Domain-specific semantic taxonomy dictionary for high-precision local embeddings
- */
 const DOMAIN_TAXONOMY: Record<string, string[]> = {
   mobile: ['react native', 'expo', 'ios', 'android', 'flutter', 'swift', 'kotlin', 'mobile app', 'turbomodules'],
   frontend: ['react', 'next.js', 'vue', 'tailwind', 'typescript', 'ui', 'ux', 'web app', 'figma'],
@@ -14,25 +17,47 @@ const DOMAIN_TAXONOMY: Record<string, string[]> = {
   finance: ['accounting', 'gst', 'audit', 'taxation', 'valuation', 'fundraising', 'payroll'],
 };
 
+const TOXIC_PATTERNS = [/kill\s+yourself/i, /hate\s+all\s+\w+/i, /scam\s+link/i, /free\s+crypto\s+giveaway/i, /f\*\*k/i];
+
 export class HeuristicFallbackProvider implements AIProvider {
   readonly name = 'heuristic-fallback';
+  readonly providerType = 'HEURISTIC' as const;
 
-  async generateText(prompt: string, options?: AICompletionOptions): Promise<string> {
+  async isAvailable(): Promise<boolean> {
+    return true;
+  }
+
+  async generateText(prompt: string, options?: AICompletionOptions): Promise<AIGenerateResult> {
+    const startTime = Date.now();
     const lower = prompt.toLowerCase();
+    let text = `LipTalk AI Assistant is ready to help you navigate business synergy, find verified partners, and draft high-impact opportunities.`;
 
-    if (lower.includes('rephrase') || lower.includes('professional')) {
-      return `Thank you for reaching out. We would be delighted to collaborate on this initiative. Could we schedule a brief discussion to review the project scope and alignment?`;
+    if (lower.includes('rephrase') || lower.includes('professional') || lower.includes('chat-assist')) {
+      text = `Thank you for reaching out. We would be delighted to collaborate on this initiative. Could we schedule a brief discussion to review project scope and alignment?`;
+    } else if (lower.includes('summarize')) {
+      text = `Key discussion points: Confirmed technical scope, aligned deliverable timelines, and agreed on next steps for proposal review.`;
+    } else if (lower.includes('translate')) {
+      text = `[Localized translation]: ${prompt.replace(/translate to \w+:/i, '').trim()}`;
     }
-    if (lower.includes('summarize')) {
-      return `Key discussion points: Confirmed technical scope, discussed deliverable timeline, and agreed on next steps for proposal review.`;
-    }
-    return `LipTalk AI Assistant is ready to help you navigate business synergy, find verified partners, and draft high-impact opportunities.`;
+
+    const inputTokens = Math.ceil(prompt.length / 4);
+    const outputTokens = Math.ceil(text.length / 4);
+    const latencyMs = Date.now() - startTime;
+
+    return {
+      text,
+      model: 'heuristic-v1',
+      provider: this.providerType,
+      inputTokens,
+      outputTokens,
+      estimatedCostUsd: 0.0,
+      latencyMs,
+    };
   }
 
   async generateStructuredJson<T = any>(prompt: string, schemaDescription: string, options?: AICompletionOptions): Promise<T> {
     const lower = prompt.toLowerCase();
 
-    // Smart Need / Offer Extraction
     if (lower.includes('need') || lower.includes('requirement')) {
       let category = 'IT & Software Development';
       const tags: string[] = ['Verified Provider'];
@@ -67,10 +92,9 @@ export class HeuristicFallbackProvider implements AIProvider {
       } as unknown as T;
     }
 
-    // Default fallback structured object
     return {
       action: 'GENERAL_ASSIST',
-      keywords: ['business', 'synergy'],
+      keywords: ['business', 'synergy', 'verified'],
       summary: 'Processed natural language request',
     } as unknown as T;
   }
@@ -79,7 +103,6 @@ export class HeuristicFallbackProvider implements AIProvider {
     const normalized = text.toLowerCase();
     const vector: number[] = [];
 
-    // Construct a semantic taxonomy vector
     for (const [domain, keywords] of Object.entries(DOMAIN_TAXONOMY)) {
       let domainScore = 0;
       if (normalized.includes(domain)) domainScore += 3;
@@ -89,12 +112,50 @@ export class HeuristicFallbackProvider implements AIProvider {
       vector.push(domainScore);
     }
 
-    // L2 Normalize
     const magnitude = Math.sqrt(vector.reduce((acc, val) => acc + val * val, 0));
     if (magnitude === 0) {
       return vector.map(() => 0);
     }
     return vector.map((v) => v / magnitude);
+  }
+
+  async moderate(text: string): Promise<AIModerationResult> {
+    const isToxic = TOXIC_PATTERNS.some((pattern) => pattern.test(text));
+    return {
+      isFlagged: isToxic,
+      categories: {
+        hateSpeech: isToxic,
+        harassment: isToxic,
+        sexualContent: false,
+        dangerousContent: isToxic,
+        spamOrPhishing: /free\s+crypto/i.test(text),
+      },
+      confidenceScore: isToxic ? 0.95 : 0.05,
+      reason: isToxic ? 'Triggered prohibited communication pattern' : undefined,
+    };
+  }
+
+  async classify(text: string, categories: string[]): Promise<AIClassificationResult> {
+    const lower = text.toLowerCase();
+    const scores: Record<string, number> = {};
+    let bestCat = categories[0] || 'General';
+    let maxScore = -1;
+
+    for (const cat of categories) {
+      let score = 0.1;
+      if (lower.includes(cat.toLowerCase())) score += 0.8;
+      scores[cat] = score;
+      if (score > maxScore) {
+        maxScore = score;
+        bestCat = cat;
+      }
+    }
+
+    return {
+      primaryCategory: bestCat,
+      confidence: maxScore,
+      allScores: scores,
+    };
   }
 
   computeSimilarity(vectorA: number[], vectorB: number[]): number {

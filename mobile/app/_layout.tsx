@@ -23,11 +23,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     async function initAuth() {
-      const restored = await restoreSession();
-      if (!restored && !user) {
-        // Hydrate demo session for zero-friction interactive preview
-        await setAuth(CURRENT_USER, 'demo_token_alex_morgan');
-      }
+      await restoreSession();
     }
     initAuth();
   }, []);
@@ -44,8 +40,9 @@ export default function RootLayout() {
             },
           }}
         >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
           <Stack.Screen name="chat/index" options={{ headerShown: false }} />
           <Stack.Screen name="chat/[id]" options={{ headerShown: false }} />
@@ -75,8 +72,30 @@ export default function RootLayout() {
           <Stack.Screen name="enterprise/members" options={{ headerShown: false }} />
           <Stack.Screen name="trust/index" options={{ headerShown: false }} />
           <Stack.Screen name="privacy/index" options={{ headerShown: false }} />
+          <Stack.Screen name="privacy/vault" options={{ headerShown: false }} />
           <Stack.Screen name="admin/index" options={{ headerShown: false }} />
           <Stack.Screen name="notifications" options={{ headerShown: false }} />
+          <Stack.Screen name="goals/index" options={{ headerShown: false }} />
+          <Stack.Screen name="collaboration/index" options={{ headerShown: false }} />
+          <Stack.Screen name="governance/index" options={{ headerShown: false }} />
+          <Stack.Screen name="knowledge-network/index" options={{ headerShown: false }} />
+          <Stack.Screen name="agent-teams/index" options={{ headerShown: false }} />
+          <Stack.Screen name="voice/index" options={{ headerShown: false }} />
+          <Stack.Screen name="intelligence/index" options={{ headerShown: false }} />
+          <Stack.Screen name="simulation/index" options={{ headerShown: false }} />
+          <Stack.Screen name="predictions/index" options={{ headerShown: false }} />
+          <Stack.Screen name="skills/index" options={{ headerShown: false }} />
+          <Stack.Screen name="digital-twins/index" options={{ headerShown: false }} />
+          <Stack.Screen name="adaptive/index" options={{ headerShown: false }} />
+          <Stack.Screen name="ai-plans/index" options={{ headerShown: false }} />
+          <Stack.Screen name="experiments/index" options={{ headerShown: false }} />
+          <Stack.Screen name="attention/index" options={{ headerShown: false }} />
+          <Stack.Screen name="security/hub" options={{ headerShown: false }} />
+          <Stack.Screen name="ideas/index" options={{ headerShown: false }} />
+          <Stack.Screen name="human-ai-teams/index" options={{ headerShown: false }} />
+          <Stack.Screen name="contributions/index" options={{ headerShown: false }} />
+          <Stack.Screen name="agent-marketplace/index" options={{ headerShown: false }} />
+          <Stack.Screen name="approvals/index" options={{ headerShown: false }} />
         </Stack>
       </QueryClientProvider>
     </SafeAreaProvider>

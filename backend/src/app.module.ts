@@ -35,6 +35,14 @@ import { TrustSafetyModule } from './modules/trust-safety/trust-safety.module';
 import { PrivacyModule } from './modules/privacy/privacy.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { HealthModule } from './modules/health/health.module';
+import { LocalizationModule } from './modules/localization/localization.module';
+import { DeveloperModule } from './modules/developer/developer.module';
+import { EcosystemModule } from './modules/ecosystem/ecosystem.module';
+import { UniversalModule } from './modules/universal/universal.module';
+import { CoordinationModule } from './modules/coordination/coordination.module';
+import { IntelligenceModule } from './modules/intelligence/intelligence.module';
+import { AdaptationModule } from './modules/adaptation/adaptation.module';
+import { CreationModule } from './modules/creation/creation.module';
 
 @Module({
   imports: [
@@ -96,6 +104,14 @@ import { HealthModule } from './modules/health/health.module';
     PrivacyModule,
     AdminModule,
     HealthModule,
+    LocalizationModule,
+    DeveloperModule,
+    EcosystemModule,
+    UniversalModule,
+    CoordinationModule,
+    IntelligenceModule,
+    AdaptationModule,
+    CreationModule,
   ],
 })
 export class AppModule {}
