@@ -49,6 +49,9 @@ $$\text{NEED / OFFER} \longrightarrow \text{MATCH} \longrightarrow \text{CONNECT
 │   │   └── types/              # Full TypeScript contracts
 │   └── package.json
 │
+├── docs/                       # Strategic plans, architecture documents & specs
+│   └── LIPTALK_STRATEGIC_IMPROVEMENT_PLAN.md  # Product, UI/UX & Architecture Roadmap
+│
 ├── media/                      # Consolidated marketing, branding, & media assets
 │   ├── branding/               # Specifications, poster mockups, and PDFs
 │   ├── promotions/             # Demo videos and promotional clips
@@ -67,6 +70,12 @@ $$\text{NEED / OFFER} \longrightarrow \text{MATCH} \longrightarrow \text{CONNECT
 │
 └── docker-compose.yml          # PostgreSQL (with PostGIS) and Redis services
 ```
+
+---
+
+## 📖 Strategic Improvement Plan
+For the comprehensive Product Strategy, UI/UX Redesign Proposal, and Engineering Roadmap (including NoBroker Disintermediation comparison), see:
+👉 **[LIPTALK_STRATEGIC_IMPROVEMENT_PLAN.md](docs/LIPTALK_STRATEGIC_IMPROVEMENT_PLAN.md)**
 
 ---
 
