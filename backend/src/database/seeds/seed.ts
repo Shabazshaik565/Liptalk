@@ -616,11 +616,152 @@ async function runSeed() {
   }
 
   // ==========================================
+  // PHASE 5: GUILDS & COMMUNITIES SEED
+  // ==========================================
+  const commRepo = AppDataSource.getRepository(Community);
+  const commMemberRepo = AppDataSource.getRepository(CommunityMember);
+  const commPostRepo = AppDataSource.getRepository(CommunityPost);
+
+  let c1 = await commRepo.findOne({ where: { slug: 'bangalore-tech-founders' } });
+  if (!c1) {
+    c1 = await commRepo.save(
+      commRepo.create({
+        name: 'Bangalore Tech Founders & CTOs',
+        slug: 'bangalore-tech-founders',
+        description: 'Exclusive hub for technology executives, full-stack builders, and SaaS architects in Bangalore.',
+        category: 'IT & Software Development',
+        coverImageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600',
+        avatarUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=150',
+        visibility: CommunityVisibility.PUBLIC,
+        owner: alex,
+        memberCount: 428,
+        postCount: 34,
+        isVerified: true,
+        rules: [
+          'Share real technical insights and architectures.',
+          'Post high-budget business opportunities and hiring demands.',
+          'Maintain a collaborative and helpful professional environment.',
+        ],
+      }),
+    );
+
+    await commMemberRepo.save(
+      commMemberRepo.create({
+        community: c1,
+        user: alex,
+        role: CommunityMemberRole.OWNER,
+        status: CommunityMemberStatus.ACTIVE,
+      }),
+    );
+
+    await commPostRepo.save([
+      commPostRepo.create({
+        community: c1,
+        author: alex,
+        type: PostType.ANNOUNCEMENT,
+        title: 'Best practices for React Native offline-first SQLite sync',
+        content: 'We recently transitioned our client architecture from standard REST caching to SQLite local tables with background sync workers. Reduced network payload by 65% and app start latency to 120ms. Anyone else experimenting with WatermelonDB or native TurboModules?',
+        likesCount: 19,
+        commentsCount: 6,
+        isPinned: true,
+      }),
+      commPostRepo.create({
+        community: c1,
+        author: alex,
+        type: PostType.TEXT,
+        title: 'NestJS WebSocket gateway scaling recommendations',
+        content: 'Sharing our benchmark results on scaling socket.io adapters across multi-region Redis clusters. Memory usage stays under 80MB for 10k concurrent channels.',
+        likesCount: 12,
+        commentsCount: 3,
+        isPinned: false,
+      }),
+    ]);
+  }
+
+  let c2 = await commRepo.findOne({ where: { slug: 'b2b-growth-marketing' } });
+  if (!c2) {
+    c2 = await commRepo.save(
+      commRepo.create({
+        name: 'B2B Growth & Lead Gen Guild',
+        slug: 'b2b-growth-marketing',
+        description: 'Performance marketers, LinkedIn outbound specialists, and acquisition strategists sharing proven playbooks.',
+        category: 'Digital Marketing & Growth',
+        coverImageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600',
+        avatarUrl: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=150',
+        visibility: CommunityVisibility.PUBLIC,
+        owner: vikram || alex,
+        memberCount: 312,
+        postCount: 22,
+        isVerified: true,
+        rules: [
+          'Focus on data-backed acquisition strategies.',
+          'No spam or unauthorized promotional links.',
+        ],
+      }),
+    );
+
+    await commMemberRepo.save(
+      commMemberRepo.create({
+        community: c2,
+        user: alex,
+        role: CommunityMemberRole.MEMBER,
+        status: CommunityMemberStatus.ACTIVE,
+      }),
+    );
+  }
+
+  let c3 = await commRepo.findOne({ where: { slug: 'product-design-architects' } });
+  if (!c3) {
+    c3 = await commRepo.save(
+      commRepo.create({
+        name: 'Product Design & UI/UX Architects',
+        slug: 'product-design-architects',
+        description: 'Figma token masters, design system specialists, and UX researchers discussing interaction design and mobile patterns.',
+        category: 'UI/UX & Product Design',
+        coverImageUrl: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=600',
+        avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150',
+        visibility: CommunityVisibility.PUBLIC,
+        owner: priya || alex,
+        memberCount: 265,
+        postCount: 18,
+        isVerified: true,
+      }),
+    );
+
+    await commMemberRepo.save(
+      commMemberRepo.create({
+        community: c3,
+        user: alex,
+        role: CommunityMemberRole.MEMBER,
+        status: CommunityMemberStatus.ACTIVE,
+      }),
+    );
+  }
+
+  let c4 = await commRepo.findOne({ where: { slug: 'saas-legal-compliance' } });
+  if (!c4) {
+    c4 = await commRepo.save(
+      commRepo.create({
+        name: 'SaaS Legal & Corporate Compliance Hub',
+        slug: 'saas-legal-compliance',
+        description: 'Corporate retainers, cross-border MSA contracts, and DPDP compliance advisors for Indian startups.',
+        category: 'Legal & Corporate Compliance',
+        coverImageUrl: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?w=600',
+        avatarUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=150',
+        visibility: CommunityVisibility.PUBLIC,
+        owner: alex,
+        memberCount: 184,
+        postCount: 14,
+        isVerified: true,
+      }),
+    );
+  }
+
+  // ==========================================
   // PHASE 6: LIVE ROOMS & CREATOR SEED
   // ==========================================
   const roomRepo = AppDataSource.getRepository(LiveRoom);
   const contentRepo = AppDataSource.getRepository(ProfessionalContent);
-  const commRepo = AppDataSource.getRepository(Community);
 
   const existingRoom = await roomRepo.findOne({ where: { title: 'Bangalore CTOs: Scaling High-Concurrency WebSockets & Offline Sync' } });
   if (!existingRoom) {
