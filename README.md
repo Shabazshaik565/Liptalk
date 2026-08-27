@@ -16,26 +16,9 @@ $$\text{NEED / OFFER} \longrightarrow \text{MATCH} \longrightarrow \text{CONNECT
 
 ```text
 /
-├── mobile/                     # Expo React Native App (TypeScript + Expo Router + TanStack Query + Zustand)
-│   ├── app/                    # File-based navigation screens
-│   │   ├── (auth)/             # Login, Register, OTP Verification
-│   │   ├── (onboarding)/       # Role selection, Profile Builder, Needs & Offers Setup
-│   │   ├── (tabs)/             # Discover (Home), Network, Opportunities, Partners, Profile
-│   │   ├── chat/               # Contextual real-time chat rooms
-│   │   ├── leads/              # B2B Lead CRM pipeline
-│   │   ├── opportunities/      # Requirements posting and proposals
-│   │   └── notifications.tsx   # System & Match notification center
-│   ├── src/
-│   │   ├── api/                # Axios client & domain endpoints
-│   │   ├── components/         # Atomic UI design system (MatchCard, LeadCard, OpportunityCard, PartnerCard)
-│   │   ├── constants/          # Theme tokens, Dark Mode palette, typography
-│   │   ├── store/              # Zustand Auth store
-│   │   └── types/              # Full TypeScript contracts
-│   └── package.json
-│
 ├── backend/                    # NestJS Modular Monolith API
 │   ├── src/
-│   │   ├── database/           # TypeORM Entities (PostgreSQL + PostGIS) & Database Seeders
+│   │   ├── database/           # TypeORM Entities (PostgreSQL + PostGIS / SQLite) & Database Seeders
 │   │   ├── modules/
 │   │   │   ├── auth/           # JWT authentication, session tokens & OTP
 │   │   │   ├── matching/       # Multi-factor Deterministic Need <-> Offer Matching Algorithm
@@ -48,6 +31,39 @@ $$\text{NEED / OFFER} \longrightarrow \text{MATCH} \longrightarrow \text{CONNECT
 │   │   ├── app.module.ts
 │   │   └── main.ts             # Swagger documentation & Global Validation Pipes
 │   └── package.json
+│
+├── mobile/                     # Expo React Native App (TypeScript + Expo Router + TanStack Query + Zustand)
+│   ├── app/                    # File-based navigation screens
+│   │   ├── (auth)/             # Login, Register, OTP Verification
+│   │   ├── (onboarding)/       # Role selection, Profile Builder, Needs & Offers Setup
+│   │   ├── (tabs)/             # Discover (Home), Network, Opportunities, Communities, Profile
+│   │   ├── chat/               # Contextual real-time chat rooms
+│   │   ├── leads/              # B2B Lead CRM pipeline
+│   │   ├── opportunities/      # Requirements posting and proposals
+│   │   └── notifications.tsx   # System & Match notification center
+│   ├── src/
+│   │   ├── api/                # Axios client & domain endpoints
+│   │   ├── components/         # Atomic UI design system (MatchCard, LeadCard, OpportunityCard, PartnerCard)
+│   │   ├── constants/          # Theme tokens, Dark Mode palette, typography
+│   │   ├── store/              # Zustand Auth store
+│   │   └── types/              # Full TypeScript contracts
+│   └── package.json
+│
+├── media/                      # Consolidated marketing, branding, & media assets
+│   ├── branding/               # Specifications, poster mockups, and PDFs
+│   ├── promotions/             # Demo videos and promotional clips
+│   └── character-design/       # Mascot and cartoon art assets
+│
+├── scripts/                    # Asset generation & project utilities
+│   ├── extract_mascots.py      # Mascot image isolation & generation
+│   ├── make_neat_mascot.py     # High-res polygon alpha extraction
+│   ├── generate-splash.ps1     # Native splash screen builder
+│   └── setup-mascots.js        # Asset distribution script
+│
+├── tests/                      # Verification test suites
+│   ├── test-ai-foundation.js   # AI gateway & prompt templates suite
+│   ├── test-globalization.js   # Multi-currency & localization suite
+│   └── test-phase*.js / *.ts   # Phase validation test suites
 │
 └── docker-compose.yml          # PostgreSQL (with PostGIS) and Redis services
 ```
