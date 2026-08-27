@@ -40,6 +40,10 @@ export interface UserProfile {
   skills: string[];
   interests: string[];
   profileCompletionPercentage: number;
+  businessName?: string;
+  businessStage?: string;
+  industry?: string;
+  website?: string;
 }
 
 export interface BusinessProfile {

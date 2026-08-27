@@ -138,7 +138,7 @@ export default function ContributionsScreen() {
                   </TouchableOpacity>
                 ) : (
                   <View style={styles.assignedNotice}>
-                    <Ionicons name="person-check" size={14} color="#38BDF8" />
+                    <Ionicons name="checkmark-circle-outline" size={14} color="#38BDF8" />
                     <Text style={styles.assignedNoticeText}>
                       Assigned to Contributor (Impact: {item.attributionRecord?.impactScore}/100)
                     </Text>

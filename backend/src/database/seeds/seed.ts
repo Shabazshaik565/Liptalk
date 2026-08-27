@@ -467,7 +467,7 @@ async function runSeed() {
         leadNoteRepo.create({
           lead: l1,
           author: alex,
-          content: 'Shared architecture wireframes and milestone timeline. Client agreed on 45-day deliverable scope.',
+          noteText: 'Shared architecture wireframes and milestone timeline. Client agreed on 45-day deliverable scope.',
         }),
       );
 
@@ -486,7 +486,7 @@ async function runSeed() {
         leadNoteRepo.create({
           lead: l2,
           author: alex,
-          content: 'Introductory design sync call completed. Preparing Figma component tokens sample.',
+          noteText: 'Introductory design sync call completed. Preparing Figma component tokens sample.',
         }),
       );
     }

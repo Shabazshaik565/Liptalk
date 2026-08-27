@@ -37,6 +37,21 @@ import {
   AiUserPreference,
   AiUserMemoryItem,
   AiUsageSummary,
+  ImprovementProposalItem,
+  PlatformExperimentItem,
+  FeatureFlagItem,
+  AdaptiveUxProfileItem,
+  AiPlanItem,
+  SecurityThreatItem,
+  PlatformHealthModelItem,
+  FeedbackClusterItem,
+  IdeaItem,
+  HumanAiTeamItem,
+  CollaborationRoomItem,
+  ResourceRequestItem,
+  ContributionListingItem,
+  AgentCertificationItem,
+  HumanApprovalRequestItem,
 } from '../types';
 
 export const CURRENT_USER: User = {
