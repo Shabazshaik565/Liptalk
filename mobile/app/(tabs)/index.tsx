@@ -76,7 +76,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Header />
+      <Header onAskAi={() => setAssistantVisible(true)} />
 
       <ScrollView
         style={styles.scrollView}
@@ -295,17 +295,7 @@ export default function HomeScreen() {
         )}
       </ScrollView>
 
-      {/* Floating AI Assistant Action Trigger */}
-      <TouchableOpacity
-        style={styles.floatingAssistantBtn}
-        onPress={() => setAssistantVisible(true)}
-        activeOpacity={0.85}
-      >
-        <Sparkles size={16} color="#FFF" />
-        <Text style={styles.floatingAssistantText}>Ask LipTalk</Text>
-      </TouchableOpacity>
-
-      {/* Slide-Up AI Assistant Sheet */}
+      {/* Slide-Up AI Assistant Sheet (Triggered from Top Header / Search) */}
       <AskLipTalkSheet
         visible={assistantVisible}
         onClose={() => setAssistantVisible(false)}
@@ -473,24 +463,5 @@ const styles = StyleSheet.create({
     color: COLORS.accent,
     fontSize: 9.5,
     fontWeight: '900',
-  },
-  floatingAssistantBtn: {
-    position: 'absolute',
-    bottom: SPACING.tabBarClearance + 8,
-    right: SPACING.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: RADIUS.full,
-    ...SHADOWS.glowPrimary,
-  },
-  floatingAssistantText: {
-    color: '#FFF',
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.4,
   },
 });

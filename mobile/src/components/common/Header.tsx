@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Bell, MessageSquare, ArrowLeft } from 'lucide-react-native';
+import { Bell, MessageSquare, ArrowLeft, Sparkles } from 'lucide-react-native';
 import { COLORS, SPACING, RADIUS, SHADOWS } from '../../constants/theme';
 import { useAuthStore } from '../../store/auth.store';
 
@@ -13,6 +13,7 @@ interface HeaderProps {
   showBack?: boolean;
   onBack?: () => void;
   rightAction?: React.ReactNode;
+  onAskAi?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,6 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   showBack = false,
   onBack,
   rightAction,
+  onAskAi,
 }) => {
   const router = useRouter();
   const isHome = !title || title === 'LIP TALK';
@@ -63,12 +65,23 @@ export const Header: React.FC<HeaderProps> = ({
 
           {showActions && (
             <>
+              {onAskAi && (
+                <TouchableOpacity
+                  style={styles.headerAskAiBtn}
+                  onPress={onAskAi}
+                  activeOpacity={0.82}
+                >
+                  <Sparkles color="#FFFFFF" size={13} />
+                  <Text style={styles.headerAskAiText}>Ask LipTalk</Text>
+                </TouchableOpacity>
+              )}
+
               <TouchableOpacity
                 style={styles.iconButton}
                 onPress={() => router.push('/chat' as any)}
                 activeOpacity={0.7}
               >
-                <MessageSquare color={COLORS.purpleLight} size={18} />
+                <MessageSquare color={COLORS.purpleLight} size={17} />
                 <View style={styles.badgeDot}>
                   <Text style={styles.badgeDotText}>1</Text>
                 </View>
@@ -79,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onPress={() => router.push('/notifications' as any)}
                 activeOpacity={0.7}
               >
-                <Bell color={COLORS.purpleLight} size={18} />
+                <Bell color={COLORS.purpleLight} size={17} />
                 <View style={styles.notificationDot} />
               </TouchableOpacity>
             </>
@@ -139,9 +152,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.sm,
   },
+  headerAskAiBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 11,
+    paddingVertical: 7.5,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    ...SHADOWS.glowPrimary,
+  },
+  headerAskAiText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
   iconButton: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     borderRadius: RADIUS.md,
     backgroundColor: COLORS.bgCard,
     alignItems: 'center',
@@ -153,8 +184,8 @@ const styles = StyleSheet.create({
   },
   notificationDot: {
     position: 'absolute',
-    top: 9,
-    right: 9,
+    top: 7,
+    right: 7,
     width: 7,
     height: 7,
     borderRadius: 3.5,
@@ -162,19 +193,19 @@ const styles = StyleSheet.create({
   },
   badgeDot: {
     position: 'absolute',
-    top: 4,
-    right: 4,
+    top: 3,
+    right: 3,
     backgroundColor: COLORS.primary,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
+    minWidth: 15,
+    height: 15,
+    borderRadius: 7.5,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 3,
   },
   badgeDotText: {
     color: '#FFFFFF',
-    fontSize: 9,
-    fontWeight: '900',
+    fontSize: 8.5,
+    fontWeight: '800',
   },
 });
