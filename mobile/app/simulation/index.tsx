@@ -9,10 +9,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, ShieldCheck, Lock, Play, GitCompare, ArrowUpCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { intelligenceApi } from '../../src/api/domain.api';
 import { SimulationScenarioItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function SimulationScreen() {
   const router = useRouter();
@@ -87,8 +88,8 @@ export default function SimulationScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Simulation Lab & Sandboxes</Text>
@@ -97,20 +98,21 @@ export default function SimulationScreen() {
         <TouchableOpacity
           style={styles.actionBtn}
           onPress={() => Alert.alert('Zero Mutation Guarantee', 'All simulations run on isolated snapshots. Production data is never modified directly.')}
+          activeOpacity={0.8}
         >
-          <Ionicons name="shield-checkmark" size={18} color="#10B981" />
+          <ShieldCheck size={18} color={COLORS.accent} />
         </TouchableOpacity>
       </View>
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Isolation Banner */}
           <View style={styles.sandboxBanner}>
-            <Ionicons name="lock-closed" size={14} color="#38BDF8" />
+            <Lock size={14} color={COLORS.info} />
             <Text style={styles.sandboxBannerText}>
               Sandbox Mode Active: Hypothetical parameter changes are purely probabilistic estimates.
             </Text>
@@ -126,14 +128,14 @@ export default function SimulationScreen() {
             <TextInput
               style={styles.input}
               placeholder="Scenario Title (e.g. Add 2 regional grain hubs)"
-              placeholderTextColor="#64748B"
+              placeholderTextColor={COLORS.textDim}
               value={newTitle}
               onChangeText={setNewTitle}
             />
             <TextInput
-              style={[styles.input, { height: 60 }]}
+              style={[styles.input, { height: 64 }]}
               placeholder="Hypothesis (e.g. Will shorten trade transit latency by 30%)"
-              placeholderTextColor="#64748B"
+              placeholderTextColor={COLORS.textDim}
               multiline
               value={newHypothesis}
               onChangeText={setNewHypothesis}
@@ -143,12 +145,13 @@ export default function SimulationScreen() {
               style={styles.simulateBtn}
               onPress={handleRunCustomSimulation}
               disabled={simulating}
+              activeOpacity={0.85}
             >
               {simulating ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <>
-                  <Ionicons name="play" size={16} color="#FFFFFF" />
+                  <Play size={15} color="#FFFFFF" />
                   <Text style={styles.simulateBtnText}>Run Isolated Simulation</Text>
                 </>
               )}
@@ -158,8 +161,8 @@ export default function SimulationScreen() {
           {/* Active / Historical Scenarios */}
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Simulated Scenarios ({scenarios.length})</Text>
-            <TouchableOpacity style={styles.compareBtn} onPress={handleCompare} disabled={comparing}>
-              <Ionicons name="git-compare-outline" size={14} color="#6366F1" />
+            <TouchableOpacity style={styles.compareBtn} onPress={handleCompare} disabled={comparing} activeOpacity={0.8}>
+              <GitCompare size={14} color={COLORS.primaryLight} />
               <Text style={styles.compareBtnText}>Compare Scenarios</Text>
             </TouchableOpacity>
           </View>
@@ -215,7 +218,7 @@ export default function SimulationScreen() {
                 <Text style={styles.outcomesHeader}>Projected Outcomes (Estimates):</Text>
                 {scen.simulationResults?.expectedOutcomes?.map((out, oIdx) => (
                   <View key={oIdx} style={styles.outcomeRow}>
-                    <Ionicons name="arrow-up-circle" size={14} color="#10B981" />
+                    <ArrowUpCircle size={14} color={COLORS.accent} />
                     <Text style={styles.outcomeText}>{out.outcomeSummary}</Text>
                   </View>
                 ))}
@@ -233,21 +236,29 @@ export default function SimulationScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   actionBtn: {
     width: 36,
     height: 36,
@@ -255,37 +266,42 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(16, 185, 129, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
   },
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
   sandboxBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: 'rgba(56, 189, 248, 0.1)',
-    borderRadius: 8,
-    padding: 10,
+    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    borderRadius: RADIUS.md,
+    padding: 11,
     marginBottom: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.25)',
   },
-  sandboxBannerText: { fontSize: 11, color: '#BAE6FD', flex: 1, lineHeight: 15 },
+  sandboxBannerText: { fontSize: 11, color: '#BAE6FD', flex: 1, lineHeight: 15, fontWeight: '600' },
   card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
-  cardSectionTitle: { fontSize: 16, fontWeight: '700', color: '#F8FAFC', marginBottom: 4 },
-  cardDesc: { fontSize: 12, color: '#94A3B8', lineHeight: 17, marginBottom: 12 },
+  cardSectionTitle: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 4 },
+  cardDesc: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 17, marginBottom: 12 },
   input: {
-    backgroundColor: '#0F172A',
-    borderRadius: 8,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: '#F8FAFC',
+    color: COLORS.textPrimary,
     fontSize: 13,
     marginBottom: 8,
   },
@@ -294,85 +310,93 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#6366F1',
+    backgroundColor: COLORS.primary,
     paddingVertical: 11,
-    borderRadius: 8,
+    borderRadius: RADIUS.md,
+    ...SHADOWS.glowPrimary,
   },
-  simulateBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
+  simulateBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '800' },
   sectionHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
   },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#F8FAFC' },
+  sectionTitle: { fontSize: 15, fontWeight: '800', color: COLORS.textPrimary },
   compareBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
   },
-  compareBtnText: { color: '#6366F1', fontSize: 11, fontWeight: '700' },
+  compareBtnText: { color: COLORS.primaryLight, fontSize: 11, fontWeight: '800' },
   comparisonBox: {
-    backgroundColor: '#0F172A',
-    borderRadius: 12,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: RADIUS.lg,
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#6366F1',
+    borderColor: COLORS.primary,
   },
-  comparisonTitle: { fontSize: 12, fontWeight: '700', color: '#38BDF8', marginBottom: 8 },
+  comparisonTitle: { fontSize: 12, fontWeight: '800', color: COLORS.info, marginBottom: 8 },
   metricRow: {
     paddingVertical: 6,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.borderLight,
   },
-  metricName: { fontSize: 11, color: '#94A3B8', fontWeight: '600' },
+  metricName: { fontSize: 11, color: COLORS.textMuted, fontWeight: '700' },
   metricScores: { flexDirection: 'row', gap: 10, alignItems: 'center', marginTop: 2 },
-  scoreText: { fontSize: 11, color: '#F1F5F9' },
-  winningBadge: { fontSize: 10, color: '#10B981', fontWeight: '700' },
-  synthesisText: { fontSize: 11, color: '#E2E8F0', fontStyle: 'italic', marginTop: 8 },
+  scoreText: { fontSize: 11, color: COLORS.textPrimary },
+  winningBadge: { fontSize: 10.5, color: COLORS.accent, fontWeight: '800' },
+  synthesisText: { fontSize: 11, color: COLORS.textSecondary, fontStyle: 'italic', marginTop: 8, lineHeight: 16 },
   scenarioCard: {
-    backgroundColor: '#111827',
-    borderRadius: 14,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
     padding: 14,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   scenHead: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
   scopeBadge: {
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
   },
-  scopeBadgeText: { color: '#6366F1', fontSize: 10, fontWeight: '700' },
-  confidenceTag: { color: '#10B981', fontSize: 11, fontWeight: '600' },
-  scenTitle: { fontSize: 14, fontWeight: '700', color: '#F1F5F9', marginBottom: 4 },
-  scenHypo: { fontSize: 12, color: '#94A3B8', fontStyle: 'italic', marginBottom: 10 },
+  scopeBadgeText: { color: COLORS.primaryLight, fontSize: 10, fontWeight: '800' },
+  confidenceTag: { color: COLORS.accent, fontSize: 11, fontWeight: '800' },
+  scenTitle: { fontSize: 14.5, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 4 },
+  scenHypo: { fontSize: 12, color: COLORS.textMuted, fontStyle: 'italic', marginBottom: 10 },
   variablesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 },
   vChip: {
-    backgroundColor: '#0F172A',
+    backgroundColor: COLORS.bgInput,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.borderLight,
   },
-  vName: { fontSize: 9, color: '#94A3B8' },
-  vChange: { fontSize: 11, fontWeight: '600', color: '#38BDF8' },
+  vName: { fontSize: 9.5, color: COLORS.textMuted },
+  vChange: { fontSize: 11, fontWeight: '700', color: COLORS.info },
   outcomesBox: {
-    backgroundColor: '#0F172A',
-    borderRadius: 8,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: RADIUS.md,
     padding: 10,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
   },
-  outcomesHeader: { fontSize: 10, fontWeight: '700', color: '#94A3B8', marginBottom: 4 },
-  outcomeRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 },
-  outcomeText: { fontSize: 11, color: '#6EE7B7' },
-  execSummary: { fontSize: 11, color: '#CBD5E1', lineHeight: 15 },
+  outcomesHeader: { fontSize: 10, fontWeight: '800', color: COLORS.textMuted, marginBottom: 4 },
+  outcomeRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+  outcomeText: { fontSize: 11, color: COLORS.accentLight, fontWeight: '600' },
+  execSummary: { fontSize: 11, color: COLORS.textSecondary, lineHeight: 16 },
 });

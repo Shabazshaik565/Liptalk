@@ -9,10 +9,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, Moon, Mail, Star } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { adaptationApi } from '../../src/api/domain.api';
 import { AdaptiveUxProfileItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function AttentionCenterScreen() {
   const router = useRouter();
@@ -65,8 +66,8 @@ export default function AttentionCenterScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Attention & UX Profile</Text>
@@ -76,14 +77,14 @@ export default function AttentionCenterScreen() {
 
       {loading || !uxProfile ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Focus Mode Quick Toggle */}
           <View style={styles.focusCard}>
             <View style={styles.focusRow}>
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 1, paddingRight: SPACING.md }}>
                 <Text style={styles.focusTitle}>Focus Mode</Text>
                 <Text style={styles.focusDesc}>
                   Silence non-essential notification badges and batch alerts into digests.
@@ -92,8 +93,8 @@ export default function AttentionCenterScreen() {
               <Switch
                 value={uxProfile.attentionPreferences.focusModeActive}
                 onValueChange={handleToggleFocus}
-                trackColor={{ false: '#1E293B', true: '#F59E0B' }}
-                thumbColor={uxProfile.attentionPreferences.focusModeActive ? '#FFFFFF' : '#94A3B8'}
+                trackColor={{ false: COLORS.bgElevated, true: COLORS.warning }}
+                thumbColor={uxProfile.attentionPreferences.focusModeActive ? '#FFFFFF' : COLORS.textMuted}
               />
             </View>
           </View>
@@ -114,6 +115,7 @@ export default function AttentionCenterScreen() {
                     uxProfile.activeProfile === tier && styles.tierBtnActive,
                   ]}
                   onPress={() => handleSelectProfileTier(tier)}
+                  activeOpacity={0.82}
                 >
                   <Text
                     style={[
@@ -149,7 +151,7 @@ export default function AttentionCenterScreen() {
                   {uxProfile.attentionPreferences.quietHoursStart} - {uxProfile.attentionPreferences.quietHoursEnd}
                 </Text>
               </View>
-              <Ionicons name="moon-outline" size={18} color="#38BDF8" />
+              <Moon size={18} color={COLORS.info} />
             </View>
 
             <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
@@ -159,7 +161,7 @@ export default function AttentionCenterScreen() {
                   {uxProfile.attentionPreferences.digestModeFrequency?.replace(/_/g, ' ')}
                 </Text>
               </View>
-              <Ionicons name="mail-unread-outline" size={18} color="#10B981" />
+              <Mail size={18} color={COLORS.accent} />
             </View>
           </View>
 
@@ -172,7 +174,7 @@ export default function AttentionCenterScreen() {
             <View style={styles.tagWrap}>
               {uxProfile.frequentToolsPriority.map((tool, idx) => (
                 <View key={idx} style={styles.tag}>
-                  <Ionicons name="star-outline" size={12} color="#F59E0B" />
+                  <Star size={12} color={COLORS.warning} />
                   <Text style={styles.tagText}>{tool}</Text>
                 </View>
               ))}
@@ -185,76 +187,92 @@ export default function AttentionCenterScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
   focusCard: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   focusRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  focusTitle: { fontSize: 16, fontWeight: '700', color: '#F8FAFC', marginBottom: 2 },
-  focusDesc: { fontSize: 12, color: '#94A3B8', lineHeight: 16, maxWidth: '85%' },
+  focusTitle: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 2 },
+  focusDesc: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 16 },
   sectionBox: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#F8FAFC', marginBottom: 4 },
-  sectionDesc: { fontSize: 12, color: '#94A3B8', lineHeight: 16, marginBottom: 12 },
+  sectionTitle: { fontSize: 15, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 4 },
+  sectionDesc: { fontSize: 12, color: COLORS.textMuted, lineHeight: 16, marginBottom: 12 },
   tierGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   tierBtn: {
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: '#0F172A',
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.bgInput,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.borderLight,
   },
-  tierBtnActive: { backgroundColor: '#6366F1', borderColor: '#6366F1' },
-  tierText: { fontSize: 11, fontWeight: '600', color: '#94A3B8' },
-  tierTextActive: { color: '#FFFFFF' },
+  tierBtnActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primaryLight,
+    ...SHADOWS.glowPrimary,
+  },
+  tierText: { fontSize: 11, fontWeight: '700', color: COLORS.textMuted },
+  tierTextActive: { color: '#FFFFFF', fontWeight: '800' },
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 10,
+    paddingVertical: 11,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.borderLight,
   },
-  settingLabel: { fontSize: 13, fontWeight: '600', color: '#F1F5F9', marginBottom: 2 },
-  settingSub: { fontSize: 11, color: '#94A3B8' },
-  settingVal: { fontSize: 11, fontWeight: '700', color: '#10B981' },
+  settingLabel: { fontSize: 13, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 2 },
+  settingSub: { fontSize: 11, color: COLORS.textMuted },
+  settingVal: { fontSize: 11, fontWeight: '800', color: COLORS.accent },
   tagWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
   tag: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#0F172A',
+    gap: 5,
+    backgroundColor: COLORS.bgInput,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
   },
-  tagText: { color: '#CBD5E1', fontSize: 11 },
+  tagText: { color: COLORS.textSecondary, fontSize: 11, fontWeight: '600' },
 });

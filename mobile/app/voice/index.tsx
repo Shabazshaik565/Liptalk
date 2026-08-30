@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,12 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
+  Animated,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, Mic, Zap, Volume2, ArrowRight, Search, ShieldCheck } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { coordinationApi } from '../../src/api/domain.api';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function VoiceScreen() {
   const router = useRouter();
@@ -23,6 +25,35 @@ export default function VoiceScreen() {
   // Multimodal query state
   const [searchQuery, setSearchQuery] = useState('');
   const [multimodalResults, setMultimodalResults] = useState<any[]>([]);
+
+  // Pulse animation for recording orb
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    let animLoop: Animated.CompositeAnimation | null = null;
+    if (isRecording) {
+      animLoop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.15,
+            duration: 600,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1.0,
+            duration: 600,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      animLoop.start();
+    } else {
+      pulseAnim.setValue(1);
+    }
+    return () => {
+      if (animLoop) animLoop.stop();
+    };
+  }, [isRecording]);
 
   const handleSimulateVoice = async (presetText?: string) => {
     const textToSend = presetText || speechText || 'What is the status of my open FMCG supply chain goal?';
@@ -49,8 +80,8 @@ export default function VoiceScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Voice & Multimodal AI</Text>
@@ -58,7 +89,7 @@ export default function VoiceScreen() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Voice Interaction Orb Card */}
         <View style={styles.voiceOrbCard}>
           <Text style={styles.voiceCardTitle}>Voice Assistant Foundation</Text>
@@ -67,21 +98,21 @@ export default function VoiceScreen() {
           </Text>
 
           <View style={styles.orbContainer}>
-            <TouchableOpacity
-              style={[styles.orb, isRecording && styles.orbActive]}
-              onPress={() => {
-                setIsRecording(!isRecording);
-                if (!isRecording) {
-                  setTimeout(() => handleSimulateVoice(), 1500);
-                }
-              }}
-            >
-              <Ionicons
-                name={isRecording ? 'mic' : 'mic-outline'}
-                size={36}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
+            <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+              <TouchableOpacity
+                style={[styles.orb, isRecording && styles.orbActive]}
+                activeOpacity={0.85}
+                onPress={() => {
+                  const nextRec = !isRecording;
+                  setIsRecording(nextRec);
+                  if (nextRec) {
+                    setTimeout(() => handleSimulateVoice(), 1500);
+                  }
+                }}
+              >
+                <Mic size={36} color="#FFFFFF" />
+              </TouchableOpacity>
+            </Animated.View>
             <Text style={styles.orbStatus}>
               {isRecording ? 'Listening & Transcribing...' : 'Tap Mic to Speak'}
             </Text>
@@ -99,8 +130,9 @@ export default function VoiceScreen() {
                 key={idx}
                 style={styles.presetChip}
                 onPress={() => handleSimulateVoice(p)}
+                activeOpacity={0.82}
               >
-                <Ionicons name="flash-outline" size={12} color="#6366F1" />
+                <Zap size={12} color={COLORS.primaryLight} />
                 <Text style={styles.presetText}>{p}</Text>
               </TouchableOpacity>
             ))}
@@ -108,7 +140,7 @@ export default function VoiceScreen() {
 
           {processing && (
             <View style={styles.processingRow}>
-              <ActivityIndicator size="small" color="#6366F1" />
+              <ActivityIndicator size="small" color={COLORS.primary} />
               <Text style={styles.processingText}>Detecting intent & compiling response...</Text>
             </View>
           )}
@@ -128,7 +160,7 @@ export default function VoiceScreen() {
               </Text>
 
               <View style={styles.replyBox}>
-                <Ionicons name="volume-high" size={18} color="#10B981" />
+                <Volume2 size={18} color={COLORS.accent} />
                 <Text style={styles.replyText}>{sessionResult.aiVoiceReplyText}</Text>
               </View>
 
@@ -138,11 +170,12 @@ export default function VoiceScreen() {
                   onPress={() =>
                     router.push(sessionResult.suggestedActionPayload.suggestedRoute as any)
                   }
+                  activeOpacity={0.85}
                 >
                   <Text style={styles.routeBtnText}>
                     Navigate to {sessionResult.suggestedActionPayload.suggestedRoute}
                   </Text>
-                  <Ionicons name="arrow-forward" size={14} color="#FFFFFF" />
+                  <ArrowRight size={14} color="#FFFFFF" />
                 </TouchableOpacity>
               )}
             </View>
@@ -160,12 +193,12 @@ export default function VoiceScreen() {
             <TextInput
               style={styles.searchInput}
               placeholder="Search documents or certificates..."
-              placeholderTextColor="#64748B"
+              placeholderTextColor={COLORS.textDim}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
-            <TouchableOpacity style={styles.searchBtn} onPress={handleMultimodalSearch}>
-              <Ionicons name="search" size={18} color="#FFFFFF" />
+            <TouchableOpacity style={styles.searchBtn} onPress={handleMultimodalSearch} activeOpacity={0.85}>
+              <Search size={16} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
 
@@ -175,9 +208,10 @@ export default function VoiceScreen() {
                 <View style={styles.modalityBadge}>
                   <Text style={styles.modalityText}>{item.modality}</Text>
                 </View>
-                <Text style={styles.safetyTag}>
-                  <Ionicons name="shield-checkmark" size={12} color="#10B981" /> {item.moderationStatus}
-                </Text>
+                <View style={styles.safetyTag}>
+                  <ShieldCheck size={12} color={COLORS.accent} />
+                  <Text style={styles.safetyText}>{item.moderationStatus}</Text>
+                </View>
               </View>
               <Text style={styles.assetTitle}>{item.title}</Text>
               <Text style={styles.assetSummary}>{item.aiVisualSummary}</Text>
@@ -190,132 +224,157 @@ export default function VoiceScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
-  headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
-  scrollContent: { padding: 16, paddingBottom: 40 },
-  voiceOrbCard: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#1E293B',
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
-  voiceCardTitle: { fontSize: 17, fontWeight: '700', color: '#F8FAFC', marginBottom: 6 },
-  voiceCardDesc: { fontSize: 13, color: '#94A3B8', textAlign: 'center', marginBottom: 20 },
+  headerTitleContainer: { flex: 1 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
+  voiceOrbCard: {
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: 'center',
+    ...SHADOWS.sm,
+  },
+  voiceCardTitle: { fontSize: 17, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 6 },
+  voiceCardDesc: { fontSize: 12.5, color: COLORS.textSecondary, textAlign: 'center', marginBottom: 20 },
   orbContainer: { alignItems: 'center', marginBottom: 20 },
   orb: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#6366F1',
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.5,
-    shadowRadius: 16,
-    elevation: 8,
+    ...SHADOWS.glowPrimary,
   },
-  orbActive: { backgroundColor: '#EF4444', transform: [{ scale: 1.08 }] },
-  orbStatus: { color: '#CBD5E1', fontSize: 12, fontWeight: '600', marginTop: 10 },
-  presetsLabel: { fontSize: 11, fontWeight: '700', color: '#94A3B8', alignSelf: 'flex-start', marginBottom: 8 },
+  orbActive: { backgroundColor: COLORS.danger, ...SHADOWS.glowDanger },
+  orbStatus: { color: COLORS.textPrimary, fontSize: 12, fontWeight: '700', marginTop: 12 },
+  presetsLabel: { fontSize: 11, fontWeight: '800', color: COLORS.primaryLight, alignSelf: 'flex-start', marginBottom: 8, letterSpacing: 0.4 },
   presetWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 14 },
   presetChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#0F172A',
+    backgroundColor: COLORS.bgInput,
     paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingVertical: 7,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.borderLight,
   },
-  presetText: { fontSize: 11, color: '#E2E8F0' },
+  presetText: { fontSize: 11, color: COLORS.textSecondary, fontWeight: '600' },
   processingRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 10 },
-  processingText: { fontSize: 12, color: '#94A3B8' },
+  processingText: { fontSize: 12, color: COLORS.primaryLight, fontWeight: '600' },
   sessionBox: {
     width: '100%',
-    backgroundColor: '#0F172A',
-    borderRadius: 12,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: RADIUS.md,
     padding: 14,
     marginTop: 10,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: COLORS.borderLight,
   },
   sessionHead: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  intentBadge: { backgroundColor: 'rgba(56, 189, 248, 0.15)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
-  intentText: { color: '#38BDF8', fontSize: 11, fontWeight: '700' },
-  latencyText: { color: '#94A3B8', fontSize: 11 },
-  transcriptionText: { fontSize: 12, color: '#CBD5E1', fontStyle: 'italic', marginBottom: 10 },
+  intentBadge: {
+    backgroundColor: 'rgba(56, 189, 248, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.3)',
+  },
+  intentText: { color: COLORS.info, fontSize: 11, fontWeight: '800' },
+  latencyText: { color: COLORS.textMuted, fontSize: 11 },
+  transcriptionText: { fontSize: 12, color: COLORS.textSecondary, fontStyle: 'italic', marginBottom: 10 },
   replyBox: {
     flexDirection: 'row',
     gap: 10,
-    backgroundColor: '#1E293B',
-    padding: 10,
-    borderRadius: 8,
+    backgroundColor: COLORS.bgElevated,
+    padding: 12,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
-  replyText: { fontSize: 13, color: '#F1F5F9', flex: 1, lineHeight: 18 },
+  replyText: { fontSize: 13, color: COLORS.textPrimary, flex: 1, lineHeight: 18, fontWeight: '600' },
   routeBtn: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#6366F1',
-    paddingVertical: 8,
-    borderRadius: 6,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 10,
+    borderRadius: RADIUS.md,
+    ...SHADOWS.glowPrimary,
   },
-  routeBtnText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
+  routeBtnText: { color: '#FFFFFF', fontSize: 12, fontWeight: '800' },
   multimodalCard: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
-  sectionHeader: { fontSize: 16, fontWeight: '700', color: '#F8FAFC', marginBottom: 4 },
-  sectionDesc: { fontSize: 12, color: '#94A3B8', marginBottom: 12 },
+  sectionHeader: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 4 },
+  sectionDesc: { fontSize: 12, color: COLORS.textSecondary, marginBottom: 12 },
   searchRow: { flexDirection: 'row', gap: 8, marginBottom: 14 },
   searchInput: {
     flex: 1,
-    backgroundColor: '#0F172A',
-    borderRadius: 8,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: RADIUS.md,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    color: '#F8FAFC',
-    fontSize: 13,
+    color: COLORS.textPrimary,
+    fontSize: 12.5,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.borderLight,
   },
   searchBtn: {
-    backgroundColor: '#6366F1',
+    backgroundColor: COLORS.primary,
     paddingHorizontal: 14,
-    borderRadius: 8,
+    borderRadius: RADIUS.md,
     justifyContent: 'center',
     alignItems: 'center',
+    ...SHADOWS.glowPrimary,
   },
-  assetCard: { backgroundColor: '#0F172A', borderRadius: 10, padding: 12, marginTop: 8 },
+  assetCard: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 12, marginTop: 8, borderWidth: 1, borderColor: COLORS.borderLight },
   assetHead: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  modalityBadge: { backgroundColor: '#1E293B', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  modalityText: { color: '#A855F7', fontSize: 10, fontWeight: '700' },
-  safetyTag: { color: '#10B981', fontSize: 11, fontWeight: '600' },
-  assetTitle: { fontSize: 13, fontWeight: '700', color: '#F1F5F9', marginBottom: 4 },
-  assetSummary: { fontSize: 12, color: '#94A3B8', lineHeight: 16 },
+  modalityBadge: {
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
+  },
+  modalityText: { color: COLORS.primaryLight, fontSize: 10, fontWeight: '800' },
+  safetyTag: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  safetyText: { color: COLORS.accent, fontSize: 11, fontWeight: '700' },
+  assetTitle: { fontSize: 13.5, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 4 },
+  assetSummary: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 16 },
 });

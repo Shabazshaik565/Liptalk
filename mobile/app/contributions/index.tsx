@@ -8,10 +8,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, CheckCircle2, Hand, UserCheck } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { creationApi } from '../../src/api/domain.api';
 import { ContributionListingItem, ResourceRequestItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function ContributionsScreen() {
   const router = useRouter();
@@ -62,8 +63,8 @@ export default function ContributionsScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Contribution Marketplace</Text>
@@ -76,14 +77,16 @@ export default function ContributionsScreen() {
         <TouchableOpacity
           style={[styles.tabBtn, activeTab === 'CONTRIBUTIONS' && styles.tabBtnActive]}
           onPress={() => setActiveTab('CONTRIBUTIONS')}
+          activeOpacity={0.82}
         >
           <Text style={[styles.tabBtnText, activeTab === 'CONTRIBUTIONS' && styles.tabBtnTextActive]}>
-            Open Contribution Calls ({listings.length})
+            Open Calls ({listings.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tabBtn, activeTab === 'RESOURCE_REQUESTS' && styles.tabBtnActive]}
           onPress={() => setActiveTab('RESOURCE_REQUESTS')}
+          activeOpacity={0.82}
         >
           <Text style={[styles.tabBtnText, activeTab === 'RESOURCE_REQUESTS' && styles.tabBtnTextActive]}>
             Resource Matching ({requests.length})
@@ -93,10 +96,10 @@ export default function ContributionsScreen() {
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {activeTab === 'CONTRIBUTIONS' ? (
             listings.map((item) => (
               <View key={item.id} style={styles.card}>
@@ -107,7 +110,7 @@ export default function ContributionsScreen() {
                   <Text
                     style={[
                       styles.statusText,
-                      { color: item.status === 'OPEN_CALL' ? '#10B981' : '#38BDF8' },
+                      { color: item.status === 'OPEN_CALL' ? COLORS.accent : COLORS.info },
                     ]}
                   >
                     ● {item.status.replace(/_/g, ' ')}
@@ -122,7 +125,7 @@ export default function ContributionsScreen() {
                   <Text style={styles.delivHead}>Required Milestone Deliverables:</Text>
                   {item.deliverablesSummary?.map((d, dIdx) => (
                     <View key={dIdx} style={styles.delivRow}>
-                      <Ionicons name="checkmark-circle-outline" size={14} color="#38BDF8" />
+                      <CheckCircle2 size={13} color={COLORS.info} />
                       <Text style={styles.delivText}>{d}</Text>
                     </View>
                   ))}
@@ -132,13 +135,14 @@ export default function ContributionsScreen() {
                   <TouchableOpacity
                     style={styles.applyBtn}
                     onPress={() => handleApplyContribution(item)}
+                    activeOpacity={0.85}
                   >
-                    <Ionicons name="hand-right-outline" size={14} color="#FFFFFF" />
+                    <Hand size={14} color="#FFFFFF" />
                     <Text style={styles.applyBtnText}>Apply to Contribute</Text>
                   </TouchableOpacity>
                 ) : (
                   <View style={styles.assignedNotice}>
-                    <Ionicons name="checkmark-circle-outline" size={14} color="#38BDF8" />
+                    <UserCheck size={14} color={COLORS.info} />
                     <Text style={styles.assignedNoticeText}>
                       Assigned to Contributor (Impact: {item.attributionRecord?.impactScore}/100)
                     </Text>
@@ -182,83 +186,115 @@ export default function ContributionsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   tabStrip: {
     flexDirection: 'row',
-    backgroundColor: '#111827',
-    paddingHorizontal: 16,
-    paddingBottom: 10,
+    backgroundColor: COLORS.bgInput,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
     gap: 8,
   },
   tabBtn: {
     flex: 1,
     paddingVertical: 8,
     alignItems: 'center',
-    borderRadius: 8,
-    backgroundColor: '#0F172A',
-  },
-  tabBtnActive: { backgroundColor: '#6366F1' },
-  tabBtnText: { fontSize: 11, fontWeight: '600', color: '#94A3B8' },
-  tabBtnTextActive: { color: '#FFFFFF' },
-  loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
-  card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 14,
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.bgElevated,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+  },
+  tabBtnActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primaryLight,
+    ...SHADOWS.glowPrimary,
+  },
+  tabBtnText: { fontSize: 11, fontWeight: '700', color: COLORS.textMuted },
+  tabBtnTextActive: { color: '#FFFFFF', fontWeight: '800' },
+  loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
+  card: {
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  typeBadge: { backgroundColor: 'rgba(99, 102, 241, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  typeBadgeText: { color: '#6366F1', fontSize: 10, fontWeight: '700' },
-  statusText: { fontSize: 11, fontWeight: '700' },
-  matchTag: { color: '#10B981', fontSize: 11, fontWeight: '700' },
-  cardTitle: { fontSize: 15, fontWeight: '700', color: '#F8FAFC', marginBottom: 4 },
-  cardDesc: { fontSize: 12, color: '#94A3B8', lineHeight: 17, marginBottom: 12 },
-  delivBox: { backgroundColor: '#0F172A', borderRadius: 8, padding: 10, marginBottom: 12 },
-  delivHead: { fontSize: 10, fontWeight: '700', color: '#64748B', marginBottom: 6 },
+  typeBadge: {
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
+  },
+  typeBadgeText: { color: COLORS.primaryLight, fontSize: 10, fontWeight: '800' },
+  statusText: { fontSize: 11, fontWeight: '800' },
+  matchTag: { color: COLORS.accent, fontSize: 11, fontWeight: '800' },
+  cardTitle: { fontSize: 15, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 4 },
+  cardDesc: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 17, marginBottom: 12 },
+  delivBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 10, marginBottom: 12, borderWidth: 1, borderColor: COLORS.borderLight },
+  delivHead: { fontSize: 10, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 6, letterSpacing: 0.4 },
   delivRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  delivText: { fontSize: 11, color: '#E2E8F0', flex: 1 },
-  criteriaText: { fontSize: 11, color: '#CBD5E1', marginBottom: 6 },
+  delivText: { fontSize: 11, color: COLORS.textSecondary, flex: 1 },
+  criteriaText: { fontSize: 11, color: COLORS.textMuted, marginBottom: 6 },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  chip: { backgroundColor: '#1E293B', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
-  chipText: { fontSize: 10, color: '#38BDF8' },
+  chip: {
+    backgroundColor: COLORS.bgElevated,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  chipText: { fontSize: 10.5, color: COLORS.info, fontWeight: '700' },
   applyBtn: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#6366F1',
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 11,
+    borderRadius: RADIUS.md,
+    ...SHADOWS.glowPrimary,
   },
-  applyBtnText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
+  applyBtnText: { color: '#FFFFFF', fontSize: 12.5, fontWeight: '800' },
   assignedNotice: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(56, 189, 248, 0.1)',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 6,
+    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    paddingVertical: 9,
+    paddingHorizontal: 11,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.25)',
   },
-  assignedNoticeText: { color: '#38BDF8', fontSize: 11, fontWeight: '600' },
+  assignedNoticeText: { color: COLORS.info, fontSize: 11.5, fontWeight: '700' },
 });

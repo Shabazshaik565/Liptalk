@@ -9,10 +9,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, ShieldCheck, Lock, Send } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { coordinationApi } from '../../src/api/domain.api';
 import { AgentTeamItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function AgentTeamsScreen() {
   const router = useRouter();
@@ -58,8 +59,8 @@ export default function AgentTeamsScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Multi-Agent Project Teams</Text>
@@ -68,17 +69,18 @@ export default function AgentTeamsScreen() {
         <TouchableOpacity
           style={styles.actionBtn}
           onPress={() => Alert.alert('Squad Safety', 'All agents operate within strict tool allowlists & token limits.')}
+          activeOpacity={0.8}
         >
-          <Ionicons name="shield-checkmark" size={20} color="#10B981" />
+          <ShieldCheck size={18} color={COLORS.accent} />
         </TouchableOpacity>
       </View>
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {teams.map((team) => (
             <View key={team.id} style={styles.card}>
               <View style={styles.cardHeader}>
@@ -113,7 +115,7 @@ export default function AgentTeamsScreen() {
 
               {/* Quality Gates Badge */}
               <View style={styles.qualityGateBanner}>
-                <Ionicons name="lock-closed" size={14} color="#10B981" />
+                <Lock size={14} color={COLORS.accent} />
                 <Text style={styles.qualityGateText}>
                   AI Quality Gatekeeper active: Schema validation + policy checks enforced between all agent hops.
                 </Text>
@@ -124,7 +126,7 @@ export default function AgentTeamsScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Enter mission prompt (e.g. Audit Mysore wheat suppliers)..."
-                  placeholderTextColor="#64748B"
+                  placeholderTextColor={COLORS.textDim}
                   value={missionPrompt}
                   onChangeText={setMissionPrompt}
                 />
@@ -132,12 +134,13 @@ export default function AgentTeamsScreen() {
                   style={styles.dispatchBtn}
                   onPress={() => handleExecuteMission(team.id)}
                   disabled={executing}
+                  activeOpacity={0.85}
                 >
                   {executing ? (
                     <ActivityIndicator size="small" color="#FFFFFF" />
                   ) : (
                     <>
-                      <Ionicons name="paper-plane" size={16} color="#FFFFFF" />
+                      <Send size={15} color="#FFFFFF" />
                       <Text style={styles.dispatchBtnText}>Dispatch Squad Mission</Text>
                     </>
                   )}
@@ -174,21 +177,29 @@ export default function AgentTeamsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   actionBtn: {
     width: 36,
     height: 36,
@@ -196,16 +207,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(16, 185, 129, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
   },
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
   card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -214,47 +228,53 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   badge: {
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
   },
-  badgeText: { color: '#6366F1', fontSize: 11, fontWeight: '700' },
-  budgetTag: { fontSize: 11, color: '#94A3B8', fontWeight: '600' },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: '#F8FAFC', marginBottom: 6 },
-  cardDesc: { fontSize: 13, color: '#94A3B8', lineHeight: 18, marginBottom: 12 },
-  rosterBox: { backgroundColor: '#0F172A', borderRadius: 10, padding: 12, marginBottom: 12 },
-  rosterHeader: { fontSize: 11, fontWeight: '700', color: '#94A3B8', marginBottom: 8 },
+  badgeText: { color: COLORS.primaryLight, fontSize: 11, fontWeight: '800' },
+  budgetTag: { fontSize: 11, color: COLORS.textMuted, fontWeight: '700' },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 6 },
+  cardDesc: { fontSize: 13, color: COLORS.textSecondary, lineHeight: 18, marginBottom: 12 },
+  rosterBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: COLORS.borderLight },
+  rosterHeader: { fontSize: 11, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 8, letterSpacing: 0.5 },
   agentRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
   agentRoleBadge: {
-    backgroundColor: '#1E293B',
+    backgroundColor: COLORS.bgElevated,
     paddingHorizontal: 6,
     paddingVertical: 3,
     borderRadius: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
-  agentRoleText: { color: '#38BDF8', fontSize: 10, fontWeight: '700' },
+  agentRoleText: { color: COLORS.info, fontSize: 10, fontWeight: '800' },
   agentDetails: { flex: 1 },
-  agentNameText: { fontSize: 12, fontWeight: '600', color: '#F1F5F9' },
-  agentToolsText: { fontSize: 10, color: '#94A3B8' },
+  agentNameText: { fontSize: 12, fontWeight: '700', color: COLORS.textPrimary },
+  agentToolsText: { fontSize: 10.5, color: COLORS.textMuted },
   qualityGateBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     backgroundColor: 'rgba(16, 185, 129, 0.1)',
-    borderRadius: 8,
+    borderRadius: RADIUS.sm,
     padding: 10,
     marginBottom: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.25)',
   },
-  qualityGateText: { fontSize: 11, color: '#6EE7B7', flex: 1, lineHeight: 15 },
+  qualityGateText: { fontSize: 11, color: COLORS.accentLight, flex: 1, lineHeight: 15 },
   dispatchSection: { marginBottom: 10 },
   input: {
-    backgroundColor: '#0F172A',
-    borderRadius: 8,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: '#F8FAFC',
+    color: COLORS.textPrimary,
     fontSize: 13,
     marginBottom: 8,
   },
@@ -263,37 +283,42 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#6366F1',
+    backgroundColor: COLORS.primary,
     paddingVertical: 11,
-    borderRadius: 8,
+    borderRadius: RADIUS.md,
+    ...SHADOWS.glowPrimary,
   },
-  dispatchBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
+  dispatchBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '800' },
   executionBox: {
-    backgroundColor: '#0F172A',
-    borderRadius: 10,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: RADIUS.md,
     padding: 12,
     marginTop: 10,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: COLORS.border,
   },
-  execHeader: { fontSize: 12, fontWeight: '700', color: '#38BDF8', marginBottom: 8 },
+  execHeader: { fontSize: 12, fontWeight: '800', color: COLORS.info, marginBottom: 8 },
   trailStep: {
-    backgroundColor: '#1E293B',
-    borderRadius: 6,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.sm,
     padding: 8,
     marginBottom: 6,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
   },
   stepBadge: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  stepNum: { color: '#94A3B8', fontSize: 10, fontWeight: '600' },
-  stepRole: { color: '#A855F7', fontSize: 10, fontWeight: '700' },
-  stepAction: { color: '#F1F5F9', fontSize: 11, fontWeight: '500' },
-  stepOutput: { color: '#CBD5E1', fontSize: 11, fontStyle: 'italic', marginTop: 2 },
+  stepNum: { color: COLORS.textMuted, fontSize: 10, fontWeight: '700' },
+  stepRole: { color: COLORS.secondaryLight, fontSize: 10, fontWeight: '800' },
+  stepAction: { color: COLORS.textPrimary, fontSize: 11.5, fontWeight: '700' },
+  stepOutput: { color: COLORS.textMuted, fontSize: 11, fontStyle: 'italic', marginTop: 2 },
   finalBox: {
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
-    borderRadius: 8,
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    borderRadius: RADIUS.sm,
     padding: 10,
     marginTop: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
   },
-  finalTitle: { fontSize: 11, fontWeight: '700', color: '#6366F1', marginBottom: 4 },
-  finalText: { fontSize: 12, color: '#E2E8F0', lineHeight: 17 },
+  finalTitle: { fontSize: 11, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 4 },
+  finalText: { fontSize: 12, color: COLORS.textPrimary, lineHeight: 17 },
 });

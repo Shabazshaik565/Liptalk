@@ -8,10 +8,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, Lock, User, Palette, Code, Shield, XCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { coordinationApi } from '../../src/api/domain.api';
 import { PersonalVaultReport } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function PrivacyVaultScreen() {
   const router = useRouter();
@@ -54,12 +55,25 @@ export default function PrivacyVaultScreen() {
     Alert.alert('Identity Context Switched', `Active Persona changed to: [${contextType}]. Permissions scoped.`);
   };
 
+  const getPersonaIcon = (type: string, color: string) => {
+    switch (type) {
+      case 'PERSONAL':
+        return <User size={16} color={color} />;
+      case 'CREATOR':
+        return <Palette size={16} color={color} />;
+      case 'DEVELOPER':
+        return <Code size={16} color={color} />;
+      default:
+        return <Shield size={16} color={color} />;
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Personal Data Vault</Text>
@@ -68,17 +82,18 @@ export default function PrivacyVaultScreen() {
         <TouchableOpacity
           style={styles.actionBtn}
           onPress={() => Alert.alert('Vault Encrypted', 'Personal data vault is isolated with AES-256 local key escrow.')}
+          activeOpacity={0.8}
         >
-          <Ionicons name="lock-closed" size={18} color="#10B981" />
+          <Lock size={18} color={COLORS.accent} />
         </TouchableOpacity>
       </View>
 
       {loading || !vaultData ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Identity Context Switcher Card */}
           <View style={styles.card}>
             <Text style={styles.cardSectionHeader}>Active Identity Persona</Text>
@@ -94,21 +109,10 @@ export default function PrivacyVaultScreen() {
                     key={p.contextType}
                     style={[styles.personaChip, isActive && styles.personaChipActive]}
                     onPress={() => handleSwitchContext(p.contextType)}
+                    activeOpacity={0.82}
                   >
                     <View style={styles.personaHead}>
-                      <Ionicons
-                        name={
-                          p.contextType === 'PERSONAL'
-                            ? 'person-outline'
-                            : p.contextType === 'CREATOR'
-                            ? 'color-palette-outline'
-                            : p.contextType === 'DEVELOPER'
-                            ? 'code-slash-outline'
-                            : 'shield-outline'
-                        }
-                        size={16}
-                        color={isActive ? '#6366F1' : '#94A3B8'}
-                      />
+                      {getPersonaIcon(p.contextType, isActive ? COLORS.primaryLight : COLORS.textMuted)}
                       <Text style={[styles.personaType, isActive && styles.personaTypeActive]}>
                         {p.contextType}
                       </Text>
@@ -136,11 +140,11 @@ export default function PrivacyVaultScreen() {
             </View>
             <View style={styles.controlRow}>
               <Text style={styles.controlLabel}>Third-Party Tracking Sharing</Text>
-              <Text style={[styles.controlVal, { color: '#EF4444' }]}>DISABLED</Text>
+              <Text style={[styles.controlVal, { color: COLORS.danger }]}>DISABLED</Text>
             </View>
-            <View style={styles.controlRow}>
+            <View style={[styles.controlRow, { borderBottomWidth: 0 }]}>
               <Text style={styles.controlLabel}>Biometric Audio Storage</Text>
-              <Text style={[styles.controlVal, { color: '#EF4444' }]}>ZERO-RETENTION</Text>
+              <Text style={[styles.controlVal, { color: COLORS.danger }]}>ZERO-RETENTION</Text>
             </View>
           </View>
 
@@ -171,8 +175,9 @@ export default function PrivacyVaultScreen() {
                   <TouchableOpacity
                     style={styles.revokeBtn}
                     onPress={() => handleRevoke(evt.id)}
+                    activeOpacity={0.82}
                   >
-                    <Ionicons name="close-circle-outline" size={14} color="#EF4444" />
+                    <XCircle size={13} color={COLORS.danger} />
                     <Text style={styles.revokeText}>Revoke Permission</Text>
                   </TouchableOpacity>
                 )}
@@ -186,21 +191,29 @@ export default function PrivacyVaultScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   actionBtn: {
     width: 36,
     height: 36,
@@ -208,67 +221,74 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(16, 185, 129, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
   },
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
   card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
-  cardSectionHeader: { fontSize: 16, fontWeight: '700', color: '#F8FAFC', marginBottom: 4 },
-  cardDesc: { fontSize: 13, color: '#94A3B8', lineHeight: 18, marginBottom: 12 },
+  cardSectionHeader: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 4 },
+  cardDesc: { fontSize: 12.5, color: COLORS.textSecondary, lineHeight: 18, marginBottom: 12 },
   personaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   personaChip: {
     width: '48%',
-    backgroundColor: '#0F172A',
-    borderRadius: 10,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: RADIUS.md,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.borderLight,
   },
-  personaChipActive: { borderColor: '#6366F1', backgroundColor: 'rgba(99, 102, 241, 0.1)' },
+  personaChipActive: { borderColor: COLORS.primary, backgroundColor: 'rgba(139, 92, 246, 0.12)' },
   personaHead: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
-  personaType: { fontSize: 10, fontWeight: '700', color: '#94A3B8' },
-  personaTypeActive: { color: '#6366F1' },
-  personaName: { fontSize: 12, fontWeight: '600', color: '#F1F5F9', marginBottom: 4 },
-  personaRep: { fontSize: 10, color: '#10B981' },
+  personaType: { fontSize: 10, fontWeight: '800', color: COLORS.textMuted },
+  personaTypeActive: { color: COLORS.primaryLight },
+  personaName: { fontSize: 12, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 4 },
+  personaRep: { fontSize: 10.5, color: COLORS.accent, fontWeight: '700' },
   controlRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.borderLight,
   },
-  controlLabel: { fontSize: 13, color: '#CBD5E1' },
-  controlVal: { fontSize: 12, fontWeight: '700', color: '#10B981' },
+  controlLabel: { fontSize: 12.5, color: COLORS.textSecondary },
+  controlVal: { fontSize: 11.5, fontWeight: '800', color: COLORS.accent },
   logCard: {
-    backgroundColor: '#0F172A',
-    borderRadius: 10,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: RADIUS.md,
     padding: 12,
     marginBottom: 10,
     borderLeftWidth: 3,
-    borderLeftColor: '#38BDF8',
+    borderLeftColor: COLORS.info,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
   },
   logHead: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  accessorIdText: { fontSize: 13, fontWeight: '700', color: '#F1F5F9' },
-  logStatus: { fontSize: 10, fontWeight: '700', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  statusAuth: { backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10B981' },
-  statusRevoked: { backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#EF4444' },
-  scopeText: { fontSize: 12, color: '#38BDF8', fontWeight: '500', marginBottom: 2 },
-  purposeText: { fontSize: 11, color: '#94A3B8', fontStyle: 'italic', marginBottom: 8 },
+  accessorIdText: { fontSize: 13, fontWeight: '800', color: COLORS.textPrimary },
+  logStatus: { fontSize: 10, fontWeight: '800', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  statusAuth: { backgroundColor: 'rgba(16, 185, 129, 0.15)', color: COLORS.accent },
+  statusRevoked: { backgroundColor: 'rgba(239, 68, 68, 0.15)', color: COLORS.danger },
+  scopeText: { fontSize: 12, color: COLORS.info, fontWeight: '600', marginBottom: 2 },
+  purposeText: { fontSize: 11, color: COLORS.textMuted, fontStyle: 'italic', marginBottom: 8 },
   revokeBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingVertical: 5,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.25)',
   },
-  revokeText: { color: '#EF4444', fontSize: 11, fontWeight: '600' },
+  revokeText: { color: COLORS.danger, fontSize: 11, fontWeight: '700' },
 });

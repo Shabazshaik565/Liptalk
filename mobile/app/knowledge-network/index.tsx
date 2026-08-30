@@ -8,10 +8,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, FlaskConical, GitCompare, Library, Sparkles } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { coordinationApi } from '../../src/api/domain.api';
 import { KnowledgeConflictItem, ResearchProjectItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function KnowledgeNetworkScreen() {
   const router = useRouter();
@@ -44,8 +45,8 @@ export default function KnowledgeNetworkScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Collective Knowledge Network</Text>
@@ -54,8 +55,9 @@ export default function KnowledgeNetworkScreen() {
         <TouchableOpacity
           style={styles.actionBtn}
           onPress={() => Alert.alert('New Research', 'Start a structured collective research investigation.')}
+          activeOpacity={0.8}
         >
-          <Ionicons name="flask-outline" size={20} color="#6366F1" />
+          <FlaskConical size={18} color={COLORS.primaryLight} />
         </TouchableOpacity>
       </View>
 
@@ -64,11 +66,11 @@ export default function KnowledgeNetworkScreen() {
         <TouchableOpacity
           style={[styles.tabItem, activeTab === 'CONFLICTS' && styles.tabItemActive]}
           onPress={() => setActiveTab('CONFLICTS')}
+          activeOpacity={0.82}
         >
-          <Ionicons
-            name="git-compare-outline"
-            size={16}
-            color={activeTab === 'CONFLICTS' ? '#6366F1' : '#94A3B8'}
+          <GitCompare
+            size={15}
+            color={activeTab === 'CONFLICTS' ? COLORS.primaryLight : COLORS.textMuted}
           />
           <Text style={[styles.tabText, activeTab === 'CONFLICTS' && styles.tabTextActive]}>
             Conflict Analysis ({conflicts.length})
@@ -77,11 +79,11 @@ export default function KnowledgeNetworkScreen() {
         <TouchableOpacity
           style={[styles.tabItem, activeTab === 'RESEARCH' && styles.tabItemActive]}
           onPress={() => setActiveTab('RESEARCH')}
+          activeOpacity={0.82}
         >
-          <Ionicons
-            name="library-outline"
-            size={16}
-            color={activeTab === 'RESEARCH' ? '#6366F1' : '#94A3B8'}
+          <Library
+            size={15}
+            color={activeTab === 'RESEARCH' ? COLORS.primaryLight : COLORS.textMuted}
           />
           <Text style={[styles.tabText, activeTab === 'RESEARCH' && styles.tabTextActive]}>
             Research Hub ({researchList.length})
@@ -91,16 +93,16 @@ export default function KnowledgeNetworkScreen() {
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {activeTab === 'CONFLICTS' &&
             conflicts.map((conf) => (
               <View key={conf.id} style={styles.card}>
                 <View style={styles.cardHeader}>
-                  <View style={[styles.badge, { backgroundColor: 'rgba(239, 68, 68, 0.15)' }]}>
-                    <Text style={[styles.badgeText, { color: '#EF4444' }]}>Source Divergence</Text>
+                  <View style={[styles.badge, { backgroundColor: 'rgba(239, 68, 68, 0.15)', borderColor: 'rgba(239, 68, 68, 0.3)' }]}>
+                    <Text style={[styles.badgeText, { color: COLORS.danger }]}>Source Divergence</Text>
                   </View>
                   <Text style={styles.statusText}>● {conf.status}</Text>
                 </View>
@@ -125,7 +127,7 @@ export default function KnowledgeNetworkScreen() {
                 {/* AI Conflict Synthesis */}
                 <View style={styles.aiExplanationBox}>
                   <View style={styles.aiHead}>
-                    <Ionicons name="sparkles" size={14} color="#38BDF8" />
+                    <Sparkles size={14} color={COLORS.info} />
                     <Text style={styles.aiHeadTitle}>AI Conflict Context Engine</Text>
                   </View>
                   <Text style={styles.aiExplainText}>{conf.aiConflictExplanation}</Text>
@@ -155,6 +157,7 @@ export default function KnowledgeNetworkScreen() {
                 <TouchableOpacity
                   style={styles.actionBtnFull}
                   onPress={() => Alert.alert('Evidence Added', 'Added peer-reviewed citation to this research.')}
+                  activeOpacity={0.82}
                 >
                   <Text style={styles.actionBtnText}>Add Peer Evidence / Note</Text>
                 </TouchableOpacity>
@@ -167,36 +170,48 @@ export default function KnowledgeNetworkScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   actionBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: '#0F172A',
+    backgroundColor: COLORS.bgInput,
     padding: 4,
-    marginHorizontal: 16,
+    marginHorizontal: SPACING.lg,
     marginTop: 12,
-    borderRadius: 10,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   tabItem: {
     flex: 1,
@@ -204,21 +219,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 9,
-    borderRadius: 8,
+    borderRadius: RADIUS.sm,
     gap: 6,
   },
-  tabItemActive: { backgroundColor: '#1E293B' },
-  tabText: { fontSize: 12, fontWeight: '600', color: '#94A3B8' },
-  tabTextActive: { color: '#6366F1' },
+  tabItemActive: { backgroundColor: COLORS.bgElevated },
+  tabText: { fontSize: 11.5, fontWeight: '700', color: COLORS.textMuted },
+  tabTextActive: { color: COLORS.primaryLight, fontWeight: '800' },
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
   card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -227,45 +243,53 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   badge: {
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
   },
-  badgeText: { color: '#6366F1', fontSize: 11, fontWeight: '700' },
-  statusText: { color: '#10B981', fontSize: 11, fontWeight: '600' },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: '#F8FAFC', marginBottom: 8 },
-  questionText: { fontSize: 13, color: '#CBD5E1', marginBottom: 12, fontStyle: 'italic' },
+  badgeText: { color: COLORS.primaryLight, fontSize: 10, fontWeight: '800' },
+  statusText: { color: COLORS.accent, fontSize: 11, fontWeight: '700' },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 8 },
+  questionText: { fontSize: 13, color: COLORS.textSecondary, marginBottom: 12, fontStyle: 'italic' },
   sourcesContainer: { gap: 8, marginBottom: 12 },
   sourceBox: {
-    backgroundColor: '#0F172A',
-    borderRadius: 8,
-    padding: 10,
-    borderLeftWidth: 2,
-    borderLeftColor: '#64748B',
-  },
-  sourceHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  sourceName: { fontSize: 12, fontWeight: '700', color: '#CBD5E1', flex: 1 },
-  confidenceScore: { fontSize: 11, color: '#38BDF8', fontWeight: '600' },
-  sourceClaim: { fontSize: 12, color: '#94A3B8', lineHeight: 16 },
-  aiExplanationBox: {
-    backgroundColor: 'rgba(56, 189, 248, 0.08)',
-    borderRadius: 8,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: RADIUS.md,
     padding: 10,
     borderLeftWidth: 3,
-    borderLeftColor: '#38BDF8',
+    borderLeftColor: COLORS.danger,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+  },
+  sourceHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
+  sourceName: { fontSize: 12, fontWeight: '800', color: COLORS.textPrimary, flex: 1 },
+  confidenceScore: { fontSize: 11, color: COLORS.info, fontWeight: '700' },
+  sourceClaim: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 16 },
+  aiExplanationBox: {
+    backgroundColor: 'rgba(56, 189, 248, 0.08)',
+    borderRadius: RADIUS.md,
+    padding: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.info,
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.2)',
   },
   aiHead: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  aiHeadTitle: { fontSize: 12, fontWeight: '700', color: '#38BDF8' },
-  aiExplainText: { fontSize: 12, color: '#E2E8F0', lineHeight: 17 },
-  reportBox: { backgroundColor: '#0F172A', borderRadius: 8, padding: 12, marginBottom: 12 },
-  reportHeader: { fontSize: 11, fontWeight: '700', color: '#94A3B8', marginBottom: 6 },
-  reportText: { fontSize: 12, color: '#E2E8F0', lineHeight: 17 },
+  aiHeadTitle: { fontSize: 12, fontWeight: '800', color: COLORS.info },
+  aiExplainText: { fontSize: 12, color: COLORS.textPrimary, lineHeight: 17 },
+  reportBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: COLORS.borderLight },
+  reportHeader: { fontSize: 11, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 6, letterSpacing: 0.4 },
+  reportText: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 17 },
   actionBtnFull: {
-    backgroundColor: '#1E293B',
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: COLORS.bgElevated,
+    paddingVertical: 11,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
-  actionBtnText: { color: '#6366F1', fontSize: 12, fontWeight: '700' },
+  actionBtnText: { color: COLORS.primaryLight, fontSize: 12, fontWeight: '800' },
 });

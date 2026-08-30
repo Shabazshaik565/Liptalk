@@ -9,10 +9,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, Fingerprint, Box, TrendingUp, Network, User, Sparkles, Search, Info, ThumbsUp, EyeOff, XCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { intelligenceApi } from '../../src/api/domain.api';
 import { GraphOverviewReport, ExplainableRecommendationItem, PersonalWeeklyBriefItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function IntelligenceFabricScreen() {
   const router = useRouter();
@@ -69,8 +70,8 @@ export default function IntelligenceFabricScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Global Intelligence Fabric</Text>
@@ -79,33 +80,34 @@ export default function IntelligenceFabricScreen() {
         <TouchableOpacity
           style={styles.actionBtn}
           onPress={() => router.push('/digital-twins' as any)}
+          activeOpacity={0.8}
         >
-          <Ionicons name="finger-print-outline" size={20} color="#6366F1" />
+          <Fingerprint size={18} color={COLORS.primaryLight} />
         </TouchableOpacity>
       </View>
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Quick Action Navigation Strip */}
           <View style={styles.navStrip}>
-            <TouchableOpacity style={styles.navChip} onPress={() => router.push('/simulation' as any)}>
-              <Ionicons name="cube-outline" size={14} color="#38BDF8" />
+            <TouchableOpacity style={styles.navChip} onPress={() => router.push('/simulation' as any)} activeOpacity={0.82}>
+              <Box size={14} color={COLORS.info} />
               <Text style={styles.navChipText}>Simulation Lab</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.navChip} onPress={() => router.push('/predictions' as any)}>
-              <Ionicons name="trending-up-outline" size={14} color="#10B981" />
+            <TouchableOpacity style={styles.navChip} onPress={() => router.push('/predictions' as any)} activeOpacity={0.82}>
+              <TrendingUp size={14} color={COLORS.accent} />
               <Text style={styles.navChipText}>Forecasts</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.navChip} onPress={() => router.push('/skills' as any)}>
-              <Ionicons name="git-network-outline" size={14} color="#A855F7" />
+            <TouchableOpacity style={styles.navChip} onPress={() => router.push('/skills' as any)} activeOpacity={0.82}>
+              <Network size={14} color={COLORS.primaryLight} />
               <Text style={styles.navChipText}>Skill Graph</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.navChip} onPress={() => router.push('/digital-twins' as any)}>
-              <Ionicons name="person-circle-outline" size={14} color="#F59E0B" />
+            <TouchableOpacity style={styles.navChip} onPress={() => router.push('/digital-twins' as any)} activeOpacity={0.82}>
+              <User size={14} color={COLORS.warning} />
               <Text style={styles.navChipText}>Digital Twins</Text>
             </TouchableOpacity>
           </View>
@@ -124,7 +126,7 @@ export default function IntelligenceFabricScreen() {
               <View style={styles.highlightList}>
                 {weeklyBrief.keyHighlights.map((hl, idx) => (
                   <View key={idx} style={styles.hlRow}>
-                    <Ionicons name="sparkles" size={14} color="#6366F1" style={{ marginTop: 2 }} />
+                    <Sparkles size={14} color={COLORS.primaryLight} style={{ marginTop: 2 }} />
                     <View style={{ flex: 1 }}>
                       <Text style={styles.hlCategory}>{hl.category}</Text>
                       <Text style={styles.hlTitle}>{hl.headline}</Text>
@@ -158,14 +160,14 @@ export default function IntelligenceFabricScreen() {
                       {
                         backgroundColor:
                           node.domain === 'PEOPLE'
-                            ? '#6366F1'
+                            ? COLORS.primary
                             : node.domain === 'SOCIAL'
-                            ? '#10B981'
+                            ? COLORS.accent
                             : node.domain === 'PROJECTS'
-                            ? '#38BDF8'
+                            ? COLORS.info
                             : node.domain === 'AI_AGENTS'
-                            ? '#A855F7'
-                            : '#F59E0B',
+                            ? COLORS.primaryLight
+                            : COLORS.warning,
                       },
                     ]}
                   />
@@ -186,15 +188,15 @@ export default function IntelligenceFabricScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="e.g. Which communities relate to my FMCG project?"
-                  placeholderTextColor="#64748B"
+                  placeholderTextColor={COLORS.textDim}
                   value={searchQuestion}
                   onChangeText={setSearchQuestion}
                 />
-                <TouchableOpacity style={styles.traverseBtn} onPress={handleTraverse} disabled={traversing}>
+                <TouchableOpacity style={styles.traverseBtn} onPress={handleTraverse} disabled={traversing} activeOpacity={0.85}>
                   {traversing ? (
                     <ActivityIndicator size="small" color="#FFFFFF" />
                   ) : (
-                    <Ionicons name="search" size={18} color="#FFFFFF" />
+                    <Search size={16} color="#FFFFFF" />
                   )}
                 </TouchableOpacity>
               </View>
@@ -226,7 +228,7 @@ export default function IntelligenceFabricScreen() {
 
                 <Text style={styles.recTitle}>{rec.itemTitle}</Text>
                 <View style={styles.whyBox}>
-                  <Ionicons name="information-circle-outline" size={14} color="#38BDF8" />
+                  <Info size={14} color={COLORS.info} />
                   <Text style={styles.whyText}>Why: {rec.explanationReason}</Text>
                 </View>
 
@@ -234,23 +236,26 @@ export default function IntelligenceFabricScreen() {
                   <TouchableOpacity
                     style={styles.feedbackBtn}
                     onPress={() => handleFeedback(rec.id, 'HELPFUL')}
+                    activeOpacity={0.82}
                   >
-                    <Ionicons name="thumbs-up-outline" size={12} color="#10B981" />
-                    <Text style={[styles.feedbackBtnText, { color: '#10B981' }]}>Relevant</Text>
+                    <ThumbsUp size={12} color={COLORS.accent} />
+                    <Text style={[styles.feedbackBtnText, { color: COLORS.accent }]}>Relevant</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.feedbackBtn}
                     onPress={() => handleFeedback(rec.id, 'SHOW_LESS')}
+                    activeOpacity={0.82}
                   >
-                    <Ionicons name="eye-off-outline" size={12} color="#94A3B8" />
+                    <EyeOff size={12} color={COLORS.textMuted} />
                     <Text style={styles.feedbackBtnText}>Show Less</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.feedbackBtn}
                     onPress={() => handleFeedback(rec.id, 'DISMISSED')}
+                    activeOpacity={0.82}
                   >
-                    <Ionicons name="close-circle-outline" size={12} color="#EF4444" />
-                    <Text style={[styles.feedbackBtnText, { color: '#EF4444' }]}>Dismiss</Text>
+                    <XCircle size={12} color={COLORS.danger} />
+                    <Text style={[styles.feedbackBtnText, { color: COLORS.danger }]}>Dismiss</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -263,31 +268,41 @@ export default function IntelligenceFabricScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   actionBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
   },
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
   navStrip: { flexDirection: 'row', gap: 8, marginBottom: 14 },
   navChip: {
     flex: 1,
@@ -295,88 +310,104 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-    backgroundColor: '#111827',
+    backgroundColor: COLORS.bgCard,
     paddingVertical: 10,
-    borderRadius: 10,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
-  navChipText: { color: '#F1F5F9', fontSize: 11, fontWeight: '600' },
+  navChipText: { color: COLORS.textPrimary, fontSize: 10.5, fontWeight: '700' },
   card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   badgeRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   briefBadge: {
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 6,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
   },
-  briefBadgeText: { color: '#6366F1', fontSize: 11, fontWeight: '700' },
-  periodText: { color: '#94A3B8', fontSize: 11 },
-  briefHeadline: { fontSize: 15, fontWeight: '700', color: '#F8FAFC', marginBottom: 12, lineHeight: 20 },
+  briefBadgeText: { color: COLORS.primaryLight, fontSize: 10, fontWeight: '800' },
+  periodText: { color: COLORS.textMuted, fontSize: 11 },
+  briefHeadline: { fontSize: 15, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 12, lineHeight: 20 },
   highlightList: { gap: 10 },
-  hlRow: { flexDirection: 'row', gap: 10, backgroundColor: '#0F172A', padding: 10, borderRadius: 8 },
-  hlCategory: { fontSize: 10, fontWeight: '700', color: '#38BDF8', marginBottom: 2 },
-  hlTitle: { fontSize: 12, fontWeight: '600', color: '#F1F5F9', marginBottom: 2 },
-  hlDesc: { fontSize: 11, color: '#94A3B8', lineHeight: 15 },
+  hlRow: { flexDirection: 'row', gap: 10, backgroundColor: COLORS.bgInput, padding: 10, borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLORS.borderLight },
+  hlCategory: { fontSize: 10, fontWeight: '800', color: COLORS.info, marginBottom: 2 },
+  hlTitle: { fontSize: 12.5, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 2 },
+  hlDesc: { fontSize: 11, color: COLORS.textSecondary, lineHeight: 15 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: '#F8FAFC' },
-  graphScopeTag: { fontSize: 11, color: '#38BDF8', fontWeight: '600' },
-  cardDesc: { fontSize: 12, color: '#94A3B8', lineHeight: 17, marginBottom: 12 },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary },
+  graphScopeTag: { fontSize: 11, color: COLORS.info, fontWeight: '700' },
+  cardDesc: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 17, marginBottom: 12 },
   nodeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 },
   nodeChip: {
     width: '48%',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#0F172A',
+    backgroundColor: COLORS.bgInput,
     padding: 10,
-    borderRadius: 8,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.borderLight,
   },
   domainDot: { width: 8, height: 8, borderRadius: 4 },
-  nodeDomain: { fontSize: 9, fontWeight: '700', color: '#94A3B8' },
-  nodeLabel: { fontSize: 11, fontWeight: '600', color: '#F1F5F9' },
-  queryBox: { backgroundColor: '#0F172A', borderRadius: 10, padding: 12 },
-  queryLabel: { fontSize: 11, fontWeight: '700', color: '#94A3B8', marginBottom: 6 },
+  nodeDomain: { fontSize: 9, fontWeight: '800', color: COLORS.textMuted },
+  nodeLabel: { fontSize: 11.5, fontWeight: '700', color: COLORS.textPrimary },
+  queryBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 12, borderWidth: 1, borderColor: COLORS.borderLight },
+  queryLabel: { fontSize: 11, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 6, letterSpacing: 0.4 },
   inputRow: { flexDirection: 'row', gap: 8 },
   input: {
     flex: 1,
-    backgroundColor: '#1E293B',
-    borderRadius: 8,
+    backgroundColor: COLORS.bgElevated,
+    borderRadius: RADIUS.md,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    color: '#F8FAFC',
+    color: COLORS.textPrimary,
     fontSize: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   traverseBtn: {
-    backgroundColor: '#6366F1',
+    backgroundColor: COLORS.primary,
     paddingHorizontal: 14,
-    borderRadius: 8,
+    borderRadius: RADIUS.md,
     justifyContent: 'center',
     alignItems: 'center',
+    ...SHADOWS.glowPrimary,
   },
   traverseResultBox: {
     marginTop: 10,
-    backgroundColor: 'rgba(99, 102, 241, 0.1)',
-    borderRadius: 8,
+    backgroundColor: 'rgba(139, 92, 246, 0.12)',
+    borderRadius: RADIUS.md,
     padding: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.25)',
   },
-  traverseResultTitle: { fontSize: 11, fontWeight: '700', color: '#6366F1', marginBottom: 4 },
-  traverseResultText: { fontSize: 12, color: '#E2E8F0', lineHeight: 16 },
-  recItem: { backgroundColor: '#0F172A', borderRadius: 10, padding: 12, marginBottom: 10 },
+  traverseResultTitle: { fontSize: 11, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 4 },
+  traverseResultText: { fontSize: 12, color: COLORS.textPrimary, lineHeight: 16 },
+  recItem: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 12, marginBottom: 10, borderWidth: 1, borderColor: COLORS.borderLight },
   recHead: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  recCategoryBadge: { backgroundColor: '#1E293B', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  recCategoryText: { color: '#A855F7', fontSize: 10, fontWeight: '700' },
-  recScore: { color: '#10B981', fontSize: 11, fontWeight: '700' },
-  recTitle: { fontSize: 14, fontWeight: '700', color: '#F1F5F9', marginBottom: 6 },
+  recCategoryBadge: {
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
+  },
+  recCategoryText: { color: COLORS.primaryLight, fontSize: 10, fontWeight: '800' },
+  recScore: { color: COLORS.accent, fontSize: 11, fontWeight: '800' },
+  recTitle: { fontSize: 14, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 6 },
   whyBox: {
     flexDirection: 'row',
     gap: 6,
@@ -384,6 +415,8 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 6,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.2)',
   },
   whyText: { fontSize: 11, color: '#BAE6FD', flex: 1, lineHeight: 15 },
   feedbackRow: { flexDirection: 'row', gap: 8 },
@@ -391,10 +424,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#1E293B',
+    backgroundColor: COLORS.bgElevated,
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingVertical: 5,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
-  feedbackBtnText: { fontSize: 10, color: '#CBD5E1', fontWeight: '600' },
+  feedbackBtnText: { fontSize: 10.5, color: COLORS.textMuted, fontWeight: '700' },
 });

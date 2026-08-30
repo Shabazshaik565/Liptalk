@@ -8,10 +8,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, Edit3, Users, ShieldCheck, ArrowRight, Sparkles, CheckCheck } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { coordinationApi } from '../../src/api/domain.api';
 import { SharedWorkspaceItem, ProjectContributionItem, CreatorCollectiveItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function CollaborationScreen() {
   const router = useRouter();
@@ -47,8 +48,8 @@ export default function CollaborationScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Collective Workspaces</Text>
@@ -57,8 +58,9 @@ export default function CollaborationScreen() {
         <TouchableOpacity
           style={styles.actionBtn}
           onPress={() => Alert.alert('New Workspace', 'Create shared workspace dialog opened.')}
+          activeOpacity={0.8}
         >
-          <Ionicons name="create-outline" size={20} color="#6366F1" />
+          <Edit3 size={18} color={COLORS.primaryLight} />
         </TouchableOpacity>
       </View>
 
@@ -92,10 +94,10 @@ export default function CollaborationScreen() {
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {activeTab === 'WORKSPACES' &&
             workspaces.map((ws) => (
               <View key={ws.id} style={styles.card}>
@@ -116,7 +118,7 @@ export default function CollaborationScreen() {
                     <View style={styles.tagWrap}>
                       {ws.participatingCommunityIds.map((cid, i) => (
                         <View key={i} style={styles.fedTag}>
-                          <Ionicons name="people-circle-outline" size={14} color="#38BDF8" />
+                          <Users size={12} color={COLORS.info} />
                           <Text style={styles.fedTagText}>{cid}</Text>
                         </View>
                       ))}
@@ -126,7 +128,7 @@ export default function CollaborationScreen() {
 
                 {/* Members list */}
                 <View style={styles.membersRow}>
-                  <Ionicons name="shield-checkmark-outline" size={16} color="#10B981" />
+                  <ShieldCheck size={16} color={COLORS.accent} />
                   <Text style={styles.membersText}>
                     {ws.members?.length || 2} Authorized Workspace Admins & Members
                   </Text>
@@ -135,9 +137,10 @@ export default function CollaborationScreen() {
                 <TouchableOpacity
                   style={styles.openBtn}
                   onPress={() => Alert.alert('Workspace Opened', `Opened collaborative canvas for ${ws.name}`)}
+                  activeOpacity={0.85}
                 >
                   <Text style={styles.openBtnText}>Open Shared Canvas</Text>
-                  <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+                  <ArrowRight size={16} color="#FFFFFF" />
                 </TouchableOpacity>
               </View>
             ))}
@@ -146,11 +149,11 @@ export default function CollaborationScreen() {
             contributions.map((cb) => (
               <View key={cb.id} style={styles.card}>
                 <View style={styles.cardHeader}>
-                  <View style={[styles.badge, { backgroundColor: 'rgba(56, 189, 248, 0.15)' }]}>
-                    <Text style={[styles.badgeText, { color: '#38BDF8' }]}>{cb.category}</Text>
+                  <View style={[styles.badge, { backgroundColor: 'rgba(56, 189, 248, 0.15)', borderColor: 'rgba(56, 189, 248, 0.3)' }]}>
+                    <Text style={[styles.badgeText, { color: COLORS.info }]}>{cb.category}</Text>
                   </View>
-                  <View style={[styles.badge, { backgroundColor: 'rgba(16, 185, 129, 0.15)' }]}>
-                    <Text style={[styles.badgeText, { color: '#10B981' }]}>v{cb.versionNumber} {cb.status}</Text>
+                  <View style={[styles.badge, { backgroundColor: 'rgba(16, 185, 129, 0.15)', borderColor: 'rgba(16, 185, 129, 0.3)' }]}>
+                    <Text style={[styles.badgeText, { color: COLORS.accent }]}>v{cb.versionNumber} {cb.status}</Text>
                   </View>
                 </View>
 
@@ -159,7 +162,7 @@ export default function CollaborationScreen() {
 
                 {cb.isAiAssisted && (
                   <View style={styles.aiTagRow}>
-                    <Ionicons name="sparkles" size={14} color="#A855F7" />
+                    <Sparkles size={14} color={COLORS.primaryLight} />
                     <Text style={styles.aiTagText}>
                       AI-Assisted Contribution (Audited & Human-Verified)
                     </Text>
@@ -167,7 +170,7 @@ export default function CollaborationScreen() {
                 )}
 
                 <View style={styles.verifierRow}>
-                  <Ionicons name="checkmark-done" size={16} color="#10B981" />
+                  <CheckCheck size={16} color={COLORS.accent} />
                   <Text style={styles.verifierText}>
                     Verified by {cb.verifiedBy || 'Project Maintainer'}
                   </Text>
@@ -179,8 +182,8 @@ export default function CollaborationScreen() {
             collectives.map((col) => (
               <View key={col.id} style={styles.card}>
                 <View style={styles.cardHeader}>
-                  <View style={[styles.badge, { backgroundColor: 'rgba(168, 85, 247, 0.15)' }]}>
-                    <Text style={[styles.badgeText, { color: '#A855F7' }]}>{col.category}</Text>
+                  <View style={[styles.badge, { backgroundColor: 'rgba(139, 92, 246, 0.15)', borderColor: 'rgba(139, 92, 246, 0.3)' }]}>
+                    <Text style={[styles.badgeText, { color: COLORS.primaryLight }]}>{col.category}</Text>
                   </View>
                   <Text style={styles.earningsText}>
                     ₹{(col.totalCollectiveEarnings / 1000).toFixed(0)}k Earned
@@ -206,8 +209,9 @@ export default function CollaborationScreen() {
                 </View>
 
                 <TouchableOpacity
-                  style={[styles.openBtn, { backgroundColor: '#A855F7' }]}
+                  style={[styles.openBtn, { backgroundColor: COLORS.primary }]}
                   onPress={() => Alert.alert('Collective Joined', `Subscribed to ${col.name}`)}
+                  activeOpacity={0.85}
                 >
                   <Text style={styles.openBtnText}>Join Creator Collective</Text>
                 </TouchableOpacity>
@@ -220,50 +224,63 @@ export default function CollaborationScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   actionBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: '#0F172A',
+    backgroundColor: COLORS.bgInput,
     padding: 4,
-    marginHorizontal: 16,
+    marginHorizontal: SPACING.lg,
     marginTop: 12,
-    borderRadius: 10,
-  },
-  tabItem: { flex: 1, paddingVertical: 9, alignItems: 'center', borderRadius: 8 },
-  tabItemActive: { backgroundColor: '#1E293B' },
-  tabText: { fontSize: 12, fontWeight: '600', color: '#94A3B8' },
-  tabTextActive: { color: '#6366F1' },
-  loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
-  card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+  },
+  tabItem: { flex: 1, paddingVertical: 9, alignItems: 'center', borderRadius: RADIUS.sm },
+  tabItemActive: { backgroundColor: COLORS.bgElevated },
+  tabText: { fontSize: 11.5, fontWeight: '700', color: COLORS.textMuted },
+  tabTextActive: { color: COLORS.primaryLight, fontWeight: '800' },
+  loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
+  card: {
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -272,58 +289,65 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   badge: {
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
   },
-  badgeText: { color: '#6366F1', fontSize: 11, fontWeight: '700' },
-  activeTag: { color: '#10B981', fontSize: 11, fontWeight: '600' },
-  earningsText: { color: '#10B981', fontSize: 12, fontWeight: '700' },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: '#F8FAFC', marginBottom: 6 },
-  cardDesc: { fontSize: 13, color: '#94A3B8', lineHeight: 18, marginBottom: 12 },
-  federationBox: { backgroundColor: '#0F172A', borderRadius: 8, padding: 10, marginBottom: 12 },
-  federationTitle: { fontSize: 11, fontWeight: '700', color: '#94A3B8', marginBottom: 6 },
+  badgeText: { color: COLORS.primaryLight, fontSize: 11, fontWeight: '800' },
+  activeTag: { color: COLORS.accent, fontSize: 11, fontWeight: '700' },
+  earningsText: { color: COLORS.accent, fontSize: 12, fontWeight: '800' },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 6 },
+  cardDesc: { fontSize: 13, color: COLORS.textSecondary, lineHeight: 18, marginBottom: 12 },
+  federationBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 10, marginBottom: 12, borderWidth: 1, borderColor: COLORS.borderLight },
+  federationTitle: { fontSize: 11, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 6, letterSpacing: 0.4 },
   tagWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   fedTag: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#1E293B',
+    backgroundColor: COLORS.bgElevated,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
-  fedTagText: { fontSize: 11, color: '#38BDF8', fontWeight: '500' },
+  fedTagText: { fontSize: 11, color: COLORS.info, fontWeight: '600' },
   membersRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 14 },
-  membersText: { fontSize: 12, color: '#CBD5E1' },
+  membersText: { fontSize: 12, color: COLORS.textSecondary },
   openBtn: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#6366F1',
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 11,
+    borderRadius: RADIUS.md,
+    ...SHADOWS.glowPrimary,
   },
-  openBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
+  openBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '800' },
   aiTagRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+    backgroundColor: 'rgba(139, 92, 246, 0.12)',
     padding: 8,
     borderRadius: 6,
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.25)',
   },
-  aiTagText: { fontSize: 12, color: '#D8B4FE', fontWeight: '500' },
+  aiTagText: { fontSize: 12, color: '#D8B4FE', fontWeight: '600' },
   verifierRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  verifierText: { fontSize: 12, color: '#94A3B8' },
-  membersBox: { backgroundColor: '#0F172A', borderRadius: 8, padding: 10, marginBottom: 12 },
+  verifierText: { fontSize: 12, color: COLORS.textMuted },
+  membersBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 10, marginBottom: 12, borderWidth: 1, borderColor: COLORS.borderLight },
   memberSplitRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3 },
-  memberIdText: { fontSize: 12, color: '#E2E8F0' },
-  splitValText: { fontSize: 12, color: '#A855F7', fontWeight: '700' },
+  memberIdText: { fontSize: 12, color: COLORS.textPrimary },
+  splitValText: { fontSize: 12, color: COLORS.primaryLight, fontWeight: '800' },
   pricingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  subPriceLabel: { fontSize: 12, color: '#94A3B8' },
-  subPriceVal: { fontSize: 14, fontWeight: '700', color: '#F8FAFC' },
+  subPriceLabel: { fontSize: 12, color: COLORS.textMuted },
+  subPriceVal: { fontSize: 14, fontWeight: '800', color: COLORS.textPrimary },
 });

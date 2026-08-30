@@ -8,10 +8,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, Lock, Lightbulb, XCircle, CheckCircle2 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { creationApi } from '../../src/api/domain.api';
 import { HumanApprovalRequestItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function ApprovalsScreen() {
   const router = useRouter();
@@ -70,29 +71,29 @@ export default function ApprovalsScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Human Approval Gate</Text>
           <Text style={styles.headerSubtitle}>Consequential Action Control • Decision Intelligence</Text>
         </View>
         <View style={styles.gateBadge}>
-          <Ionicons name="lock-closed" size={14} color="#F59E0B" />
+          <Lock size={14} color={COLORS.warning} />
         </View>
       </View>
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Decision Intelligence Briefing Card */}
           {decisionBriefing && (
             <View style={styles.briefCard}>
               <View style={styles.briefHead}>
-                <Ionicons name="bulb-outline" size={16} color="#A855F7" />
+                <Lightbulb size={16} color={COLORS.primaryLight} />
                 <Text style={styles.briefTitle}>AI Decision Intelligence Briefing</Text>
               </View>
               <Text style={styles.briefProposal}>{decisionBriefing.proposalTitle}</Text>
@@ -115,7 +116,7 @@ export default function ApprovalsScreen() {
               </View>
 
               <Text style={styles.recText}>
-                <Text style={{ fontWeight: '700', color: '#10B981' }}>Recommended Next Step: </Text>
+                <Text style={{ fontWeight: '800', color: COLORS.accent }}>Recommended Next Step: </Text>
                 {decisionBriefing.recommendedNextStep}
               </Text>
             </View>
@@ -138,7 +139,7 @@ export default function ApprovalsScreen() {
                 <Text
                   style={[
                     styles.riskTag,
-                    { color: req.riskRating === 'HIGH' ? '#EF4444' : '#F59E0B' },
+                    { color: req.riskRating === 'HIGH' ? COLORS.danger : COLORS.warning },
                   ]}
                 >
                   {req.riskRating} RISK
@@ -152,7 +153,7 @@ export default function ApprovalsScreen() {
                 <Text style={styles.metaLbl}>Requester: {req.requesterAgentOrUserId}</Text>
                 <Text style={styles.metaLbl}>Target: {req.targetEntityId}</Text>
                 <Text style={styles.metaOutcome}>
-                  <Text style={{ fontWeight: '700', color: '#38BDF8' }}>Expected Outcome: </Text>
+                  <Text style={{ fontWeight: '800', color: COLORS.info }}>Expected Outcome: </Text>
                   {req.expectedOutcome}
                 </Text>
               </View>
@@ -162,16 +163,18 @@ export default function ApprovalsScreen() {
                   <TouchableOpacity
                     style={styles.rejectBtn}
                     onPress={() => handleResolve(req.id, false)}
+                    activeOpacity={0.82}
                   >
-                    <Ionicons name="close-circle-outline" size={14} color="#EF4444" />
+                    <XCircle size={14} color={COLORS.danger} />
                     <Text style={styles.rejectBtnText}>Reject</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={styles.approveBtn}
                     onPress={() => handleResolve(req.id, true)}
+                    activeOpacity={0.85}
                   >
-                    <Ionicons name="checkmark-circle-outline" size={14} color="#FFFFFF" />
+                    <CheckCircle2 size={14} color="#FFFFFF" />
                     <Text style={styles.approveBtnText}>Authorize Action</Text>
                   </TouchableOpacity>
                 </View>
@@ -189,69 +192,88 @@ export default function ApprovalsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   gateBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: 'rgba(245, 158, 11, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.3)',
   },
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
   briefCard: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(168, 85, 247, 0.2)',
+    borderColor: 'rgba(139, 92, 246, 0.25)',
+    ...SHADOWS.sm,
   },
   briefHead: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  briefTitle: { fontSize: 12, fontWeight: '700', color: '#A855F7' },
-  briefProposal: { fontSize: 15, fontWeight: '700', color: '#F8FAFC', marginBottom: 4 },
-  briefSum: { fontSize: 12, color: '#94A3B8', lineHeight: 16, marginBottom: 10 },
-  argBox: { backgroundColor: '#0F172A', borderRadius: 8, padding: 10 },
-  argHeadPositive: { fontSize: 10, fontWeight: '700', color: '#10B981', marginBottom: 4 },
-  argHeadNegative: { fontSize: 10, fontWeight: '700', color: '#EF4444', marginBottom: 4 },
-  argText: { fontSize: 11, color: '#CBD5E1', lineHeight: 16 },
-  recText: { fontSize: 11, color: '#CBD5E1', marginTop: 8, lineHeight: 15 },
+  briefTitle: { fontSize: 12, fontWeight: '800', color: COLORS.primaryLight },
+  briefProposal: { fontSize: 15, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 4 },
+  briefSum: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 17, marginBottom: 10 },
+  argBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 10, borderWidth: 1, borderColor: COLORS.borderLight },
+  argHeadPositive: { fontSize: 10.5, fontWeight: '800', color: COLORS.accent, marginBottom: 4 },
+  argHeadNegative: { fontSize: 10.5, fontWeight: '800', color: COLORS.danger, marginBottom: 4 },
+  argText: { fontSize: 11, color: COLORS.textSecondary, lineHeight: 16 },
+  recText: { fontSize: 11.5, color: COLORS.textSecondary, marginTop: 8, lineHeight: 16 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, marginTop: 4 },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#F8FAFC' },
-  countBadge: { backgroundColor: '#6366F1', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
-  countBadgeText: { color: '#FFFFFF', fontSize: 10, fontWeight: '700' },
+  sectionTitle: { fontSize: 14.5, fontWeight: '800', color: COLORS.textPrimary },
+  countBadge: { backgroundColor: COLORS.primary, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
+  countBadgeText: { color: '#FFFFFF', fontSize: 10, fontWeight: '800' },
   card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 14,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  actionTypeBadge: { backgroundColor: 'rgba(99, 102, 241, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  actionTypeText: { color: '#6366F1', fontSize: 10, fontWeight: '700' },
-  riskTag: { fontSize: 10, fontWeight: '700' },
-  cardTitle: { fontSize: 15, fontWeight: '700', color: '#F8FAFC', marginBottom: 4 },
-  cardDesc: { fontSize: 12, color: '#94A3B8', lineHeight: 17, marginBottom: 10 },
-  metaBox: { backgroundColor: '#0F172A', borderRadius: 8, padding: 10, marginBottom: 12, gap: 2 },
-  metaLbl: { fontSize: 10, color: '#64748B' },
-  metaOutcome: { fontSize: 11, color: '#E2E8F0', marginTop: 4, lineHeight: 15 },
+  actionTypeBadge: {
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
+  },
+  actionTypeText: { color: COLORS.primaryLight, fontSize: 10, fontWeight: '800' },
+  riskTag: { fontSize: 10, fontWeight: '800' },
+  cardTitle: { fontSize: 15, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 4 },
+  cardDesc: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 17, marginBottom: 10 },
+  metaBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 10, marginBottom: 12, gap: 3, borderWidth: 1, borderColor: COLORS.borderLight },
+  metaLbl: { fontSize: 10.5, color: COLORS.textDim },
+  metaOutcome: { fontSize: 11, color: COLORS.textPrimary, marginTop: 4, lineHeight: 16 },
   btnRow: { flexDirection: 'row', gap: 10 },
   rejectBtn: {
     flex: 1,
@@ -259,22 +281,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    paddingVertical: 11,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
   },
-  rejectBtnText: { color: '#EF4444', fontSize: 11, fontWeight: '700' },
+  rejectBtnText: { color: COLORS.danger, fontSize: 11.5, fontWeight: '800' },
   approveBtn: {
     flex: 2,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-    backgroundColor: '#10B981',
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: COLORS.accent,
+    paddingVertical: 11,
+    borderRadius: RADIUS.md,
+    ...SHADOWS.glowAccent,
   },
-  approveBtnText: { color: '#FFFFFF', fontSize: 11, fontWeight: '700' },
-  resolvedTag: { backgroundColor: '#0F172A', paddingVertical: 6, paddingHorizontal: 8, borderRadius: 6, alignSelf: 'flex-start' },
-  resolvedText: { color: '#94A3B8', fontSize: 10, fontWeight: '600' },
+  approveBtnText: { color: '#000000', fontSize: 11.5, fontWeight: '900' },
+  resolvedTag: { backgroundColor: COLORS.bgInput, paddingVertical: 6, paddingHorizontal: 8, borderRadius: 6, alignSelf: 'flex-start' },
+  resolvedText: { color: COLORS.textMuted, fontSize: 10, fontWeight: '700' },
 });

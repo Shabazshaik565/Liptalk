@@ -8,10 +8,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, BarChart3, User, Cpu, CheckSquare, MessagesSquare } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { creationApi } from '../../src/api/domain.api';
 import { HumanAiTeamItem, CollaborationRoomItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function HumanAiTeamsScreen() {
   const router = useRouter();
@@ -47,8 +48,8 @@ export default function HumanAiTeamsScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Human-AI Teams & Rooms</Text>
@@ -61,6 +62,7 @@ export default function HumanAiTeamsScreen() {
         <TouchableOpacity
           style={[styles.tabBtn, activeTab === 'TEAMS' && styles.tabBtnActive]}
           onPress={() => setActiveTab('TEAMS')}
+          activeOpacity={0.82}
         >
           <Text style={[styles.tabBtnText, activeTab === 'TEAMS' && styles.tabBtnTextActive]}>
             Human-AI Team Squads
@@ -69,6 +71,7 @@ export default function HumanAiTeamsScreen() {
         <TouchableOpacity
           style={[styles.tabBtn, activeTab === 'ROOMS' && styles.tabBtnActive]}
           onPress={() => setActiveTab('ROOMS')}
+          activeOpacity={0.82}
         >
           <Text style={[styles.tabBtnText, activeTab === 'ROOMS' && styles.tabBtnTextActive]}>
             Collaboration Rooms
@@ -78,21 +81,21 @@ export default function HumanAiTeamsScreen() {
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {activeTab === 'TEAMS' ? (
             <View>
               {/* AI Project Manager Telemetry Banner */}
               {pmReport && (
                 <View style={styles.pmCard}>
                   <View style={styles.pmHeader}>
-                    <Ionicons name="stats-chart" size={16} color="#10B981" />
+                    <BarChart3 size={16} color={COLORS.accent} />
                     <Text style={styles.pmTitle}>{pmReport.reportHeadline}</Text>
                   </View>
                   <Text style={styles.pmRec}>
-                    <Text style={{ fontWeight: '700', color: '#F1F5F9' }}>Recommendation: </Text>
+                    <Text style={{ fontWeight: '800', color: COLORS.textPrimary }}>Recommendation: </Text>
                     {pmReport.aiRecommendation}
                   </Text>
                   <View style={styles.blockerBox}>
@@ -115,7 +118,7 @@ export default function HumanAiTeamsScreen() {
                     <View style={styles.memberList}>
                       {team.humanMembers.map((h, hIdx) => (
                         <View key={hIdx} style={styles.memberRow}>
-                          <Ionicons name="person-circle-outline" size={16} color="#38BDF8" />
+                          <User size={15} color={COLORS.info} />
                           <Text style={styles.memberName}>{h.userId}</Text>
                           <View style={styles.roleBadge}>
                             <Text style={styles.roleText}>{h.role}</Text>
@@ -131,7 +134,7 @@ export default function HumanAiTeamsScreen() {
                     <View style={styles.memberList}>
                       {team.aiMembers.map((a, aIdx) => (
                         <View key={aIdx} style={styles.memberRow}>
-                          <Ionicons name="hardware-chip-outline" size={16} color="#A855F7" />
+                          <Cpu size={15} color={COLORS.primaryLight} />
                           <View style={{ flex: 1 }}>
                             <Text style={styles.memberName}>{a.agentName}</Text>
                             <Text style={styles.agentScope}>
@@ -170,7 +173,7 @@ export default function HumanAiTeamsScreen() {
                       <Text style={[styles.intelHead, { marginTop: 8 }]}>Extracted Action Items:</Text>
                       {room.realtimeIntelligence.extractedActionItems?.map((act, aIdx) => (
                         <View key={aIdx} style={styles.actionRow}>
-                          <Ionicons name="checkbox-outline" size={14} color="#10B981" />
+                          <CheckSquare size={13} color={COLORS.accent} />
                           <Text style={styles.actionText}>{act}</Text>
                         </View>
                       ))}
@@ -180,8 +183,9 @@ export default function HumanAiTeamsScreen() {
                   <TouchableOpacity
                     style={styles.joinBtn}
                     onPress={() => Alert.alert('Connected to Collaboration Room', 'Isolated context boundaries active.')}
+                    activeOpacity={0.85}
                   >
-                    <Ionicons name="chatbubbles-outline" size={14} color="#FFFFFF" />
+                    <MessagesSquare size={15} color="#FFFFFF" />
                     <Text style={styles.joinBtnText}>Enter Collaboration Space</Text>
                   </TouchableOpacity>
                 </View>
@@ -195,91 +199,108 @@ export default function HumanAiTeamsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   tabStrip: {
     flexDirection: 'row',
-    backgroundColor: '#111827',
-    paddingHorizontal: 16,
-    paddingBottom: 10,
+    backgroundColor: COLORS.bgInput,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
     gap: 8,
   },
   tabBtn: {
     flex: 1,
     paddingVertical: 8,
     alignItems: 'center',
-    borderRadius: 8,
-    backgroundColor: '#0F172A',
-  },
-  tabBtnActive: { backgroundColor: '#6366F1' },
-  tabBtnText: { fontSize: 11, fontWeight: '600', color: '#94A3B8' },
-  tabBtnTextActive: { color: '#FFFFFF' },
-  loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
-  pmCard: {
-    backgroundColor: '#111827',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 16,
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.bgElevated,
     borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.2)',
+    borderColor: COLORS.border,
+  },
+  tabBtnActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primaryLight,
+    ...SHADOWS.glowPrimary,
+  },
+  tabBtnText: { fontSize: 11, fontWeight: '700', color: COLORS.textMuted },
+  tabBtnTextActive: { color: '#FFFFFF', fontWeight: '800' },
+  loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
+  pmCard: {
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.25)',
+    ...SHADOWS.sm,
   },
   pmHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
-  pmTitle: { fontSize: 13, fontWeight: '700', color: '#10B981' },
-  pmRec: { fontSize: 11, color: '#CBD5E1', lineHeight: 16, marginBottom: 8 },
-  blockerBox: { backgroundColor: '#0F172A', borderRadius: 8, padding: 8 },
-  blockerHead: { fontSize: 10, fontWeight: '700', color: '#EF4444', marginBottom: 2 },
-  blockerText: { fontSize: 11, color: '#94A3B8' },
+  pmTitle: { fontSize: 13, fontWeight: '800', color: COLORS.accent },
+  pmRec: { fontSize: 11.5, color: COLORS.textSecondary, lineHeight: 16, marginBottom: 8 },
+  blockerBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 8, borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.2)' },
+  blockerHead: { fontSize: 10, fontWeight: '800', color: COLORS.danger, marginBottom: 2 },
+  blockerText: { fontSize: 11, color: COLORS.textMuted },
   card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
-  teamTitle: { fontSize: 16, fontWeight: '700', color: '#F8FAFC', marginBottom: 4 },
-  missionText: { fontSize: 12, color: '#94A3B8', lineHeight: 17, marginBottom: 14 },
-  memberSection: { backgroundColor: '#0F172A', borderRadius: 10, padding: 12, marginBottom: 10 },
-  sectionHeader: { fontSize: 11, fontWeight: '700', color: '#94A3B8', marginBottom: 8 },
+  teamTitle: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 4 },
+  missionText: { fontSize: 12.5, color: COLORS.textSecondary, lineHeight: 17, marginBottom: 14 },
+  memberSection: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 12, marginBottom: 10, borderWidth: 1, borderColor: COLORS.borderLight },
+  sectionHeader: { fontSize: 11, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 8, letterSpacing: 0.4 },
   memberList: { gap: 6 },
   memberRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  memberName: { fontSize: 12, fontWeight: '600', color: '#F1F5F9' },
-  roleBadge: { backgroundColor: '#1E293B', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  roleText: { color: '#38BDF8', fontSize: 9, fontWeight: '700' },
-  agentScope: { fontSize: 10, color: '#64748B', marginTop: 1 },
+  memberName: { fontSize: 12, fontWeight: '700', color: COLORS.textPrimary },
+  roleBadge: { backgroundColor: COLORS.bgElevated, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, borderWidth: 1, borderColor: COLORS.border },
+  roleText: { color: COLORS.info, fontSize: 9.5, fontWeight: '800' },
+  agentScope: { fontSize: 10.5, color: COLORS.textMuted, marginTop: 1 },
   roomHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  liveBadge: { backgroundColor: 'rgba(16, 185, 129, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  liveBadgeText: { color: '#10B981', fontSize: 9, fontWeight: '700' },
-  participantCount: { fontSize: 11, color: '#94A3B8' },
-  intelBox: { backgroundColor: '#0F172A', borderRadius: 10, padding: 12, marginBottom: 12 },
-  intelHead: { fontSize: 10, fontWeight: '700', color: '#64748B', marginBottom: 4 },
-  intelSummary: { fontSize: 11, color: '#CBD5E1', lineHeight: 16 },
+  liveBadge: { backgroundColor: 'rgba(16, 185, 129, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.3)' },
+  liveBadgeText: { color: COLORS.accent, fontSize: 9.5, fontWeight: '800' },
+  participantCount: { fontSize: 11, color: COLORS.textMuted },
+  intelBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: COLORS.borderLight },
+  intelHead: { fontSize: 10.5, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 4, letterSpacing: 0.4 },
+  intelSummary: { fontSize: 11.5, color: COLORS.textSecondary, lineHeight: 16 },
   actionRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
-  actionText: { fontSize: 11, color: '#F1F5F9', flex: 1 },
+  actionText: { fontSize: 11.5, color: COLORS.textPrimary, flex: 1 },
   joinBtn: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#6366F1',
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 11,
+    borderRadius: RADIUS.md,
+    ...SHADOWS.glowPrimary,
   },
-  joinBtnText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
+  joinBtnText: { color: '#FFFFFF', fontSize: 12.5, fontWeight: '800' },
 });

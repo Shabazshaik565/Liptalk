@@ -9,10 +9,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, Sparkles, Shield, Play, StopCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { adaptationApi } from '../../src/api/domain.api';
 import { AiPlanItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function AiPlansScreen() {
   const router = useRouter();
@@ -101,8 +102,8 @@ export default function AiPlansScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>AI Planning Engine</Text>
@@ -117,7 +118,7 @@ export default function AiPlansScreen() {
           <TextInput
             style={styles.input}
             placeholder="e.g. Help me coordinate a regional logistics pilot..."
-            placeholderTextColor="#64748B"
+            placeholderTextColor={COLORS.textDim}
             value={goalInput}
             onChangeText={setGoalInput}
           />
@@ -125,11 +126,12 @@ export default function AiPlansScreen() {
             style={styles.genBtn}
             onPress={handleGeneratePlan}
             disabled={generating}
+            activeOpacity={0.85}
           >
             {generating ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
-              <Ionicons name="sparkles" size={16} color="#FFFFFF" />
+              <Sparkles size={16} color="#FFFFFF" />
             )}
           </TouchableOpacity>
         </View>
@@ -137,10 +139,10 @@ export default function AiPlansScreen() {
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {plans.map((plan) => (
             <View key={plan.id} style={styles.planCard}>
               <View style={styles.planHeader}>
@@ -172,10 +174,10 @@ export default function AiPlansScreen() {
                             {
                               color:
                                 step.status === 'COMPLETED'
-                                  ? '#10B981'
+                                  ? COLORS.accent
                                   : step.status === 'EXECUTING'
-                                  ? '#38BDF8'
-                                  : '#94A3B8',
+                                  ? COLORS.info
+                                  : COLORS.textMuted,
                             },
                           ]}
                         >
@@ -183,7 +185,7 @@ export default function AiPlansScreen() {
                         </Text>
                       </View>
                       <Text style={styles.stepRoleText}>
-                        Agent: <Text style={{ color: '#6366F1' }}>{step.agentRole}</Text> • Type: {step.actionType}
+                        Agent: <Text style={{ color: COLORS.primaryLight }}>{step.agentRole}</Text> • Type: {step.actionType}
                       </Text>
                       <Text style={styles.stepDesc}>{step.description}</Text>
 
@@ -193,12 +195,13 @@ export default function AiPlansScreen() {
                           onPress={() =>
                             handleExecuteStep(plan.id, step.stepIndex, step.requiresHumanReview)
                           }
+                          activeOpacity={0.82}
                         >
-                          <Ionicons
-                            name={step.requiresHumanReview ? 'shield-outline' : 'play-outline'}
-                            size={12}
-                            color="#FFFFFF"
-                          />
+                          {step.requiresHumanReview ? (
+                            <Shield size={12} color="#FFFFFF" />
+                          ) : (
+                            <Play size={12} color="#FFFFFF" />
+                          )}
                           <Text style={styles.stepActionText}>
                             {step.requiresHumanReview ? 'Authorize & Execute' : 'Execute Step'}
                           </Text>
@@ -214,8 +217,9 @@ export default function AiPlansScreen() {
                 <TouchableOpacity
                   style={styles.cancelBtn}
                   onPress={() => handleCancelPlan(plan.id)}
+                  activeOpacity={0.82}
                 >
-                  <Ionicons name="stop-circle-outline" size={14} color="#EF4444" />
+                  <StopCircle size={14} color={COLORS.danger} />
                   <Text style={styles.cancelBtnText}>Halt Plan Execution</Text>
                 </TouchableOpacity>
               )}
@@ -228,102 +232,124 @@ export default function AiPlansScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   promptBox: {
-    backgroundColor: '#111827',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: COLORS.bgCard,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  promptLabel: { fontSize: 11, fontWeight: '700', color: '#94A3B8', marginBottom: 8 },
+  promptLabel: { fontSize: 11, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 8, letterSpacing: 0.4 },
   inputRow: { flexDirection: 'row', gap: 8 },
   input: {
     flex: 1,
-    backgroundColor: '#0F172A',
-    borderRadius: 8,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: RADIUS.md,
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    color: '#F8FAFC',
-    fontSize: 12,
+    paddingVertical: 9,
+    color: COLORS.textPrimary,
+    fontSize: 12.5,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
   },
   genBtn: {
-    backgroundColor: '#6366F1',
-    borderRadius: 8,
+    backgroundColor: COLORS.primary,
+    borderRadius: RADIUS.md,
     paddingHorizontal: 14,
     justifyContent: 'center',
     alignItems: 'center',
+    ...SHADOWS.glowPrimary,
   },
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
   planCard: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   planHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  statusBadge: { backgroundColor: 'rgba(99, 102, 241, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  statusBadgeText: { color: '#6366F1', fontSize: 10, fontWeight: '700' },
-  costText: { fontSize: 11, color: '#10B981', fontWeight: '700' },
-  planTitle: { fontSize: 16, fontWeight: '700', color: '#F8FAFC', marginBottom: 4 },
-  planDesc: { fontSize: 12, color: '#94A3B8', lineHeight: 17, marginBottom: 12 },
-  stepsBox: { backgroundColor: '#0F172A', borderRadius: 10, padding: 12, marginBottom: 12 },
-  stepsHeader: { fontSize: 11, fontWeight: '700', color: '#94A3B8', marginBottom: 10 },
+  statusBadge: {
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
+  },
+  statusBadgeText: { color: COLORS.primaryLight, fontSize: 10, fontWeight: '800' },
+  costText: { fontSize: 11, color: COLORS.accent, fontWeight: '800' },
+  planTitle: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 4 },
+  planDesc: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 17, marginBottom: 12 },
+  stepsBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: COLORS.borderLight },
+  stepsHeader: { fontSize: 11, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 10, letterSpacing: 0.4 },
   stepRow: { flexDirection: 'row', gap: 10, marginBottom: 12 },
   stepNumberBadge: {
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: '#1E293B',
+    backgroundColor: COLORS.bgElevated,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
-  stepNumText: { fontSize: 10, fontWeight: '700', color: '#38BDF8' },
+  stepNumText: { fontSize: 10, fontWeight: '800', color: COLORS.info },
   stepDetails: { flex: 1 },
   stepMetaRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 },
-  stepTitle: { fontSize: 13, fontWeight: '700', color: '#F1F5F9' },
-  stepStatus: { fontSize: 10, fontWeight: '700' },
-  stepRoleText: { fontSize: 10, color: '#94A3B8', marginBottom: 4 },
-  stepDesc: { fontSize: 11, color: '#CBD5E1', lineHeight: 15, marginBottom: 6 },
+  stepTitle: { fontSize: 13, fontWeight: '800', color: COLORS.textPrimary },
+  stepStatus: { fontSize: 10, fontWeight: '800' },
+  stepRoleText: { fontSize: 10.5, color: COLORS.textMuted, marginBottom: 4 },
+  stepDesc: { fontSize: 11, color: COLORS.textSecondary, lineHeight: 15, marginBottom: 6 },
   stepActionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     alignSelf: 'flex-start',
-    backgroundColor: '#6366F1',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: RADIUS.sm,
+    ...SHADOWS.glowPrimary,
   },
-  stepActionText: { color: '#FFFFFF', fontSize: 10, fontWeight: '700' },
+  stepActionText: { color: '#FFFFFF', fontSize: 10.5, fontWeight: '800' },
   cancelBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
   },
-  cancelBtnText: { color: '#EF4444', fontSize: 11, fontWeight: '600' },
+  cancelBtnText: { color: COLORS.danger, fontSize: 11, fontWeight: '700' },
 });

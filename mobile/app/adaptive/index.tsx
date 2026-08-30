@@ -8,10 +8,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, ShieldCheck, Network, FlaskConical, BellRing, Lock, Sparkles } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { adaptationApi } from '../../src/api/domain.api';
 import { ImprovementProposalItem, FeedbackClusterItem, PlatformHealthModelItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function AdaptiveHubScreen() {
   const router = useRouter();
@@ -49,8 +50,8 @@ export default function AdaptiveHubScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Adaptive Operating Hub</Text>
@@ -59,17 +60,18 @@ export default function AdaptiveHubScreen() {
         <TouchableOpacity
           style={styles.safetyBadge}
           onPress={() => Alert.alert('AI Governance Protocol', 'AI evaluates telemetry and proposes experiments, but is strictly prohibited from modifying its own permissions or safety boundaries.')}
+          activeOpacity={0.8}
         >
-          <Ionicons name="shield-checkmark" size={18} color="#10B981" />
+          <ShieldCheck size={18} color={COLORS.accent} />
         </TouchableOpacity>
       </View>
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Status Banner */}
           <View style={styles.statusBanner}>
             <View style={styles.statusRow}>
@@ -100,8 +102,9 @@ export default function AdaptiveHubScreen() {
             <TouchableOpacity
               style={styles.navCard}
               onPress={() => router.push('/ai-plans' as any)}
+              activeOpacity={0.82}
             >
-              <Ionicons name="git-network-outline" size={22} color="#6366F1" />
+              <Network size={22} color={COLORS.primaryLight} />
               <Text style={styles.navCardTitle}>AI Planning</Text>
               <Text style={styles.navCardSub}>Multi-Step Plans</Text>
             </TouchableOpacity>
@@ -109,8 +112,9 @@ export default function AdaptiveHubScreen() {
             <TouchableOpacity
               style={styles.navCard}
               onPress={() => router.push('/experiments' as any)}
+              activeOpacity={0.82}
             >
-              <Ionicons name="flask-outline" size={22} color="#38BDF8" />
+              <FlaskConical size={22} color={COLORS.info} />
               <Text style={styles.navCardTitle}>Experiments</Text>
               <Text style={styles.navCardSub}>Canary Rollouts</Text>
             </TouchableOpacity>
@@ -118,8 +122,9 @@ export default function AdaptiveHubScreen() {
             <TouchableOpacity
               style={styles.navCard}
               onPress={() => router.push('/attention' as any)}
+              activeOpacity={0.82}
             >
-              <Ionicons name="notifications-circle-outline" size={22} color="#F59E0B" />
+              <BellRing size={22} color={COLORS.warning} />
               <Text style={styles.navCardTitle}>Attention Center</Text>
               <Text style={styles.navCardSub}>Focus & Batching</Text>
             </TouchableOpacity>
@@ -127,8 +132,9 @@ export default function AdaptiveHubScreen() {
             <TouchableOpacity
               style={styles.navCard}
               onPress={() => router.push('/security/hub' as any)}
+              activeOpacity={0.82}
             >
-              <Ionicons name="lock-closed-outline" size={22} color="#10B981" />
+              <Lock size={22} color={COLORS.accent} />
               <Text style={styles.navCardTitle}>Security Hub</Text>
               <Text style={styles.navCardSub}>Threats & Privacy</Text>
             </TouchableOpacity>
@@ -151,7 +157,7 @@ export default function AdaptiveHubScreen() {
                 <Text
                   style={[
                     styles.statusTag,
-                    { color: prop.status === 'EXPERIMENTING' ? '#38BDF8' : '#10B981' },
+                    { color: prop.status === 'EXPERIMENTING' ? COLORS.info : COLORS.accent },
                   ]}
                 >
                   ● {prop.status}
@@ -203,7 +209,7 @@ export default function AdaptiveHubScreen() {
               </View>
 
               <View style={styles.aiRoadmapBox}>
-                <Ionicons name="sparkles" size={14} color="#A855F7" />
+                <Sparkles size={14} color={COLORS.primaryLight} />
                 <Text style={styles.aiRoadmapText}>{fb.aiRoadmapRecommendation}</Text>
               </View>
             </View>
@@ -215,21 +221,29 @@ export default function AdaptiveHubScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   safetyBadge: {
     width: 36,
     height: 36,
@@ -237,63 +251,91 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(16, 185, 129, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
   },
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
   statusBanner: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
-  statusPulse: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#10B981' },
-  statusTitle: { fontSize: 11, fontWeight: '700', color: '#10B981', letterSpacing: 0.5 },
-  statusDesc: { fontSize: 12, color: '#94A3B8', lineHeight: 17, marginBottom: 14 },
-  metricsRow: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#0F172A', borderRadius: 10, padding: 12 },
+  statusPulse: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.accent },
+  statusTitle: { fontSize: 11, fontWeight: '800', color: COLORS.accent, letterSpacing: 0.5 },
+  statusDesc: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 17, marginBottom: 14 },
+  metricsRow: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 12, borderWidth: 1, borderColor: COLORS.borderLight },
   metricBox: { alignItems: 'center', flex: 1 },
-  metricVal: { fontSize: 16, fontWeight: '700', color: '#F8FAFC' },
-  metricLbl: { fontSize: 10, color: '#94A3B8', marginTop: 2 },
+  metricVal: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary },
+  metricLbl: { fontSize: 10.5, color: COLORS.textMuted, marginTop: 2 },
   navGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
   navCard: {
     width: '48%',
-    backgroundColor: '#111827',
-    borderRadius: 12,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.lg,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
-  navCardTitle: { fontSize: 13, fontWeight: '700', color: '#F8FAFC', marginTop: 8 },
-  navCardSub: { fontSize: 10, color: '#94A3B8', marginTop: 2 },
+  navCardTitle: { fontSize: 13, fontWeight: '800', color: COLORS.textPrimary, marginTop: 8 },
+  navCardSub: { fontSize: 10.5, color: COLORS.textMuted, marginTop: 2 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, marginTop: 6 },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#F8FAFC' },
-  badgeCount: { backgroundColor: '#6366F1', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
-  badgeCountText: { color: '#FFFFFF', fontSize: 10, fontWeight: '700' },
+  sectionTitle: { fontSize: 15, fontWeight: '800', color: COLORS.textPrimary },
+  badgeCount: { backgroundColor: COLORS.primary, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
+  badgeCountText: { color: '#FFFFFF', fontSize: 10, fontWeight: '800' },
   card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  catBadge: { backgroundColor: 'rgba(99, 102, 241, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  catBadgeText: { color: '#6366F1', fontSize: 10, fontWeight: '700' },
-  statusTag: { fontSize: 11, fontWeight: '700' },
-  cardTitle: { fontSize: 15, fontWeight: '700', color: '#F8FAFC', marginBottom: 6 },
-  cardDesc: { fontSize: 12, color: '#94A3B8', lineHeight: 17, marginBottom: 10 },
-  metaBox: { backgroundColor: '#0F172A', borderRadius: 8, padding: 10, gap: 6 },
+  catBadge: {
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
+  },
+  catBadgeText: { color: COLORS.primaryLight, fontSize: 10, fontWeight: '800' },
+  statusTag: { fontSize: 11, fontWeight: '800' },
+  cardTitle: { fontSize: 15, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 6 },
+  cardDesc: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 17, marginBottom: 10 },
+  metaBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 10, gap: 6, borderWidth: 1, borderColor: COLORS.borderLight },
   metaRow: { flexDirection: 'column' },
-  metaLbl: { fontSize: 10, fontWeight: '700', color: '#64748B', marginBottom: 1 },
-  metaVal: { fontSize: 11, color: '#CBD5E1', lineHeight: 15 },
-  feedbackBadge: { backgroundColor: 'rgba(168, 85, 247, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  feedbackBadgeText: { color: '#A855F7', fontSize: 10, fontWeight: '700' },
-  urgentTag: { fontSize: 11, fontWeight: '700', color: '#F59E0B' },
-  quoteBox: { backgroundColor: '#0F172A', borderRadius: 8, padding: 10, marginBottom: 10, gap: 4 },
-  quoteText: { fontSize: 11, color: '#94A3B8', fontStyle: 'italic' },
-  aiRoadmapBox: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(168, 85, 247, 0.1)', padding: 10, borderRadius: 8 },
+  metaLbl: { fontSize: 10, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 1 },
+  metaVal: { fontSize: 11, color: COLORS.textSecondary, lineHeight: 15 },
+  feedbackBadge: {
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
+  },
+  feedbackBadgeText: { color: COLORS.primaryLight, fontSize: 10, fontWeight: '800' },
+  urgentTag: { fontSize: 11, fontWeight: '800', color: COLORS.warning },
+  quoteBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 10, marginBottom: 10, gap: 4, borderWidth: 1, borderColor: COLORS.borderLight },
+  quoteText: { fontSize: 11, color: COLORS.textMuted, fontStyle: 'italic' },
+  aiRoadmapBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(139, 92, 246, 0.12)',
+    padding: 10,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.25)',
+  },
   aiRoadmapText: { fontSize: 11, color: '#E9D5FF', flex: 1, lineHeight: 15 },
 });

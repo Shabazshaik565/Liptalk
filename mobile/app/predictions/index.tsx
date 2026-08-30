@@ -8,10 +8,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, Info, Activity } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { intelligenceApi } from '../../src/api/domain.api';
 import { EcosystemPredictionItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function PredictionsScreen() {
   const router = useRouter();
@@ -43,8 +44,8 @@ export default function PredictionsScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Predictive Intelligence</Text>
@@ -53,8 +54,9 @@ export default function PredictionsScreen() {
         <TouchableOpacity
           style={styles.actionBtn}
           onPress={() => Alert.alert('Uncertainty Disclaimer', 'Forecasts communicate statistical confidence bands and are never guaranteed outcomes.')}
+          activeOpacity={0.8}
         >
-          <Ionicons name="information-circle-outline" size={20} color="#38BDF8" />
+          <Info size={18} color={COLORS.info} />
         </TouchableOpacity>
       </View>
 
@@ -68,9 +70,10 @@ export default function PredictionsScreen() {
                 key={d}
                 style={[styles.domainTab, isActive && styles.domainTabActive]}
                 onPress={() => setSelectedDomain(d)}
+                activeOpacity={0.82}
               >
                 <Text style={[styles.domainTabText, isActive && styles.domainTabTextActive]}>
-                  {d.replace('_', ' ')}
+                  {d.replace(/_/g, ' ')}
                 </Text>
               </TouchableOpacity>
             );
@@ -80,10 +83,10 @@ export default function PredictionsScreen() {
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {predictions.map((pred) => (
             <View key={pred.id} style={styles.predCard}>
               <View style={styles.cardHead}>
@@ -122,7 +125,7 @@ export default function PredictionsScreen() {
                 <Text style={styles.signalsHeader}>Key Influencing Signals:</Text>
                 {pred.influencingSignals?.map((sig, sIdx) => (
                   <View key={sIdx} style={styles.signalRow}>
-                    <Ionicons name="analytics" size={12} color="#6366F1" />
+                    <Activity size={12} color={COLORS.primaryLight} />
                     <Text style={styles.signalName}>{sig.signalName}:</Text>
                     <Text style={styles.signalObs}>{sig.observation}</Text>
                   </View>
@@ -141,21 +144,29 @@ export default function PredictionsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   actionBtn: {
     width: 36,
     height: 36,
@@ -163,63 +174,79 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(56, 189, 248, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.3)',
   },
-  domainStrip: { backgroundColor: '#111827', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1E293B' },
-  domainScroll: { paddingHorizontal: 16, gap: 8 },
+  domainStrip: { backgroundColor: COLORS.bgInput, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: COLORS.border },
+  domainScroll: { paddingHorizontal: SPACING.lg, gap: 8 },
   domainTab: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 20,
-    backgroundColor: '#0F172A',
+    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.bgElevated,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
   },
-  domainTabActive: { backgroundColor: '#6366F1', borderColor: '#6366F1' },
-  domainTabText: { fontSize: 11, fontWeight: '600', color: '#94A3B8' },
-  domainTabTextActive: { color: '#FFFFFF' },
+  domainTabActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primaryLight, ...SHADOWS.glowPrimary },
+  domainTabText: { fontSize: 11, fontWeight: '700', color: COLORS.textMuted },
+  domainTabTextActive: { color: '#FFFFFF', fontWeight: '800' },
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
   predCard: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   cardHead: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
   domainBadge: {
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
   },
-  domainBadgeText: { color: '#6366F1', fontSize: 10, fontWeight: '700' },
-  confidenceScore: { color: '#10B981', fontSize: 11, fontWeight: '700' },
-  predTitle: { fontSize: 15, fontWeight: '700', color: '#F8FAFC', marginBottom: 6 },
-  forecastText: { fontSize: 13, color: '#E2E8F0', lineHeight: 18, marginBottom: 12 },
+  domainBadgeText: { color: COLORS.primaryLight, fontSize: 10, fontWeight: '800' },
+  confidenceScore: { color: COLORS.accent, fontSize: 11, fontWeight: '800' },
+  predTitle: { fontSize: 15, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 6 },
+  forecastText: { fontSize: 13, color: COLORS.textSecondary, lineHeight: 18, marginBottom: 12 },
   uncertaintyBox: {
-    backgroundColor: '#0F172A',
-    borderRadius: 10,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: RADIUS.md,
     padding: 12,
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
   },
-  uncertaintyHeader: { fontSize: 10, fontWeight: '700', color: '#94A3B8', marginBottom: 6 },
+  uncertaintyHeader: { fontSize: 10, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 6, letterSpacing: 0.4 },
   rangeRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  rangeVal: { fontSize: 10, color: '#94A3B8' },
-  rangeCenter: { backgroundColor: 'rgba(56, 189, 248, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  expectedVal: { fontSize: 11, fontWeight: '700', color: '#38BDF8' },
-  barBackground: { height: 6, backgroundColor: '#1E293B', borderRadius: 3, overflow: 'hidden' },
-  barFill: { height: '100%', width: '70%', backgroundColor: '#6366F1', alignSelf: 'center', borderRadius: 3 },
+  rangeVal: { fontSize: 10, color: COLORS.textMuted },
+  rangeCenter: {
+    backgroundColor: 'rgba(56, 189, 248, 0.15)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.3)',
+  },
+  expectedVal: { fontSize: 11, fontWeight: '800', color: COLORS.info },
+  barBackground: { height: 6, backgroundColor: COLORS.bgElevated, borderRadius: 3, overflow: 'hidden' },
+  barFill: { height: '100%', width: '70%', backgroundColor: COLORS.primary, alignSelf: 'center', borderRadius: 3 },
   signalsBox: {
-    backgroundColor: '#0F172A',
-    borderRadius: 10,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: RADIUS.md,
     padding: 10,
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
   },
-  signalsHeader: { fontSize: 10, fontWeight: '700', color: '#94A3B8', marginBottom: 6 },
+  signalsHeader: { fontSize: 10, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 6, letterSpacing: 0.4 },
   signalRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  signalName: { fontSize: 11, fontWeight: '600', color: '#CBD5E1' },
-  signalObs: { fontSize: 10, color: '#94A3B8', flex: 1 },
-  rationaleText: { fontSize: 11, color: '#94A3B8', fontStyle: 'italic' },
+  signalName: { fontSize: 11, fontWeight: '700', color: COLORS.textPrimary },
+  signalObs: { fontSize: 10.5, color: COLORS.textMuted, flex: 1 },
+  rationaleText: { fontSize: 11, color: COLORS.textMuted, fontStyle: 'italic' },
 });

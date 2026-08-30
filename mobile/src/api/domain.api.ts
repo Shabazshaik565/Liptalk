@@ -187,7 +187,8 @@ export const needsOffersApi = {
   getNeeds: async (): Promise<NeedItem[]> => {
     try {
       const res = await apiClient.get('/needs');
-      return res.data;
+      if (Array.isArray(res.data) && res.data.length > 0) return res.data;
+      return INITIAL_NEEDS;
     } catch {
       return INITIAL_NEEDS;
     }
@@ -221,7 +222,8 @@ export const needsOffersApi = {
   getOffers: async (): Promise<OfferItem[]> => {
     try {
       const res = await apiClient.get('/offers');
-      return res.data;
+      if (Array.isArray(res.data) && res.data.length > 0) return res.data;
+      return INITIAL_OFFERS;
     } catch {
       return INITIAL_OFFERS;
     }
@@ -255,7 +257,8 @@ export const matchesApi = {
   getMatches: async (): Promise<MatchResult[]> => {
     try {
       const res = await apiClient.get('/matches');
-      return res.data;
+      if (Array.isArray(res.data) && res.data.length > 0) return res.data;
+      return MATCHES_DATA;
     } catch {
       return MATCHES_DATA;
     }
@@ -281,7 +284,8 @@ export const opportunitiesApi = {
   }): Promise<OpportunityItem[]> => {
     try {
       const res = await apiClient.get('/opportunities', { params });
-      return res.data;
+      if (Array.isArray(res.data) && res.data.length > 0) return res.data;
+      return OPPORTUNITIES_DATA;
     } catch {
       return OPPORTUNITIES_DATA;
     }
@@ -336,7 +340,8 @@ export const leadsApi = {
   getLeads: async (): Promise<LeadItem[]> => {
     try {
       const res = await apiClient.get('/leads');
-      return res.data;
+      if (Array.isArray(res.data) && res.data.length > 0) return res.data;
+      return LEADS_DATA;
     } catch {
       return LEADS_DATA;
     }
@@ -505,7 +510,9 @@ export const communitiesApi = {
   getCommunities: async (params?: { search?: string; category?: string; page?: number; limit?: number }): Promise<CommunityItem[]> => {
     try {
       const res = await apiClient.get('/communities', { params });
-      return res.data?.items || res.data || [];
+      const items = res.data?.items || res.data;
+      if (Array.isArray(items) && items.length > 0) return items;
+      return COMMUNITIES_DATA;
     } catch {
       return COMMUNITIES_DATA;
     }
@@ -513,7 +520,8 @@ export const communitiesApi = {
   getRecommended: async (): Promise<CommunityItem[]> => {
     try {
       const res = await apiClient.get('/communities/recommended');
-      return res.data || [];
+      if (Array.isArray(res.data) && res.data.length > 0) return res.data;
+      return COMMUNITIES_DATA;
     } catch {
       return COMMUNITIES_DATA;
     }
@@ -581,7 +589,9 @@ export const postsApi = {
   getCommunityPosts: async (communityId: string, page = 1): Promise<CommunityPostItem[]> => {
     try {
       const res = await apiClient.get(`/communities/${communityId}/posts`, { params: { page } });
-      return res.data?.items || res.data || [];
+      const items = res.data?.items || res.data;
+      if (Array.isArray(items) && items.length > 0) return items;
+      return COMMUNITY_POSTS_DATA;
     } catch {
       return COMMUNITY_POSTS_DATA;
     }
@@ -674,7 +684,9 @@ export const eventsApi = {
   getEvents: async (params?: { communityId?: string; category?: string; page?: number }): Promise<EventItem[]> => {
     try {
       const res = await apiClient.get('/events', { params });
-      return res.data?.items || res.data || [];
+      const items = res.data?.items || res.data;
+      if (Array.isArray(items) && items.length > 0) return items;
+      return EVENTS_DATA;
     } catch {
       return EVENTS_DATA;
     }
@@ -745,7 +757,9 @@ export const marketplaceApi = {
   getListings: async (params?: { search?: string; category?: string; pricingType?: string; location?: string; page?: number; limit?: number }): Promise<MarketplaceListingItem[]> => {
     try {
       const res = await apiClient.get('/marketplace', { params });
-      return res.data?.items || res.data || [];
+      const items = res.data?.items || res.data;
+      if (Array.isArray(items) && items.length > 0) return items;
+      return MARKETPLACE_LISTINGS_DATA;
     } catch {
       return MARKETPLACE_LISTINGS_DATA;
     }
@@ -753,7 +767,8 @@ export const marketplaceApi = {
   getRecommended: async (): Promise<MarketplaceListingItem[]> => {
     try {
       const res = await apiClient.get('/marketplace/recommended');
-      return res.data || [];
+      if (Array.isArray(res.data) && res.data.length > 0) return res.data;
+      return MARKETPLACE_LISTINGS_DATA;
     } catch {
       return MARKETPLACE_LISTINGS_DATA;
     }

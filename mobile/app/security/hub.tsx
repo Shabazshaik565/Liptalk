@@ -8,10 +8,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, ShieldCheck, CheckCircle2, XCircle, Shield } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { adaptationApi } from '../../src/api/domain.api';
 import { SecurityThreatItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function SecurityHubScreen() {
   const router = useRouter();
@@ -53,8 +54,8 @@ export default function SecurityHubScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Continuous Security Hub</Text>
@@ -64,15 +65,15 @@ export default function SecurityHubScreen() {
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Section: Live Contained Security Threats */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Continuous Threat Monitoring</Text>
             <View style={styles.safeBadge}>
-              <Ionicons name="shield-checkmark" size={12} color="#10B981" />
+              <ShieldCheck size={12} color={COLORS.accent} />
               <Text style={styles.safeBadgeText}>Auto-Contained</Text>
             </View>
           </View>
@@ -92,7 +93,7 @@ export default function SecurityHubScreen() {
               <View style={styles.autoActionBox}>
                 <Text style={styles.autoActionHeader}>Bounded Automated Response Enacted:</Text>
                 <Text style={styles.autoActionText}>
-                  Action: <Text style={{ color: '#10B981', fontWeight: '700' }}>{threat.automatedBoundedResponse?.actionTaken}</Text> on target {threat.automatedBoundedResponse?.targetId}
+                  Action: <Text style={{ color: COLORS.accent, fontWeight: '800' }}>{threat.automatedBoundedResponse?.actionTaken}</Text> on target {threat.automatedBoundedResponse?.targetId}
                 </Text>
               </View>
             </View>
@@ -114,7 +115,7 @@ export default function SecurityHubScreen() {
                 <Text style={styles.simHead}>Data Accessible Under Scopes:</Text>
                 {privacySim.dataAccessedSummary.map((item: any, idx: number) => (
                   <View key={idx} style={styles.simRow}>
-                    <Ionicons name="checkmark-circle-outline" size={14} color="#10B981" />
+                    <CheckCircle2 size={13} color={COLORS.accent} />
                     <Text style={styles.simText}>{item.impact}</Text>
                   </View>
                 ))}
@@ -124,7 +125,7 @@ export default function SecurityHubScreen() {
                 <Text style={styles.simHead}>Explicitly Prohibited Operations:</Text>
                 {privacySim.prohibitedActions.map((action: string, idx: number) => (
                   <View key={idx} style={styles.simRow}>
-                    <Ionicons name="close-circle-outline" size={14} color="#EF4444" />
+                    <XCircle size={13} color={COLORS.danger} />
                     <Text style={styles.simText}>{action}</Text>
                   </View>
                 ))}
@@ -132,13 +133,13 @@ export default function SecurityHubScreen() {
 
               <View style={styles.simPolicyBox}>
                 <Text style={styles.simPolicyText}>
-                  <Text style={{ fontWeight: '700', color: '#38BDF8' }}>Revocation Behavior: </Text>
+                  <Text style={{ fontWeight: '800', color: COLORS.info }}>Revocation Behavior: </Text>
                   {privacySim.revocationBehavior}
                 </Text>
               </View>
 
-              <TouchableOpacity style={styles.verifyBtn} onPress={handleTestSimulation}>
-                <Ionicons name="shield-outline" size={14} color="#FFFFFF" />
+              <TouchableOpacity style={styles.verifyBtn} onPress={handleTestSimulation} activeOpacity={0.85}>
+                <Shield size={14} color="#000000" />
                 <Text style={styles.verifyBtnText}>Confirm Privacy Boundary</Text>
               </TouchableOpacity>
             </View>
@@ -170,31 +171,39 @@ export default function SecurityHubScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 10,
-    marginTop: 4,
+    marginTop: 6,
   },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#F8FAFC' },
+  sectionTitle: { fontSize: 14, fontWeight: '800', color: COLORS.textPrimary },
   safeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -203,58 +212,66 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
-  },
-  safeBadgeText: { color: '#10B981', fontSize: 10, fontWeight: '700' },
-  card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 14,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+  },
+  safeBadgeText: { color: COLORS.accent, fontSize: 10, fontWeight: '800' },
+  card: {
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
   threatTypeBadge: {
     backgroundColor: 'rgba(239, 68, 68, 0.15)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
   },
-  threatTypeText: { color: '#EF4444', fontSize: 10, fontWeight: '700' },
-  statusContained: { color: '#10B981', fontSize: 11, fontWeight: '700' },
-  cardTitle: { fontSize: 15, fontWeight: '700', color: '#F8FAFC', marginBottom: 4 },
-  cardDesc: { fontSize: 12, color: '#94A3B8', lineHeight: 17, marginBottom: 10 },
-  autoActionBox: { backgroundColor: '#0F172A', borderRadius: 8, padding: 10 },
-  autoActionHeader: { fontSize: 10, fontWeight: '700', color: '#64748B', marginBottom: 2 },
-  autoActionText: { fontSize: 11, color: '#CBD5E1' },
-  simSection: { backgroundColor: '#0F172A', borderRadius: 8, padding: 10, marginBottom: 8 },
-  simHead: { fontSize: 11, fontWeight: '700', color: '#94A3B8', marginBottom: 6 },
+  threatTypeText: { color: COLORS.danger, fontSize: 10, fontWeight: '800' },
+  statusContained: { color: COLORS.accent, fontSize: 11, fontWeight: '800' },
+  cardTitle: { fontSize: 15, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 4 },
+  cardDesc: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 17, marginBottom: 10 },
+  autoActionBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 10, borderWidth: 1, borderColor: COLORS.borderLight },
+  autoActionHeader: { fontSize: 10, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 3, letterSpacing: 0.4 },
+  autoActionText: { fontSize: 11.5, color: COLORS.textSecondary },
+  simSection: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 10, marginBottom: 8, borderWidth: 1, borderColor: COLORS.borderLight },
+  simHead: { fontSize: 11, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 6, letterSpacing: 0.4 },
   simRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  simText: { fontSize: 11, color: '#E2E8F0', flex: 1 },
+  simText: { fontSize: 11.5, color: COLORS.textSecondary, flex: 1 },
   simPolicyBox: {
     backgroundColor: 'rgba(56, 189, 248, 0.1)',
-    borderRadius: 8,
+    borderRadius: RADIUS.md,
     padding: 10,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.25)',
   },
-  simPolicyText: { fontSize: 11, color: '#BAE6FD', lineHeight: 15 },
+  simPolicyText: { fontSize: 11.5, color: '#BAE6FD', lineHeight: 15 },
   verifyBtn: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#10B981',
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: COLORS.accent,
+    paddingVertical: 11,
+    borderRadius: RADIUS.md,
+    ...SHADOWS.glowAccent,
   },
-  verifyBtnText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
+  verifyBtnText: { color: '#000000', fontSize: 12.5, fontWeight: '900' },
   lifecycleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.borderLight,
   },
-  lifecycleLbl: { fontSize: 12, color: '#CBD5E1' },
-  lifecycleVal: { fontSize: 11, fontWeight: '700', color: '#38BDF8' },
+  lifecycleLbl: { fontSize: 12.5, color: COLORS.textSecondary },
+  lifecycleVal: { fontSize: 11.5, fontWeight: '800', color: COLORS.info },
 });

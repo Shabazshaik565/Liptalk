@@ -8,10 +8,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, Lightbulb, CheckCircle2, Code, MessageSquare } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { intelligenceApi } from '../../src/api/domain.api';
 import { SkillGraphItem, ExpertProfileItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function SkillsScreen() {
   const router = useRouter();
@@ -54,8 +55,8 @@ export default function SkillsScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Skill Graph & Expert Network</Text>
@@ -68,6 +69,7 @@ export default function SkillsScreen() {
         <TouchableOpacity
           style={[styles.tabBtn, activeTab === 'SKILLS' && styles.tabBtnActive]}
           onPress={() => setActiveTab('SKILLS')}
+          activeOpacity={0.82}
         >
           <Text style={[styles.tabBtnText, activeTab === 'SKILLS' && styles.tabBtnTextActive]}>
             Skill Graph
@@ -76,6 +78,7 @@ export default function SkillsScreen() {
         <TouchableOpacity
           style={[styles.tabBtn, activeTab === 'GAP_ANALYSIS' && styles.tabBtnActive]}
           onPress={() => setActiveTab('GAP_ANALYSIS')}
+          activeOpacity={0.82}
         >
           <Text style={[styles.tabBtnText, activeTab === 'GAP_ANALYSIS' && styles.tabBtnTextActive]}>
             Skill Gap Analysis
@@ -84,6 +87,7 @@ export default function SkillsScreen() {
         <TouchableOpacity
           style={[styles.tabBtn, activeTab === 'EXPERTS' && styles.tabBtnActive]}
           onPress={() => setActiveTab('EXPERTS')}
+          activeOpacity={0.82}
         >
           <Text style={[styles.tabBtnText, activeTab === 'EXPERTS' && styles.tabBtnTextActive]}>
             Expert Network
@@ -93,10 +97,10 @@ export default function SkillsScreen() {
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* TAB 1: SKILL GRAPH */}
           {activeTab === 'SKILLS' && (
             <View>
@@ -143,7 +147,7 @@ export default function SkillsScreen() {
                         <Text
                           style={[
                             styles.coverageVal,
-                            { color: req.currentCoveragePercent < 50 ? '#EF4444' : '#10B981' },
+                            { color: req.currentCoveragePercent < 50 ? COLORS.danger : COLORS.accent },
                           ]}
                         >
                           {req.currentCoveragePercent}% Ready
@@ -155,7 +159,7 @@ export default function SkillsScreen() {
                             styles.barFill,
                             {
                               width: `${req.currentCoveragePercent}%`,
-                              backgroundColor: req.currentCoveragePercent < 50 ? '#EF4444' : '#10B981',
+                              backgroundColor: req.currentCoveragePercent < 50 ? COLORS.danger : COLORS.accent,
                             },
                           ]}
                         />
@@ -165,7 +169,7 @@ export default function SkillsScreen() {
                 </View>
 
                 <View style={styles.summaryBox}>
-                  <Ionicons name="bulb-outline" size={16} color="#38BDF8" />
+                  <Lightbulb size={16} color={COLORS.info} />
                   <Text style={styles.summaryText}>{gapReport.aiSkillGapSummary}</Text>
                 </View>
               </View>
@@ -191,7 +195,7 @@ export default function SkillsScreen() {
                   <View style={styles.domainsWrap}>
                     {exp.verifiedDomains.map((dom, dIdx) => (
                       <View key={dIdx} style={styles.domainChip}>
-                        <Ionicons name="checkmark-circle" size={12} color="#10B981" />
+                        <CheckCircle2 size={12} color={COLORS.accent} />
                         <Text style={styles.domainChipText}>{dom}</Text>
                       </View>
                     ))}
@@ -202,7 +206,7 @@ export default function SkillsScreen() {
                     <Text style={styles.contribHeader}>Public Demonstrated Contributions:</Text>
                     {exp.demonstratedPublicContributions.map((c, cIdx) => (
                       <View key={cIdx} style={styles.contribRow}>
-                        <Ionicons name="code-slash" size={12} color="#6366F1" />
+                        <Code size={12} color={COLORS.primaryLight} />
                         <Text style={styles.contribTitle}>{c.title} ({c.year})</Text>
                       </View>
                     ))}
@@ -211,8 +215,9 @@ export default function SkillsScreen() {
                   <TouchableOpacity
                     style={styles.bookBtn}
                     onPress={() => handleBookConsultation(exp)}
+                    activeOpacity={0.85}
                   >
-                    <Ionicons name="chatbubbles-outline" size={14} color="#FFFFFF" />
+                    <MessageSquare size={14} color="#FFFFFF" />
                     <Text style={styles.bookBtnText}>Request Consultation</Text>
                   </TouchableOpacity>
                 </View>
@@ -226,105 +231,121 @@ export default function SkillsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   tabStrip: {
     flexDirection: 'row',
-    backgroundColor: '#111827',
-    paddingHorizontal: 16,
+    backgroundColor: COLORS.bgCard,
+    paddingHorizontal: SPACING.lg,
     paddingBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
     gap: 8,
   },
   tabBtn: {
     flex: 1,
     paddingVertical: 8,
     alignItems: 'center',
-    borderRadius: 8,
-    backgroundColor: '#0F172A',
-  },
-  tabBtnActive: { backgroundColor: '#6366F1' },
-  tabBtnText: { fontSize: 11, fontWeight: '600', color: '#94A3B8' },
-  tabBtnTextActive: { color: '#FFFFFF' },
-  loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
-  card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.bgInput,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.borderLight,
+  },
+  tabBtnActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primaryLight, ...SHADOWS.glowPrimary },
+  tabBtnText: { fontSize: 11, fontWeight: '700', color: COLORS.textMuted },
+  tabBtnTextActive: { color: '#FFFFFF', fontWeight: '800' },
+  loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
+  card: {
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  catBadge: { backgroundColor: 'rgba(99, 102, 241, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  catBadgeText: { color: '#6366F1', fontSize: 10, fontWeight: '700' },
-  levelsTag: { fontSize: 11, color: '#94A3B8' },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: '#F8FAFC', marginBottom: 6 },
-  cardDesc: { fontSize: 13, color: '#94A3B8', lineHeight: 18, marginBottom: 12 },
-  relatedBox: { backgroundColor: '#0F172A', borderRadius: 8, padding: 10 },
-  relatedLabel: { fontSize: 10, fontWeight: '700', color: '#94A3B8', marginBottom: 6 },
+  catBadge: { backgroundColor: 'rgba(139, 92, 246, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, borderWidth: 1, borderColor: 'rgba(139, 92, 246, 0.3)' },
+  catBadgeText: { color: COLORS.primaryLight, fontSize: 10, fontWeight: '800' },
+  levelsTag: { fontSize: 11, color: COLORS.textMuted, fontWeight: '600' },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 6 },
+  cardDesc: { fontSize: 12.5, color: COLORS.textSecondary, lineHeight: 18, marginBottom: 12 },
+  relatedBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 10, borderWidth: 1, borderColor: COLORS.borderLight },
+  relatedLabel: { fontSize: 10, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 6, letterSpacing: 0.4 },
   tagWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  tag: { backgroundColor: '#1E293B', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  tagText: { color: '#38BDF8', fontSize: 10 },
+  tag: { backgroundColor: COLORS.bgElevated, paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.sm, borderWidth: 1, borderColor: COLORS.border },
+  tagText: { color: COLORS.info, fontSize: 10.5, fontWeight: '700' },
   gapList: { gap: 12, marginBottom: 14 },
-  gapRow: { backgroundColor: '#0F172A', padding: 10, borderRadius: 8 },
+  gapRow: { backgroundColor: COLORS.bgInput, padding: 10, borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLORS.borderLight },
   gapHead: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  gapName: { fontSize: 12, fontWeight: '600', color: '#F1F5F9' },
-  coverageVal: { fontSize: 11, fontWeight: '700' },
-  barBg: { height: 6, backgroundColor: '#1E293B', borderRadius: 3, overflow: 'hidden' },
+  gapName: { fontSize: 12, fontWeight: '700', color: COLORS.textPrimary },
+  coverageVal: { fontSize: 11, fontWeight: '800' },
+  barBg: { height: 6, backgroundColor: COLORS.bgElevated, borderRadius: 3, overflow: 'hidden' },
   barFill: { height: '100%', borderRadius: 3 },
   summaryBox: {
     flexDirection: 'row',
     gap: 8,
     backgroundColor: 'rgba(56, 189, 248, 0.1)',
-    borderRadius: 8,
+    borderRadius: RADIUS.md,
     padding: 10,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.25)',
   },
-  summaryText: { fontSize: 11, color: '#BAE6FD', flex: 1, lineHeight: 15 },
-  availBadge: { backgroundColor: 'rgba(16, 185, 129, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  availText: { color: '#10B981', fontSize: 10, fontWeight: '700' },
-  repText: { color: '#38BDF8', fontSize: 11, fontWeight: '700' },
-  expertNameText: { fontSize: 16, fontWeight: '700', color: '#F8FAFC', marginBottom: 2 },
-  expertTitleText: { fontSize: 12, color: '#94A3B8', marginBottom: 10 },
+  summaryText: { fontSize: 11.5, color: '#BAE6FD', flex: 1, lineHeight: 15 },
+  availBadge: { backgroundColor: 'rgba(16, 185, 129, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.3)' },
+  availText: { color: COLORS.accent, fontSize: 10, fontWeight: '800' },
+  repText: { color: COLORS.info, fontSize: 11, fontWeight: '800' },
+  expertNameText: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 2 },
+  expertTitleText: { fontSize: 12, color: COLORS.textMuted, marginBottom: 10 },
   domainsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 12 },
   domainChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#0F172A',
+    backgroundColor: COLORS.bgInput,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
   },
-  domainChipText: { fontSize: 11, color: '#E2E8F0' },
-  contribBox: { backgroundColor: '#0F172A', borderRadius: 8, padding: 10, marginBottom: 12 },
-  contribHeader: { fontSize: 10, fontWeight: '700', color: '#94A3B8', marginBottom: 6 },
+  domainChipText: { fontSize: 11, color: COLORS.textSecondary, fontWeight: '600' },
+  contribBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 10, marginBottom: 12, borderWidth: 1, borderColor: COLORS.borderLight },
+  contribHeader: { fontSize: 10, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 6, letterSpacing: 0.4 },
   contribRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  contribTitle: { fontSize: 11, color: '#CBD5E1' },
+  contribTitle: { fontSize: 11, color: COLORS.textSecondary },
   bookBtn: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#6366F1',
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 11,
+    borderRadius: RADIUS.md,
+    ...SHADOWS.glowPrimary,
   },
-  bookBtnText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
+  bookBtnText: { color: '#FFFFFF', fontSize: 12, fontWeight: '800' },
 });

@@ -5,15 +5,14 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  TextInput,
   ActivityIndicator,
-  Modal,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, Plus, Box, CheckCheck, Clock, Sparkles, CheckSquare } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { coordinationApi } from '../../src/api/domain.api';
 import { GovernanceProposalItem, DecisionRecordItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function GovernanceScreen() {
   const router = useRouter();
@@ -65,8 +64,8 @@ export default function GovernanceScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Community Governance</Text>
@@ -75,8 +74,9 @@ export default function GovernanceScreen() {
         <TouchableOpacity
           style={styles.actionBtn}
           onPress={() => Alert.alert('New Proposal', 'Draft a structured community governance proposal.')}
+          activeOpacity={0.8}
         >
-          <Ionicons name="add" size={24} color="#6366F1" />
+          <Plus size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
@@ -85,11 +85,11 @@ export default function GovernanceScreen() {
         <TouchableOpacity
           style={[styles.tabItem, activeTab === 'PROPOSALS' && styles.tabItemActive]}
           onPress={() => setActiveTab('PROPOSALS')}
+          activeOpacity={0.82}
         >
-          <Ionicons
-            name="cube-outline"
-            size={16}
-            color={activeTab === 'PROPOSALS' ? '#6366F1' : '#94A3B8'}
+          <Box
+            size={15}
+            color={activeTab === 'PROPOSALS' ? COLORS.primaryLight : COLORS.textMuted}
           />
           <Text style={[styles.tabText, activeTab === 'PROPOSALS' && styles.tabTextActive]}>
             Active Proposals ({proposals.length})
@@ -99,24 +99,24 @@ export default function GovernanceScreen() {
         <TouchableOpacity
           style={[styles.tabItem, activeTab === 'DECISIONS' && styles.tabItemActive]}
           onPress={() => setActiveTab('DECISIONS')}
+          activeOpacity={0.82}
         >
-          <Ionicons
-            name="checkmark-done-circle-outline"
-            size={16}
-            color={activeTab === 'DECISIONS' ? '#6366F1' : '#94A3B8'}
+          <CheckCheck
+            size={15}
+            color={activeTab === 'DECISIONS' ? COLORS.primaryLight : COLORS.textMuted}
           />
           <Text style={[styles.tabText, activeTab === 'DECISIONS' && styles.tabTextActive]}>
-            Decision Records ({decisions.length})
+            Decisions ({decisions.length})
           </Text>
         </TouchableOpacity>
       </View>
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {activeTab === 'PROPOSALS' &&
             proposals.map((prop) => {
               const totalVotes = Object.values(prop.voteCounts || {}).reduce((a, b) => a + b, 0) || 1;
@@ -128,9 +128,12 @@ export default function GovernanceScreen() {
                     <View style={styles.badge}>
                       <Text style={styles.badgeText}>{prop.scope}</Text>
                     </View>
-                    <Text style={styles.deadlineText}>
-                      <Ionicons name="time-outline" size={12} color="#94A3B8" /> Ends {prop.votingDeadline?.slice(0, 10)}
-                    </Text>
+                    <View style={styles.deadlineWrap}>
+                      <Clock size={11} color={COLORS.textMuted} />
+                      <Text style={styles.deadlineText}>
+                        Ends {prop.votingDeadline?.slice(0, 10)}
+                      </Text>
+                    </View>
                   </View>
 
                   <Text style={styles.cardTitle}>{prop.title}</Text>
@@ -140,7 +143,7 @@ export default function GovernanceScreen() {
                   {prop.aiSummary && (
                     <View style={styles.aiSummaryBox}>
                       <View style={styles.aiHeader}>
-                        <Ionicons name="sparkles" size={14} color="#A855F7" />
+                        <Sparkles size={14} color={COLORS.primaryLight} />
                         <Text style={styles.aiTitle}>AI Governance Assistant Synthesis</Text>
                       </View>
                       <Text style={styles.aiDesc}>{prop.aiSummary}</Text>
@@ -169,6 +172,7 @@ export default function GovernanceScreen() {
                           key={opt}
                           style={[styles.optionRow, isSelected && styles.optionRowSelected]}
                           onPress={() => handleVote(prop.id, opt)}
+                          activeOpacity={0.82}
                         >
                           <View style={styles.optionInfo}>
                             <Text style={[styles.optionLabel, isSelected && styles.optionLabelSelected]}>
@@ -193,8 +197,8 @@ export default function GovernanceScreen() {
             decisions.map((dec) => (
               <View key={dec.id} style={styles.card}>
                 <View style={styles.cardHeader}>
-                  <View style={[styles.badge, { backgroundColor: 'rgba(16, 185, 129, 0.15)' }]}>
-                    <Text style={[styles.badgeText, { color: '#10B981' }]}>{dec.decisionOutcome}</Text>
+                  <View style={[styles.badge, { backgroundColor: 'rgba(16, 185, 129, 0.15)', borderColor: 'rgba(16, 185, 129, 0.3)' }]}>
+                    <Text style={[styles.badgeText, { color: COLORS.accent }]}>{dec.decisionOutcome}</Text>
                   </View>
                   <Text style={styles.govTypeText}>{dec.governanceType}</Text>
                 </View>
@@ -207,7 +211,7 @@ export default function GovernanceScreen() {
                     <Text style={styles.actionTitle}>Ratified Implementation Steps:</Text>
                     {dec.actionItems.map((item, idx) => (
                       <View key={idx} style={styles.actionRow}>
-                        <Ionicons name="checkbox" size={14} color="#10B981" />
+                        <CheckSquare size={13} color={COLORS.accent} />
                         <Text style={styles.actionText}>{item}</Text>
                       </View>
                     ))}
@@ -222,58 +226,70 @@ export default function GovernanceScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   actionBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
+    ...SHADOWS.glowPrimary,
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: '#0F172A',
-    padding: 6,
-    marginHorizontal: 16,
+    backgroundColor: COLORS.bgInput,
+    padding: 4,
+    marginHorizontal: SPACING.lg,
     marginTop: 12,
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   tabItem: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingVertical: 9,
+    borderRadius: RADIUS.sm,
     gap: 6,
   },
-  tabItemActive: { backgroundColor: '#1E293B' },
-  tabText: { fontSize: 13, fontWeight: '600', color: '#94A3B8' },
-  tabTextActive: { color: '#6366F1' },
+  tabItemActive: { backgroundColor: COLORS.bgElevated },
+  tabText: { fontSize: 11.5, fontWeight: '700', color: COLORS.textMuted },
+  tabTextActive: { color: COLORS.primaryLight, fontWeight: '800' },
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
   card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -282,52 +298,59 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   badge: {
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
   },
-  badgeText: { color: '#6366F1', fontSize: 11, fontWeight: '700' },
-  deadlineText: { fontSize: 11, color: '#94A3B8' },
-  govTypeText: { fontSize: 11, color: '#10B981', fontWeight: '600' },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: '#F8FAFC', marginBottom: 6 },
-  cardDesc: { fontSize: 13, color: '#94A3B8', lineHeight: 18, marginBottom: 12 },
+  badgeText: { color: COLORS.primaryLight, fontSize: 10, fontWeight: '800' },
+  deadlineWrap: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  deadlineText: { fontSize: 11, color: COLORS.textMuted },
+  govTypeText: { fontSize: 11, color: COLORS.accent, fontWeight: '700' },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 6 },
+  cardDesc: { fontSize: 13, color: COLORS.textSecondary, lineHeight: 18, marginBottom: 12 },
   aiSummaryBox: {
-    backgroundColor: 'rgba(168, 85, 247, 0.08)',
-    borderRadius: 10,
+    backgroundColor: 'rgba(139, 92, 246, 0.08)',
+    borderRadius: RADIUS.md,
     padding: 12,
     borderLeftWidth: 3,
-    borderLeftColor: '#A855F7',
+    borderLeftColor: COLORS.primary,
     marginBottom: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.2)',
   },
   aiHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
-  aiTitle: { fontSize: 12, fontWeight: '700', color: '#D8B4FE' },
-  aiDesc: { fontSize: 12, color: '#E2E8F0', lineHeight: 17, marginBottom: 6 },
+  aiTitle: { fontSize: 12, fontWeight: '800', color: '#D8B4FE' },
+  aiDesc: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 17, marginBottom: 6 },
   takeawayRow: { flexDirection: 'row', gap: 6, marginBottom: 4 },
-  bulletDot: { color: '#A855F7', fontSize: 12 },
-  takeawayText: { fontSize: 12, color: '#CBD5E1', flex: 1 },
-  aiDisclaim: { fontSize: 10, color: '#94A3B8', fontStyle: 'italic', marginTop: 4 },
-  votingSection: { backgroundColor: '#0F172A', borderRadius: 10, padding: 12 },
-  voteSectionTitle: { fontSize: 12, fontWeight: '700', color: '#CBD5E1', marginBottom: 10 },
+  bulletDot: { color: COLORS.primaryLight, fontSize: 12 },
+  takeawayText: { fontSize: 12, color: COLORS.textPrimary, flex: 1 },
+  aiDisclaim: { fontSize: 10, color: COLORS.textMuted, fontStyle: 'italic', marginTop: 4 },
+  votingSection: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 12, borderWidth: 1, borderColor: COLORS.borderLight },
+  voteSectionTitle: { fontSize: 11, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 10, letterSpacing: 0.4 },
   optionRow: {
-    backgroundColor: '#1E293B',
-    borderRadius: 8,
+    backgroundColor: COLORS.bgElevated,
+    borderRadius: RADIUS.sm,
     padding: 10,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   optionRowSelected: {
-    borderColor: '#6366F1',
+    borderColor: COLORS.primary,
     borderWidth: 1,
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
   },
   optionInfo: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  optionLabel: { fontSize: 13, color: '#F1F5F9', fontWeight: '600' },
-  optionLabelSelected: { color: '#6366F1' },
-  optionCount: { fontSize: 11, color: '#94A3B8' },
-  optionBarBg: { height: 4, backgroundColor: '#334155', borderRadius: 2, overflow: 'hidden' },
-  optionBarFill: { height: '100%', backgroundColor: '#6366F1', borderRadius: 2 },
-  actionBox: { backgroundColor: '#0F172A', borderRadius: 8, padding: 10, marginTop: 8 },
-  actionTitle: { fontSize: 11, fontWeight: '700', color: '#94A3B8', marginBottom: 6 },
+  optionLabel: { fontSize: 13, color: COLORS.textPrimary, fontWeight: '700' },
+  optionLabelSelected: { color: COLORS.primaryLight },
+  optionCount: { fontSize: 11, color: COLORS.textMuted },
+  optionBarBg: { height: 4, backgroundColor: COLORS.border, borderRadius: 2, overflow: 'hidden' },
+  optionBarFill: { height: '100%', backgroundColor: COLORS.primary, borderRadius: 2 },
+  actionBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 10, marginTop: 8, borderWidth: 1, borderColor: COLORS.borderLight },
+  actionTitle: { fontSize: 11, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 6, letterSpacing: 0.4 },
   actionRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  actionText: { fontSize: 12, color: '#E2E8F0', flex: 1 },
+  actionText: { fontSize: 12, color: COLORS.textSecondary, flex: 1 },
 });

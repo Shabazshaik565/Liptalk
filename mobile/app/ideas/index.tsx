@@ -9,10 +9,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, Plus, X, Sparkles, Rocket, CheckCheck } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { creationApi } from '../../src/api/domain.api';
 import { IdeaItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function IdeasScreen() {
   const router = useRouter();
@@ -90,8 +91,8 @@ export default function IdeasScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Idea Discovery Network</Text>
@@ -100,8 +101,9 @@ export default function IdeasScreen() {
         <TouchableOpacity
           style={styles.addBtn}
           onPress={() => setShowCreate(!showCreate)}
+          activeOpacity={0.8}
         >
-          <Ionicons name={showCreate ? 'close' : 'add'} size={20} color="#FFFFFF" />
+          {showCreate ? <X size={18} color="#FFFFFF" /> : <Plus size={18} color="#FFFFFF" />}
         </TouchableOpacity>
       </View>
 
@@ -112,14 +114,14 @@ export default function IdeasScreen() {
           <TextInput
             style={styles.input}
             placeholder="Idea Title..."
-            placeholderTextColor="#64748B"
+            placeholderTextColor={COLORS.textDim}
             value={title}
             onChangeText={setTitle}
           />
           <TextInput
             style={[styles.input, { height: 60 }]}
             placeholder="Problem Statement..."
-            placeholderTextColor="#64748B"
+            placeholderTextColor={COLORS.textDim}
             multiline
             value={problem}
             onChangeText={setProblem}
@@ -127,7 +129,7 @@ export default function IdeasScreen() {
           <TextInput
             style={[styles.input, { height: 60 }]}
             placeholder="Proposed Solution..."
-            placeholderTextColor="#64748B"
+            placeholderTextColor={COLORS.textDim}
             multiline
             value={solution}
             onChangeText={setSolution}
@@ -136,6 +138,7 @@ export default function IdeasScreen() {
             style={styles.submitBtn}
             onPress={handleCreateIdea}
             disabled={creating}
+            activeOpacity={0.85}
           >
             {creating ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
@@ -148,10 +151,10 @@ export default function IdeasScreen() {
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {ideas.map((idea) => (
             <View key={idea.id} style={styles.card}>
               <View style={styles.cardHeader}>
@@ -161,7 +164,7 @@ export default function IdeasScreen() {
                 <Text
                   style={[
                     styles.statusTag,
-                    { color: idea.status === 'CONVERTED_TO_PROJECT' ? '#10B981' : '#38BDF8' },
+                    { color: idea.status === 'CONVERTED_TO_PROJECT' ? COLORS.accent : COLORS.info },
                   ]}
                 >
                   ● {idea.status.replace(/_/g, ' ')}
@@ -175,17 +178,17 @@ export default function IdeasScreen() {
               {idea.aiValidationReport && (
                 <View style={styles.validationBox}>
                   <View style={styles.valHeadRow}>
-                    <Ionicons name="sparkles" size={14} color="#A855F7" />
+                    <Sparkles size={14} color={COLORS.primaryLight} />
                     <Text style={styles.valHeadText}>
                       AI Validation Analysis (Score: {idea.aiValidationReport.validationScore}/100)
                     </Text>
                   </View>
                   <Text style={styles.valSub}>
-                    <Text style={{ fontWeight: '700', color: '#CBD5E1' }}>Factual Precedents: </Text>
+                    <Text style={{ fontWeight: '800', color: COLORS.textPrimary }}>Factual Precedents: </Text>
                     {idea.aiValidationReport.factualPrecedents?.join(', ')}
                   </Text>
                   <Text style={styles.valSub}>
-                    <Text style={{ fontWeight: '700', color: '#CBD5E1' }}>Feasibility Inference: </Text>
+                    <Text style={{ fontWeight: '800', color: COLORS.textPrimary }}>Feasibility Inference: </Text>
                     {idea.aiValidationReport.feasibilityInferences?.join(' • ')}
                   </Text>
                 </View>
@@ -205,13 +208,14 @@ export default function IdeasScreen() {
                 <TouchableOpacity
                   style={styles.convertBtn}
                   onPress={() => handleConvertToProject(idea)}
+                  activeOpacity={0.85}
                 >
-                  <Ionicons name="rocket-outline" size={14} color="#FFFFFF" />
+                  <Rocket size={14} color="#FFFFFF" />
                   <Text style={styles.convertBtnText}>Convert to Project & Form Team</Text>
                 </TouchableOpacity>
               ) : (
                 <View style={styles.convertedNotice}>
-                  <Ionicons name="checkmark-done" size={14} color="#10B981" />
+                  <CheckCheck size={14} color={COLORS.accent} />
                   <Text style={styles.convertedNoticeText}>Active Project Workspace Initialized</Text>
                 </View>
               )}
@@ -224,103 +228,131 @@ export default function IdeasScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   addBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#6366F1',
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
+    ...SHADOWS.glowPrimary,
   },
   createBox: {
-    backgroundColor: '#111827',
-    padding: 16,
+    backgroundColor: COLORS.bgCard,
+    padding: SPACING.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
     gap: 8,
   },
-  createHead: { fontSize: 13, fontWeight: '700', color: '#F8FAFC', marginBottom: 2 },
+  createHead: { fontSize: 13, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 2 },
   input: {
-    backgroundColor: '#0F172A',
-    borderRadius: 8,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: RADIUS.md,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    color: '#F8FAFC',
-    fontSize: 12,
+    color: COLORS.textPrimary,
+    fontSize: 12.5,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
   },
   submitBtn: {
-    backgroundColor: '#6366F1',
-    borderRadius: 8,
-    paddingVertical: 10,
+    backgroundColor: COLORS.primary,
+    borderRadius: RADIUS.md,
+    paddingVertical: 11,
     alignItems: 'center',
     marginTop: 4,
+    ...SHADOWS.glowPrimary,
   },
-  submitBtnText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
+  submitBtnText: { color: '#FFFFFF', fontSize: 12.5, fontWeight: '800' },
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
   card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  catBadge: { backgroundColor: 'rgba(99, 102, 241, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  catBadgeText: { color: '#6366F1', fontSize: 10, fontWeight: '700' },
-  statusTag: { fontSize: 11, fontWeight: '700' },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: '#F8FAFC', marginBottom: 6 },
-  cardDesc: { fontSize: 13, color: '#94A3B8', lineHeight: 18, marginBottom: 12 },
+  catBadge: {
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
+  },
+  catBadgeText: { color: COLORS.primaryLight, fontSize: 10, fontWeight: '800' },
+  statusTag: { fontSize: 11, fontWeight: '800' },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 6 },
+  cardDesc: { fontSize: 13, color: COLORS.textSecondary, lineHeight: 18, marginBottom: 12 },
   validationBox: {
-    backgroundColor: '#0F172A',
-    borderRadius: 10,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: RADIUS.md,
     padding: 12,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: 'rgba(168, 85, 247, 0.2)',
+    borderColor: 'rgba(139, 92, 246, 0.25)',
   },
   valHeadRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
-  valHeadText: { fontSize: 11, fontWeight: '700', color: '#A855F7' },
-  valSub: { fontSize: 11, color: '#94A3B8', lineHeight: 16, marginBottom: 4 },
+  valHeadText: { fontSize: 11.5, fontWeight: '800', color: COLORS.primaryLight },
+  valSub: { fontSize: 11, color: COLORS.textMuted, lineHeight: 16, marginBottom: 4 },
   tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 14 },
-  skillChip: { backgroundColor: '#1E293B', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
-  skillChipText: { fontSize: 10, color: '#38BDF8' },
+  skillChip: {
+    backgroundColor: COLORS.bgElevated,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  skillChipText: { fontSize: 10.5, color: COLORS.info, fontWeight: '700' },
   convertBtn: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#6366F1',
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 11,
+    borderRadius: RADIUS.md,
+    ...SHADOWS.glowPrimary,
   },
-  convertBtnText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
+  convertBtnText: { color: '#FFFFFF', fontSize: 12.5, fontWeight: '800' },
   convertedNotice: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 6,
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    paddingVertical: 9,
+    paddingHorizontal: 11,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.25)',
   },
-  convertedNoticeText: { color: '#10B981', fontSize: 11, fontWeight: '600' },
+  convertedNoticeText: { color: COLORS.accent, fontSize: 11.5, fontWeight: '700' },
 });

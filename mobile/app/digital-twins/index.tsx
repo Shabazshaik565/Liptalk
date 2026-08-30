@@ -8,10 +8,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, ShieldCheck, Flag, RotateCcw } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { intelligenceApi } from '../../src/api/domain.api';
 import { DigitalTwinItem } from '../../src/types';
+import { COLORS, RADIUS, SPACING, SHADOWS } from '../../src/constants/theme';
 
 export default function DigitalTwinsScreen() {
   const router = useRouter();
@@ -56,8 +57,8 @@ export default function DigitalTwinsScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.8}>
+          <ArrowLeft size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Digital Twins Control</Text>
@@ -66,17 +67,18 @@ export default function DigitalTwinsScreen() {
         <TouchableOpacity
           style={styles.actionBtn}
           onPress={() => Alert.alert('Privacy Guard', 'Digital Twins are strictly controlled by you and never form unrestricted psychological profiles.')}
+          activeOpacity={0.8}
         >
-          <Ionicons name="shield-checkmark" size={18} color="#10B981" />
+          <ShieldCheck size={18} color={COLORS.accent} />
         </TouchableOpacity>
       </View>
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#6366F1" />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {twins.map((twin) => (
             <View key={twin.id} style={styles.card}>
               <View style={styles.cardHeader}>
@@ -95,7 +97,7 @@ export default function DigitalTwinsScreen() {
                 <View style={styles.chipWrap}>
                   {twin.stateSnapshot?.goals?.map((g, gIdx) => (
                     <View key={gIdx} style={styles.chip}>
-                      <Ionicons name="flag-outline" size={12} color="#6366F1" />
+                      <Flag size={12} color={COLORS.primaryLight} />
                       <Text style={styles.chipText}>{g}</Text>
                     </View>
                   ))}
@@ -122,7 +124,7 @@ export default function DigitalTwinsScreen() {
                     {twin.privacyControls?.shareAggregatedMetricsOnly ? 'ENFORCED' : 'OFF'}
                   </Text>
                 </View>
-                <View style={styles.prefRow}>
+                <View style={[styles.prefRow, { borderBottomWidth: 0 }]}>
                   <Text style={styles.prefLabel}>Memory Retention Horizon</Text>
                   <Text style={styles.prefVal}>
                     {twin.privacyControls?.retainEventMemoryDays || 30} Days
@@ -135,8 +137,9 @@ export default function DigitalTwinsScreen() {
                 <TouchableOpacity
                   style={styles.resetBtn}
                   onPress={() => handleResetTwin(twin.id)}
+                  activeOpacity={0.82}
                 >
-                  <Ionicons name="refresh-outline" size={14} color="#EF4444" />
+                  <RotateCcw size={13} color={COLORS.danger} />
                   <Text style={styles.resetBtnText}>Purge & Reset Memory</Text>
                 </TouchableOpacity>
               </View>
@@ -149,21 +152,29 @@ export default function DigitalTwinsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: COLORS.bgDark },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 54,
-    paddingBottom: 16,
-    backgroundColor: '#111827',
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.bgCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { padding: 6, marginRight: 10 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   headerTitleContainer: { flex: 1 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#F8FAFC' },
-  headerSubtitle: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   actionBtn: {
     width: 36,
     height: 36,
@@ -171,62 +182,78 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(16, 185, 129, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
   },
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
   card: {
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
   twinTypeBadge: {
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
   },
-  twinTypeText: { color: '#6366F1', fontSize: 10, fontWeight: '700' },
-  statusActive: { color: '#10B981', fontSize: 11, fontWeight: '700' },
-  twinTitle: { fontSize: 16, fontWeight: '700', color: '#F8FAFC', marginBottom: 4 },
-  twinDesc: { fontSize: 13, color: '#94A3B8', lineHeight: 18, marginBottom: 12 },
-  sectionBox: { backgroundColor: '#0F172A', borderRadius: 10, padding: 12, marginBottom: 10 },
-  sectionHead: { fontSize: 10, fontWeight: '700', color: '#94A3B8', marginBottom: 8 },
+  twinTypeText: { color: COLORS.primaryLight, fontSize: 10, fontWeight: '800' },
+  statusActive: { color: COLORS.accent, fontSize: 11, fontWeight: '800' },
+  twinTitle: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 4 },
+  twinDesc: { fontSize: 13, color: COLORS.textSecondary, lineHeight: 18, marginBottom: 12 },
+  sectionBox: { backgroundColor: COLORS.bgInput, borderRadius: RADIUS.md, padding: 12, marginBottom: 10, borderWidth: 1, borderColor: COLORS.borderLight },
+  sectionHead: { fontSize: 10, fontWeight: '800', color: COLORS.primaryLight, marginBottom: 8, letterSpacing: 0.4 },
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#1E293B',
+    backgroundColor: COLORS.bgElevated,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
-  chipText: { fontSize: 11, color: '#F1F5F9' },
-  chipNeutral: { backgroundColor: '#1E293B', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
-  chipTextNeutral: { fontSize: 11, color: '#38BDF8' },
+  chipText: { fontSize: 11, color: COLORS.textPrimary, fontWeight: '600' },
+  chipNeutral: {
+    backgroundColor: COLORS.bgElevated,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  chipTextNeutral: { fontSize: 11, color: COLORS.info, fontWeight: '600' },
   prefRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 6,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: COLORS.borderLight,
   },
-  prefLabel: { fontSize: 12, color: '#CBD5E1' },
-  prefVal: { fontSize: 11, fontWeight: '700', color: '#10B981' },
+  prefLabel: { fontSize: 12, color: COLORS.textSecondary },
+  prefVal: { fontSize: 11, fontWeight: '800', color: COLORS.accent },
   actionRow: { marginTop: 4 },
   resetBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
   },
-  resetBtnText: { color: '#EF4444', fontSize: 11, fontWeight: '600' },
+  resetBtnText: { color: COLORS.danger, fontSize: 11, fontWeight: '700' },
 });
