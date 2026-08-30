@@ -148,6 +148,13 @@ export const SHADOWS = {
     shadowRadius: 12,
     elevation: 6,
   },
+  glowDanger: {
+    shadowColor: '#EF4444',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.40,
+    shadowRadius: 14,
+    elevation: 7,
+  },
   glow: {
     shadowColor: '#8B5CF6',
     shadowOffset: { width: 0, height: 4 },

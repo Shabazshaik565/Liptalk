@@ -44,6 +44,7 @@ import {
   Shield,
   Users,
   Briefcase,
+  FileText,
   CheckSquare,
   ChevronDown,
   Edit3,
