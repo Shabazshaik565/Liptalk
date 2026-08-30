@@ -420,6 +420,14 @@ const CATEGORIES: EcosystemCategory[] = [
         route: '/live',
       },
       {
+        title: 'My Published Posts & Demands',
+        sub: 'Manage Active RFPs • Track Proposals & Bids',
+        icon: FileText,
+        color: '#10B981',
+        bg: 'rgba(16, 185, 129, 0.15)',
+        route: '/(tabs)/opportunities?tab=my_posts',
+      },
+      {
         title: 'B2B Marketplace Directory',
         sub: 'Manage Offerings & Quotes',
         icon: ShoppingBag,

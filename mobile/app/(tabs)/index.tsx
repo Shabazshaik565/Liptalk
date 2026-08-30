@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -26,17 +27,17 @@ import {
   Search,
   Bot,
   Radio,
+  ArrowRight,
 } from 'lucide-react-native';
 import { Header } from '../../src/components/common/Header';
 import { SectionHeader } from '../../src/components/common/SectionHeader';
-import { StatCard } from '../../src/components/common/StatCard';
 import { EmptyState } from '../../src/components/common/EmptyState';
 import { CardSkeleton } from '../../src/components/common/SkeletonLoader';
 import { MatchCard } from '../../src/components/match/MatchCard';
 import { OpportunityCard } from '../../src/components/opportunity/OpportunityCard';
 import { PartnerCard } from '../../src/components/partner/PartnerCard';
 import { AskLipTalkSheet } from '../../src/components/ai/AskLipTalkSheet';
-import { matchesApi, opportunitiesApi, partnersApi, leadsApi, recommendationsApi } from '../../src/api/domain.api';
+import { matchesApi, opportunitiesApi, partnersApi, liveRoomsApi } from '../../src/api/domain.api';
 import { COLORS, SPACING, RADIUS, SHADOWS } from '../../src/constants/theme';
 import { useAuthStore } from '../../src/store/auth.store';
 
@@ -45,6 +46,11 @@ export default function HomeScreen() {
   const { user } = useAuthStore();
   const [refreshing, setRefreshing] = useState(false);
   const [assistantVisible, setAssistantVisible] = useState(false);
+
+  const { data: liveRooms = [], isLoading: loadingRooms, refetch: refetchRooms } = useQuery({
+    queryKey: ['live-rooms-discover'],
+    queryFn: () => liveRoomsApi.getRooms(),
+  });
 
   const { data: matches, isLoading: loadingMatches, refetch: refetchMatches } = useQuery({
     queryKey: ['matches'],
@@ -61,18 +67,42 @@ export default function HomeScreen() {
     queryFn: partnersApi.getPartners,
   });
 
-  const { data: leads } = useQuery({
-    queryKey: ['leads'],
-    queryFn: leadsApi.getLeads,
-  });
-
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([refetchMatches(), refetchOpportunities(), refetchPartners()]);
+    await Promise.all([refetchRooms(), refetchMatches(), refetchOpportunities(), refetchPartners()]);
     setRefreshing(false);
   };
 
   const highMatchCount = (matches || []).filter((m) => m.matchScore >= 85).length;
+
+  const defaultRooms = [
+    {
+      id: 'room_1',
+      title: 'Scaling Your Business Globally',
+      host: { name: 'Arjun Mehta', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100' },
+      category: 'Business & Growth',
+      audienceCount: 256,
+      status: 'LIVE',
+    },
+    {
+      id: 'room_2',
+      title: 'Fintech & B2B Escrow in India',
+      host: { name: 'Priya Sharma', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100' },
+      category: 'Fintech',
+      audienceCount: 184,
+      status: 'LIVE',
+    },
+    {
+      id: 'room_3',
+      title: 'Public Speaking & Personal Brand Masterclass',
+      host: { name: 'Vikram Malhotra', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100' },
+      category: 'Personal Growth',
+      audienceCount: 142,
+      status: 'LIVE',
+    },
+  ];
+
+  const displayRooms = liveRooms.length > 0 ? liveRooms : defaultRooms;
 
   return (
     <View style={styles.container}>
@@ -99,7 +129,7 @@ export default function HomeScreen() {
         >
           <Search size={16} color={COLORS.primaryLight} />
           <Text style={styles.aiSearchPlaceholder}>
-            Search anything (e.g. React Native developers, B2B leads)...
+            Search anything (e.g. React Native developers, B2B leads, Audio Rooms)...
           </Text>
           <View style={styles.aiSearchBadge}>
             <Sparkles size={11} color={COLORS.accent} />
@@ -107,123 +137,64 @@ export default function HomeScreen() {
           </View>
         </TouchableOpacity>
 
-        {/* Premium Purple Hero Banner */}
-        <View style={styles.heroBanner}>
-          <View style={styles.heroContent}>
-            <View style={styles.heroTagRow}>
-              <View style={styles.livePulseDot} />
-              <Text style={styles.heroTagText}>OPPORTUNITY ENGINE ACTIVE</Text>
-            </View>
+        {/* Section 1: Live Now Audio Stages */}
+        <SectionHeader
+          title="Live Audio Stages"
+          subtitle="Real-time discussions, pitch stages & masterclasses"
+          icon={<Radio size={18} color={COLORS.danger} />}
+          actionText="Explore All"
+          onAction={() => router.push('/live' as any)}
+        />
 
-            <Text style={styles.heroGreeting}>
-              Welcome back, {user?.profile?.firstName || 'Alex'}
-            </Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.liveRoomsScroll}
+        >
+          {displayRooms.map((room) => (
+            <TouchableOpacity
+              key={room.id}
+              style={styles.liveRoomCard}
+              onPress={() => router.push(`/live/${room.id}` as any)}
+              activeOpacity={0.85}
+            >
+              <View style={styles.liveRoomHeader}>
+                <View style={styles.livePill}>
+                  <View style={styles.livePulseDot} />
+                  <Text style={styles.livePillText}>LIVE</Text>
+                </View>
+                <View style={styles.listenerBadge}>
+                  <Users size={12} color={COLORS.textSecondary} />
+                  <Text style={styles.listenerCount}>{room.audienceCount || 132} listening</Text>
+                </View>
+              </View>
 
-            <Text style={styles.heroSub}>
-              You have <Text style={styles.heroHighlight}>{highMatchCount || 3} high-confidence matches</Text> directly aligned with your published needs & services today.
-            </Text>
+              <Text style={styles.liveRoomTitle} numberOfLines={2}>
+                {room.title}
+              </Text>
 
-            <View style={styles.heroActionRow}>
-              <TouchableOpacity
-                style={styles.heroPrimaryBtn}
-                onPress={() => router.push('/opportunities/create' as any)}
-                activeOpacity={0.82}
-              >
-                <PlusCircle size={15} color="#FFF" />
-                <Text style={styles.heroPrimaryBtnText}>Post Requirement</Text>
-              </TouchableOpacity>
+              <View style={styles.liveRoomFooter}>
+                <Image
+                  source={{ uri: room.host?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100' }}
+                  style={styles.hostAvatar}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.hostName} numberOfLines={1}>
+                    {room.host?.name || 'Arjun Mehta'}
+                  </Text>
+                  <Text style={styles.roomCategory}>{room.category || 'Live Room'}</Text>
+                </View>
 
-              <TouchableOpacity
-                style={styles.heroSecondaryBtn}
-                onPress={() => router.push('/(tabs)/network' as any)}
-                activeOpacity={0.82}
-              >
-                <Compass size={15} color={COLORS.purpleLight} />
-                <Text style={styles.heroSecondaryBtnText}>Explore Network</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+                <View style={styles.joinStageBtn}>
+                  <Text style={styles.joinStageText}>Join</Text>
+                  <ArrowRight size={12} color="#FFF" />
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
 
-        {/* Growth & Activity Pulse Grid */}
-        <View style={styles.metricsRow}>
-          <StatCard
-            label="CRM Pipeline"
-            value={`${leads?.length || 3} Deals`}
-            subtitle="₹7.3L in discussion"
-            icon={<TrendingUp size={18} color="#34D399" />}
-            iconBg="rgba(16, 185, 129, 0.14)"
-            trend="+12%"
-            onPress={() => router.push('/leads' as any)}
-          />
-
-          <StatCard
-            label="Open Demands"
-            value={`${opportunities?.length || 3} Active`}
-            subtitle="Matching your stack"
-            icon={<Briefcase size={18} color="#A78BFA" />}
-            iconBg={COLORS.purpleSoft}
-            onPress={() => router.push('/(tabs)/opportunities' as any)}
-          />
-
-          <StatCard
-            label="Connections"
-            value="64"
-            subtitle="Verified ecosystem"
-            icon={<Users size={18} color="#FBBF24" />}
-            iconBg="rgba(245, 158, 11, 0.14)"
-            onPress={() => router.push('/(tabs)/network' as any)}
-          />
-        </View>
-
-        {/* Commercial Ecosystem Quick Hub */}
-        <View style={styles.ecosystemRow}>
-          <TouchableOpacity
-            style={styles.ecosystemBtn}
-            onPress={() => router.push('/live' as any)}
-            activeOpacity={0.8}
-          >
-            <View style={[styles.ecosystemIcon, { backgroundColor: 'rgba(239, 68, 68, 0.15)' }]}>
-              <Radio size={16} color={COLORS.danger} />
-            </View>
-            <Text style={styles.ecosystemText}>Live Stages</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.ecosystemBtn}
-            onPress={() => router.push('/marketplace' as any)}
-            activeOpacity={0.8}
-          >
-            <View style={[styles.ecosystemIcon, { backgroundColor: 'rgba(139, 92, 246, 0.15)' }]}>
-              <ShoppingBag size={16} color={COLORS.primaryLight} />
-            </View>
-            <Text style={styles.ecosystemText}>Marketplace</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.ecosystemBtn}
-            onPress={() => router.push('/rewards' as any)}
-            activeOpacity={0.8}
-          >
-            <View style={[styles.ecosystemIcon, { backgroundColor: 'rgba(16, 185, 129, 0.15)' }]}>
-              <Coins size={16} color={COLORS.accent} />
-            </View>
-            <Text style={styles.ecosystemText}>Rewards</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.ecosystemBtn}
-            onPress={() => router.push('/creator' as any)}
-            activeOpacity={0.8}
-          >
-            <View style={[styles.ecosystemIcon, { backgroundColor: 'rgba(124, 58, 237, 0.15)' }]}>
-              <Sparkles size={16} color={COLORS.primaryLight} />
-            </View>
-            <Text style={styles.ecosystemText}>Creator</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Section 1: Recommended Matches (Primary Feature) */}
+        {/* Section 2: Recommended Synergy Matches */}
         <SectionHeader
           title="Intelligent Synergy Matches"
           subtitle="Direct 1-to-1 alignments with your published needs & offers"
@@ -231,6 +202,7 @@ export default function HomeScreen() {
           badgeCount={matches?.length}
           actionText="View All"
           onAction={() => router.push('/(tabs)/network' as any)}
+          style={{ marginTop: SPACING.md }}
         />
 
         {loadingMatches ? (
@@ -316,122 +288,6 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     paddingBottom: SPACING.tabBarClearance,
   },
-  heroBanner: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: RADIUS.xl,
-    padding: SPACING.lg,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    marginBottom: SPACING.lg,
-    ...SHADOWS.md,
-  },
-  heroContent: {
-    width: '100%',
-  },
-  heroTagRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: SPACING.xs,
-  },
-  livePulseDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-    backgroundColor: COLORS.accent,
-  },
-  heroTagText: {
-    color: COLORS.primaryLight,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-  heroGreeting: {
-    color: COLORS.textPrimary,
-    fontSize: 21,
-    fontWeight: '900',
-    marginTop: 2,
-    letterSpacing: -0.3,
-  },
-  heroSub: {
-    color: COLORS.textSecondary,
-    fontSize: 13,
-    marginTop: 6,
-    lineHeight: 19,
-  },
-  heroHighlight: {
-    color: COLORS.accent,
-    fontWeight: '800',
-  },
-  heroActionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    marginTop: SPACING.md,
-  },
-  heroPrimaryBtn: {
-    backgroundColor: COLORS.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: RADIUS.md,
-    ...SHADOWS.glowPrimary,
-  },
-  heroPrimaryBtnText: {
-    color: '#FFFFFF',
-    fontSize: 12.5,
-    fontWeight: '800',
-  },
-  heroSecondaryBtn: {
-    backgroundColor: COLORS.bgElevated,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: RADIUS.md,
-    borderWidth: 1,
-    borderColor: COLORS.borderLight,
-  },
-  heroSecondaryBtnText: {
-    color: COLORS.textPrimary,
-    fontSize: 12.5,
-    fontWeight: '700',
-  },
-  metricsRow: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-    marginBottom: SPACING.md,
-  },
-  ecosystemRow: {
-    flexDirection: 'row',
-    gap: SPACING.xs,
-    marginBottom: SPACING.xl,
-  },
-  ecosystemBtn: {
-    flex: 1,
-    backgroundColor: COLORS.bgCard,
-    borderRadius: RADIUS.lg,
-    paddingVertical: SPACING.sm,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  ecosystemIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  ecosystemText: {
-    color: COLORS.textPrimary,
-    fontSize: 10.5,
-    fontWeight: '800',
-  },
   aiSearchBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -441,7 +297,7 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     borderWidth: 1,
     borderColor: COLORS.primaryDark,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.lg,
     gap: SPACING.sm,
     ...SHADOWS.sm,
   },
@@ -463,5 +319,103 @@ const styles = StyleSheet.create({
     color: COLORS.accent,
     fontSize: 9.5,
     fontWeight: '900',
+  },
+  liveRoomsScroll: {
+    paddingBottom: SPACING.sm,
+    gap: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  liveRoomCard: {
+    width: 255,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
+  },
+  liveRoomHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.sm,
+  },
+  livePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+  },
+  livePulseDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.danger,
+  },
+  livePillText: {
+    color: COLORS.danger,
+    fontSize: 9.5,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  listenerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  listenerCount: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  liveRoomTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 13.5,
+    fontWeight: '800',
+    lineHeight: 18,
+    minHeight: 36,
+    marginBottom: SPACING.md,
+  },
+  liveRoomFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  hostAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: COLORS.primaryLight,
+  },
+  hostName: {
+    color: COLORS.textPrimary,
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+  roomCategory: {
+    color: COLORS.textDim,
+    fontSize: 9.5,
+    marginTop: 1,
+  },
+  joinStageBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: RADIUS.md,
+    ...SHADOWS.glowPrimary,
+  },
+  joinStageText: {
+    color: '#FFF',
+    fontSize: 11,
+    fontWeight: '800',
   },
 });

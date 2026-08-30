@@ -59,7 +59,8 @@ export default function CreateOpportunityScreen() {
         city,
       });
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
-      router.back();
+      queryClient.invalidateQueries({ queryKey: ['my-opportunities'] });
+      router.replace('/(tabs)/opportunities?tab=my_posts' as any);
     } finally {
       setLoading(false);
     }

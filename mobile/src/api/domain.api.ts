@@ -273,6 +273,55 @@ export const matchesApi = {
   },
 };
 
+let USER_MY_POSTS: OpportunityItem[] = [
+  {
+    id: 'opp_my_01',
+    creatorId: 'usr_curr_01',
+    creatorName: 'Alex Morgan',
+    creatorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    creatorRole: 'BUSINESS',
+    businessId: 'biz_01',
+    businessName: 'Nexas Digital Solutions',
+    categoryId: 'cat_it_soft',
+    categoryName: 'IT & Software Development',
+    title: 'Looking for Senior React Native & NestJS Full-Stack Developer',
+    description: 'We require an experienced developer to help scale our real-time WebSocket architecture and offline-first mobile sync engine. 3-month contract with extension possibility.',
+    tags: ['React Native', 'NestJS', 'WebSockets', 'TypeORM'],
+    budgetAmount: 250000,
+    currency: 'INR',
+    deadline: '2026-10-15',
+    city: 'Bangalore (Hybrid)',
+    status: 'OPEN',
+    interestsCount: 6,
+    hasExpressedInterest: false,
+    matchScore: 98,
+    createdAt: '2026-08-28T10:00:00Z',
+  },
+  {
+    id: 'opp_my_02',
+    creatorId: 'usr_curr_01',
+    creatorName: 'Alex Morgan',
+    creatorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    creatorRole: 'BUSINESS',
+    businessId: 'biz_01',
+    businessName: 'Nexas Digital Solutions',
+    categoryId: 'cat_design',
+    categoryName: 'UI/UX & Product Design',
+    title: 'Mobile UI/UX Designer for Glassmorphism Brand Redesign',
+    description: 'Looking for a talented UI designer with Figma and design system expertise to craft clean micro-interactions and dark theme components for our mobile product.',
+    tags: ['UI/UX', 'Figma', 'Glassmorphism', 'Design System'],
+    budgetAmount: 120000,
+    currency: 'INR',
+    deadline: '2026-10-30',
+    city: 'Remote',
+    status: 'OPEN',
+    interestsCount: 4,
+    hasExpressedInterest: false,
+    matchScore: 94,
+    createdAt: '2026-08-25T14:30:00Z',
+  },
+];
+
 export const opportunitiesApi = {
   getOpportunities: async (params?: {
     search?: string;
@@ -284,47 +333,74 @@ export const opportunitiesApi = {
   }): Promise<OpportunityItem[]> => {
     try {
       const res = await apiClient.get('/opportunities', { params });
-      if (Array.isArray(res.data) && res.data.length > 0) return res.data;
-      return OPPORTUNITIES_DATA;
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        return [...USER_MY_POSTS, ...res.data];
+      }
+      return [...USER_MY_POSTS, ...OPPORTUNITIES_DATA];
     } catch {
-      return OPPORTUNITIES_DATA;
+      return [...USER_MY_POSTS, ...OPPORTUNITIES_DATA];
+    }
+  },
+  getMyOpportunities: async (): Promise<OpportunityItem[]> => {
+    try {
+      const res = await apiClient.get('/opportunities/my-posts');
+      if (Array.isArray(res.data) && res.data.length > 0) return res.data;
+      return USER_MY_POSTS;
+    } catch {
+      return USER_MY_POSTS;
     }
   },
   getOpportunityById: async (id: string): Promise<OpportunityItem | undefined> => {
+    const all = [...USER_MY_POSTS, ...OPPORTUNITIES_DATA];
     try {
       const res = await apiClient.get(`/opportunities/${id}`);
-      return res.data;
+      return res.data || all.find((o) => o.id === id);
     } catch {
-      return OPPORTUNITIES_DATA.find((o) => o.id === id) || OPPORTUNITIES_DATA[0];
+      return all.find((o) => o.id === id) || all[0];
     }
   },
   createOpportunity: async (data: Partial<OpportunityItem>): Promise<OpportunityItem> => {
+    const newOpp: OpportunityItem = {
+      id: 'opp_my_' + Date.now(),
+      creatorId: 'usr_curr_01',
+      creatorName: 'Alex Morgan',
+      creatorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+      creatorRole: 'BUSINESS',
+      businessId: 'biz_01',
+      businessName: 'Nexas Digital Solutions',
+      categoryId: data.categoryId || 'cat_it_soft',
+      categoryName: data.categoryName || 'IT & Software Development',
+      title: data.title || 'New Requirement',
+      description: data.description || '',
+      tags: data.tags || ['General'],
+      budgetAmount: data.budgetAmount,
+      currency: data.currency || 'INR',
+      deadline: data.deadline || '2026-10-31',
+      city: data.city || 'Bangalore',
+      status: 'OPEN',
+      interestsCount: 0,
+      hasExpressedInterest: false,
+      matchScore: 99,
+      createdAt: new Date().toISOString(),
+    };
+
+    USER_MY_POSTS = [newOpp, ...USER_MY_POSTS];
+
     try {
-      const res = await apiClient.post('/opportunities', data);
-      return res.data;
+      await apiClient.post('/opportunities', data);
     } catch {
-      return {
-        id: 'opp_' + Date.now(),
-        creatorId: 'usr_curr_01',
-        creatorName: 'Alex Morgan',
-        creatorRole: 'BUSINESS',
-        businessId: 'biz_01',
-        businessName: 'Nexas Digital Solutions',
-        categoryId: data.categoryId || 'cat_it_soft',
-        categoryName: data.categoryName || 'IT & Software Development',
-        title: data.title || 'New Requirement',
-        description: data.description || '',
-        tags: data.tags || [],
-        budgetAmount: data.budgetAmount,
-        currency: data.currency || 'INR',
-        deadline: data.deadline || '2026-10-01',
-        city: data.city || 'Bangalore',
-        status: 'OPEN',
-        interestsCount: 0,
-        hasExpressedInterest: false,
-        createdAt: new Date().toISOString(),
-      };
+      // local store already updated
     }
+    return newOpp;
+  },
+  deleteOpportunity: async (id: string): Promise<boolean> => {
+    USER_MY_POSTS = USER_MY_POSTS.filter((o) => o.id !== id);
+    try {
+      await apiClient.delete(`/opportunities/${id}`);
+    } catch {
+      // local store updated
+    }
+    return true;
   },
   expressInterest: async (oppId: string, pitch: string): Promise<boolean> => {
     try {
