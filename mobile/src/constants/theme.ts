@@ -33,6 +33,7 @@ export const COLORS = {
   danger: '#EF4444',
   dangerGlow: 'rgba(239, 68, 68, 0.20)',
   dangerSoft: 'rgba(239, 68, 68, 0.12)',
+  error: '#EF4444',
   info: '#38BDF8',
   infoSoft: 'rgba(56, 189, 248, 0.12)',
 
@@ -92,7 +93,7 @@ export const SPACING = {
   xxl: 24,
   xxxl: 32,
   hero: 40,
-  tabBarClearance: 110,
+  tabBarClearance: 135,
 };
 
 export const RADIUS = {
@@ -119,6 +120,13 @@ export const SHADOWS = {
     shadowOpacity: 0.45,
     shadowRadius: 10,
     elevation: 5,
+  },
+  lg: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.55,
+    shadowRadius: 16,
+    elevation: 8,
   },
   glowPurple: {
     shadowColor: '#8B5CF6',

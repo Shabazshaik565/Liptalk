@@ -25,7 +25,7 @@ export default function LoginScreen() {
   const [authMode, setAuthMode] = useState<'password' | 'otp'>('password');
   const [identifier, setIdentifier] = useState('alex.morgan@nexastech.com');
   const [password, setPassword] = useState('password123');
-  const [phone, setPhone] = useState('+91 98765 43210');
+  const [phone, setPhone] = useState('+91 9962786367');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -142,7 +142,7 @@ export default function LoginScreen() {
                 label="Registered Mobile Phone"
                 value={phone}
                 onChangeText={setPhone}
-                placeholder="+91 98765 43210"
+                placeholder="+91 9962786367"
                 keyboardType="phone-pad"
                 icon={<Phone size={18} color={COLORS.textDim} />}
                 hint="We will send a 6-digit verification SMS code."

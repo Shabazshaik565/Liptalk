@@ -51,6 +51,7 @@ import {
   Save,
   Check,
   User as UserIcon,
+  Phone,
 } from 'lucide-react-native';
 import { Header } from '../../src/components/common/Header';
 import { Badge } from '../../src/components/common/Badge';
@@ -685,6 +686,16 @@ export default function ProfileScreen() {
             <Badge label={user?.profile?.city || 'Bangalore'} variant="neutral" size="sm" />
             <Badge label="100% Verified" variant="accent" size="sm" />
           </View>
+
+          {/* User Verified Phone Pill */}
+          <View style={styles.userPhoneRow}>
+            <Phone size={12} color={COLORS.accent} />
+            <Text style={styles.userPhoneText}>{user?.phoneNumber || '+91 9962786367'}</Text>
+            <View style={styles.verifiedPhoneBadge}>
+              <ShieldCheck size={10} color={COLORS.accent} />
+              <Text style={styles.verifiedPhoneBadgeText}>VERIFIED CALLER ID</Text>
+            </View>
+          </View>
         </View>
 
         {/* Tab Navigation */}
@@ -1149,7 +1160,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bgElevated,
   },
   uploadOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     borderRadius: 36,
     alignItems: 'center',
@@ -1195,6 +1206,38 @@ const styles = StyleSheet.create({
   roleBadgeRow: {
     flexDirection: 'row',
     gap: SPACING.xs,
+  },
+  userPhoneRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.25)',
+    paddingHorizontal: 10,
+    paddingVertical: 4.5,
+    borderRadius: RADIUS.full,
+    marginTop: SPACING.sm,
+  },
+  userPhoneText: {
+    color: COLORS.accent,
+    fontSize: 11.5,
+    fontWeight: '800',
+  },
+  verifiedPhoneBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  verifiedPhoneBadgeText: {
+    color: COLORS.accent,
+    fontSize: 8,
+    fontWeight: '900',
+    letterSpacing: 0.4,
   },
   sectionCard: {
     backgroundColor: COLORS.bgCard,

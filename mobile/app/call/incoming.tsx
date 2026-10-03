@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,228 +6,418 @@ import {
   Image,
   TouchableOpacity,
   SafeAreaView,
+  Animated,
+  StatusBar,
+  Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Phone, PhoneOff, Video, ShieldCheck, Sparkles } from 'lucide-react-native';
+import { Phone, PhoneOff, Video, Lock, ShieldCheck } from 'lucide-react-native';
 import { socketService } from '../../src/services/socket.service';
-import { COLORS, SPACING, RADIUS, SHADOWS } from '../../src/constants/theme';
+import { voipAudioEngine } from '../../src/services/voipAudioEngine';
+import { useAuthStore } from '../../src/store/auth.store';
+import { RADIUS, SHADOWS } from '../../src/constants/theme';
 
 export default function IncomingCallScreen() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const params = useLocalSearchParams<{
     callId: string;
-    callerName: string;
+    callerId?: string;
+    callerName?: string;
     callerAvatar?: string;
     callType?: string;
     callerHeadline?: string;
+    callerPhone?: string;
   }>();
 
   const callId = params.callId || 'call_01';
+  const callerId = params.callerId || 'usr_vikram_01';
   const callerName = params.callerName || 'Vikram Singh';
-  const callerAvatar = params.callerAvatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200';
-  const callType = params.callType || 'VOICE';
+  const callerAvatar =
+    params.callerAvatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200';
+  const callerPhone = params.callerPhone || '+91 7200317219';
+  const callType = (params.callType || 'VOICE') as 'VOICE' | 'VIDEO';
   const callerHeadline = params.callerHeadline || 'Founder & CEO @ FinFlow Logistics Tech';
 
+  // WhatsApp-style concentric expanding radar rings
+  const pulseAnim1 = useRef(new Animated.Value(0)).current;
+  const pulseAnim2 = useRef(new Animated.Value(0)).current;
+  const pulseAnim3 = useRef(new Animated.Value(0)).current;
+
+  // Subtle button pulse
+  const btnPulse = useRef(new Animated.Value(1)).current;
+
+  const timeoutRef = useRef<any>(null);
+
+  useEffect(() => {
+    // Start authentic melodic ringtone
+    voipAudioEngine.playRingtone();
+
+    // Start triple concentric radar pulse
+    const createPulse = (anim: Animated.Value, delay: number) => {
+      return Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(anim, {
+            toValue: 1,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(anim, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+    };
+
+    createPulse(pulseAnim1, 0).start();
+    createPulse(pulseAnim2, 600).start();
+    createPulse(pulseAnim3, 1200).start();
+
+    // Button pulse
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(btnPulse, {
+          toValue: 1.08,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+        Animated.timing(btnPulse, {
+          toValue: 1,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // 30-second timeout for missed call
+    timeoutRef.current = setTimeout(() => {
+      handleDecline('MISSED');
+    }, 30000);
+
+    // If caller cancels while ringing
+    socketService.onCallCancelled((data: { callId: string }) => {
+      if (data.callId === callId) {
+        cleanupAndExit();
+      }
+    });
+
+    socketService.onCallEnded(() => {
+      cleanupAndExit();
+    });
+
+    return () => {
+      voipAudioEngine.stopAll();
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [callId]);
+
+  const cleanupAndExit = () => {
+    voipAudioEngine.stopAll();
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    router.back();
+  };
+
   const handleAccept = () => {
+    voipAudioEngine.stopAll();
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
     socketService.acceptCall({
       callId,
-      userId: 'usr_curr_01',
-      callerId: 'usr_vikram_01',
+      userId: user?.id || 'usr_curr_01',
+      callerId,
     });
+
     router.replace({
       pathname: '/call/active' as any,
       params: {
         callId,
+        peerId: callerId,
         peerName: callerName,
         peerAvatar: callerAvatar,
+        peerPhone: callerPhone,
         callType,
         isIncoming: 'true',
       },
     });
   };
 
-  const handleDecline = () => {
+  const handleDecline = (reason = 'DECLINED_BY_USER') => {
+    voipAudioEngine.stopAll();
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
     socketService.declineCall({
       callId,
-      callerId: 'usr_vikram_01',
-      reason: 'DECLINED_BY_USER',
+      callerId,
+      reason,
     });
     router.back();
   };
 
+  const getRippleStyle = (anim: Animated.Value) => ({
+    transform: [
+      {
+        scale: anim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [1, 1.9],
+        }),
+      },
+    ],
+    opacity: anim.interpolate({
+      inputRange: [0, 0.4, 1],
+      outputRange: [0.5, 0.2, 0],
+    }),
+  });
+
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Glow background circles */}
-      <View style={styles.glowCircle} />
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#0B141B" />
 
-      {/* Top verified badge */}
-      <View style={styles.topBadge}>
-        <ShieldCheck size={14} color={COLORS.accent} />
-        <Text style={styles.topBadgeText}>VERIFIED ENCRYPTED SIGNALING</Text>
-      </View>
+      <SafeAreaView style={styles.safeArea}>
+        {/* Top Header */}
+        <View style={styles.header}>
+          <View style={styles.encryptionBadge}>
+            <Lock size={12} color="#8696A0" />
+            <Text style={styles.encryptionText}>End-to-end encrypted</Text>
+          </View>
+          <Text style={styles.callTypeHeading}>
+            {callType === 'VIDEO' ? 'Incoming video call' : 'Incoming voice call'}
+          </Text>
+        </View>
 
-      {/* Caller Info */}
-      <View style={styles.callerContainer}>
-        <View style={styles.avatarWrapper}>
-          <Image source={{ uri: callerAvatar }} style={styles.avatar} />
-          <View style={styles.callTypeIconWrap}>
-            {callType === 'VIDEO' ? (
-              <Video size={16} color="#FFF" />
-            ) : (
-              <Phone size={16} color="#FFF" />
-            )}
+        {/* Center Caller Info & Pulsing Avatar */}
+        <View style={styles.centerSection}>
+          <View style={styles.avatarWrapper}>
+            <Animated.View style={[styles.pulseRing, getRippleStyle(pulseAnim1)]} />
+            <Animated.View style={[styles.pulseRing, getRippleStyle(pulseAnim2)]} />
+            <Animated.View style={[styles.pulseRing, getRippleStyle(pulseAnim3)]} />
+
+            <Image source={{ uri: callerAvatar }} style={styles.avatar} />
+
+            <View style={styles.typeBadge}>
+              {callType === 'VIDEO' ? (
+                <Video size={14} color="#FFFFFF" />
+              ) : (
+                <Phone size={14} color="#FFFFFF" />
+              )}
+            </View>
+          </View>
+
+          <Text style={styles.callerName}>{callerName}</Text>
+
+          <View style={styles.phonePill}>
+            <Phone size={11} color="#25D366" />
+            <Text style={styles.phonePillText}>{callerPhone}</Text>
+          </View>
+
+          <Text style={styles.callerHeadline} numberOfLines={2}>
+            {callerHeadline}
+          </Text>
+
+          <View style={styles.verifiedCard}>
+            <ShieldCheck size={12} color="#25D366" />
+            <Text style={styles.verifiedCardText}>
+              LipTalk Direct VoIP • Zero Cellular Tolls
+            </Text>
           </View>
         </View>
 
-        <Text style={styles.callerName}>{callerName}</Text>
-        <Text style={styles.callerHeadline}>{callerHeadline}</Text>
+        {/* WhatsApp-Style Action Buttons */}
+        <View style={styles.actionsContainer}>
+          {/* Decline Button */}
+          <View style={styles.actionCol}>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.declineBtn]}
+              onPress={() => handleDecline('DECLINED_BY_USER')}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="Decline call"
+            >
+              <PhoneOff size={28} color="#FFFFFF" />
+            </TouchableOpacity>
+            <Text style={styles.actionLabel}>Decline</Text>
+          </View>
 
-        <View style={styles.ringingStatusWrap}>
-          <Sparkles size={13} color={COLORS.primaryLight} />
-          <Text style={styles.ringingText}>Incoming {callType.toLowerCase()} call...</Text>
+          {/* Accept Button */}
+          <View style={styles.actionCol}>
+            <Animated.View style={{ transform: [{ scale: btnPulse }] }}>
+              <TouchableOpacity
+                style={[styles.actionButton, styles.acceptBtn]}
+                onPress={handleAccept}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Accept call"
+              >
+                {callType === 'VIDEO' ? (
+                  <Video size={28} color="#FFFFFF" />
+                ) : (
+                  <Phone size={28} color="#FFFFFF" />
+                )}
+              </TouchableOpacity>
+            </Animated.View>
+            <Text style={styles.actionLabel}>Accept</Text>
+          </View>
         </View>
-      </View>
-
-      {/* Action Buttons */}
-      <View style={styles.actionsContainer}>
-        <TouchableOpacity
-          style={[styles.actionButton, styles.declineBtn]}
-          onPress={handleDecline}
-          activeOpacity={0.8}
-        >
-          <PhoneOff size={28} color="#FFFFFF" />
-          <Text style={styles.actionLabel}>Decline</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.actionButton, styles.acceptBtn]}
-          onPress={handleAccept}
-          activeOpacity={0.8}
-        >
-          <Phone size={28} color="#FFFFFF" />
-          <Text style={styles.actionLabel}>Accept</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#090514',
-    alignItems: 'center',
+    backgroundColor: '#0B141B',
+  },
+  safeArea: {
+    flex: 1,
     justifyContent: 'space-between',
-    paddingVertical: SPACING.xl * 2,
-    paddingHorizontal: SPACING.lg,
+    paddingVertical: Platform.OS === 'android' ? 24 : 16,
+    paddingHorizontal: 20,
   },
-  glowCircle: {
-    position: 'absolute',
-    top: '25%',
-    width: 320,
-    height: 320,
-    borderRadius: 160,
-    backgroundColor: 'rgba(124, 58, 237, 0.12)',
+  header: {
+    alignItems: 'center',
+    paddingTop: 8,
   },
-  topBadge: {
+  encryptionBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: RADIUS.full,
-    borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.3)',
+    gap: 5,
+    marginBottom: 6,
   },
-  topBadgeText: {
-    color: COLORS.accent,
-    fontSize: 10.5,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+  encryptionText: {
+    color: '#8696A0',
+    fontSize: 11,
+    fontWeight: '500',
   },
-  callerContainer: {
+  callTypeHeading: {
+    color: '#8696A0',
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+  },
+  centerSection: {
     alignItems: 'center',
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: 16,
   },
   avatarWrapper: {
     position: 'relative',
-    marginBottom: SPACING.lg,
+    width: 140,
+    height: 140,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
   },
   avatar: {
     width: 130,
     height: 130,
     borderRadius: 65,
-    borderWidth: 3,
-    borderColor: COLORS.primaryLight,
+    borderWidth: 2.5,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
-  callTypeIconWrap: {
+  pulseRing: {
+    position: 'absolute',
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    borderWidth: 2,
+    borderColor: '#25D366',
+    backgroundColor: 'rgba(37, 211, 102, 0.08)',
+  },
+  typeBadge: {
     position: 'absolute',
     bottom: 2,
     right: 2,
-    backgroundColor: COLORS.primary,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    backgroundColor: '#25D366',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#090514',
+    borderColor: '#0B141B',
   },
   callerName: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: '900',
+    color: '#E9EDEF',
+    fontSize: 26,
+    fontWeight: '700',
     marginBottom: 6,
     textAlign: 'center',
+    letterSpacing: 0.2,
   },
-  callerHeadline: {
-    color: COLORS.textDim,
-    fontSize: 13,
-    textAlign: 'center',
-    marginBottom: SPACING.lg,
-  },
-  ringingStatusWrap: {
+  phonePill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(124, 58, 237, 0.2)',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+    backgroundColor: 'rgba(37, 211, 102, 0.12)',
+    paddingHorizontal: 12,
+    paddingVertical: 4.5,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: 'rgba(37, 211, 102, 0.25)',
+    marginBottom: 10,
+  },
+  phonePillText: {
+    color: '#25D366',
+    fontSize: 12.5,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  callerHeadline: {
+    color: '#8696A0',
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: 16,
+    maxWidth: 280,
+    lineHeight: 18,
+  },
+  verifiedCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(30, 42, 50, 0.7)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: RADIUS.full,
   },
-  ringingText: {
-    color: COLORS.primaryLight,
-    fontSize: 12,
-    fontWeight: '700',
+  verifiedCardText: {
+    color: '#8696A0',
+    fontSize: 10.5,
+    fontWeight: '600',
   },
   actionsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
     width: '100%',
-    paddingHorizontal: SPACING.xl,
+    paddingHorizontal: 30,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 32,
+  },
+  actionCol: {
+    alignItems: 'center',
+    gap: 8,
   },
   actionButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    ...SHADOWS.md,
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    ...SHADOWS.lg,
   },
   declineBtn: {
-    backgroundColor: COLORS.danger,
+    backgroundColor: '#EA4335',
   },
   acceptBtn: {
-    backgroundColor: COLORS.accent,
+    backgroundColor: '#25D366',
   },
   actionLabel: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '700',
-    marginTop: 4,
-    position: 'absolute',
-    bottom: -22,
+    color: '#E9EDEF',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.2,
   },
 });

@@ -206,6 +206,7 @@ export interface ConversationItem {
     name: string;
     avatarUrl?: string;
     role: UserRole;
+    phoneNumber?: string;
     isOnline: boolean;
   };
   lastMessage?: {

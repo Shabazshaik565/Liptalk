@@ -373,7 +373,7 @@ export default function CommunityDetailScreen() {
                   title="Message"
                   variant="glass"
                   size="sm"
-                  onPress={() => router.push('/chat' as any)}
+                  onPress={() => router.push('/chat/conv_01' as any)}
                 />
               </View>
             </View>

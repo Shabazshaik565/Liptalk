@@ -9,7 +9,9 @@ import {
   ScrollView,
   ActivityIndicator,
   Image,
+  Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
   Sparkles,
@@ -34,6 +36,8 @@ interface AskLipTalkSheetProps {
 
 export function AskLipTalkSheet({ visible, onClose }: AskLipTalkSheetProps) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const bottomClearance = Math.max(insets.bottom, Platform.OS === 'android' ? 24 : 16);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<AIAssistantResponse | null>(null);
@@ -169,7 +173,7 @@ export function AskLipTalkSheet({ visible, onClose }: AskLipTalkSheetProps) {
           </ScrollView>
 
           {/* Bottom Query Input */}
-          <View style={styles.inputRow}>
+          <View style={[styles.inputRow, { paddingBottom: bottomClearance }]}>
             <TextInput
               style={styles.input}
               placeholder="Ask anything (e.g. Find CTOs, opportunities...)"

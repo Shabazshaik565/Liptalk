@@ -8,9 +8,11 @@ import {
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
+  Keyboard,
   Platform,
   SafeAreaView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -32,8 +34,29 @@ import { COLORS, SPACING, RADIUS, SHADOWS } from '../../src/constants/theme';
 
 export default function LiveRoomScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const roomId = id || 'room_01';
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      () => setKeyboardVisible(true)
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardVisible(false)
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const bottomClearance = keyboardVisible
+    ? 8
+    : Math.max(insets.bottom, Platform.OS === 'android' ? 24 : 16);
 
   const { data: room } = useQuery({
     queryKey: ['live-room', roomId],
@@ -257,47 +280,51 @@ export default function LiveRoomScreen() {
           </ScrollView>
         </View>
 
-        {/* Quick Reactions Bar */}
-        <View style={styles.reactionsBar}>
-          {['👏', '🔥', '💡', '🚀', '❤️'].map((emoji) => (
+        {/* Elevated Bottom Dock with Reactions and Chat Input Bar */}
+        <View style={[styles.bottomDockContainer, { paddingBottom: bottomClearance }]}>
+          {/* Quick Reactions Bar */}
+          <View style={styles.reactionsBar}>
+            {['👏', '🔥', '💡', '🚀', '❤️'].map((emoji) => (
+              <TouchableOpacity
+                key={emoji}
+                style={styles.reactionBtn}
+                onPress={() => handleReaction(emoji)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.reactionEmoji}>{emoji}</Text>
+              </TouchableOpacity>
+            ))}
+
             <TouchableOpacity
-              key={emoji}
-              style={styles.reactionBtn}
-              onPress={() => handleReaction(emoji)}
-              activeOpacity={0.7}
+              style={[styles.raiseHandBtn, isHandRaised && styles.raiseHandBtnActive]}
+              onPress={handleRaiseHand}
+              activeOpacity={0.8}
             >
-              <Text style={styles.reactionEmoji}>{emoji}</Text>
+              <Hand size={16} color={isHandRaised ? '#FFF' : COLORS.primaryLight} />
+              <Text style={[styles.raiseHandText, isHandRaised && { color: '#FFF' }]}>
+                {isHandRaised ? 'Hand Raised' : 'Raise Hand'}
+              </Text>
             </TouchableOpacity>
-          ))}
+          </View>
 
-          <TouchableOpacity
-            style={[styles.raiseHandBtn, isHandRaised && styles.raiseHandBtnActive]}
-            onPress={handleRaiseHand}
-            activeOpacity={0.8}
-          >
-            <Hand size={16} color={isHandRaised ? '#FFF' : COLORS.primaryLight} />
-            <Text style={[styles.raiseHandText, isHandRaised && { color: '#FFF' }]}>
-              {isHandRaised ? 'Hand Raised' : 'Raise Hand'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Input Bar */}
-        <View style={styles.inputBar}>
-          <TextInput
-            style={styles.input}
-            value={chatText}
-            onChangeText={setChatText}
-            placeholder="Ask speaker a question or drop a note..."
-            placeholderTextColor={COLORS.textDim}
-          />
-          <TouchableOpacity
-            style={[styles.sendBtn, !chatText.trim() && styles.sendBtnDisabled]}
-            onPress={handleSendMessage}
-            disabled={!chatText.trim()}
-          >
-            <Send size={16} color={!chatText.trim() ? COLORS.textDim : '#FFF'} />
-          </TouchableOpacity>
+          {/* Input Bar */}
+          <View style={styles.inputBar}>
+            <TextInput
+              style={styles.input}
+              value={chatText}
+              onChangeText={setChatText}
+              placeholder="Ask speaker a question or drop a note..."
+              placeholderTextColor={COLORS.textDim}
+            />
+            <TouchableOpacity
+              style={[styles.sendBtn, !chatText.trim() && styles.sendBtnDisabled]}
+              onPress={handleSendMessage}
+              disabled={!chatText.trim()}
+              activeOpacity={0.8}
+            >
+              <Send size={16} color={!chatText.trim() ? COLORS.textDim : '#FFF'} />
+            </TouchableOpacity>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -513,20 +540,25 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     lineHeight: 17,
   },
+  bottomDockContainer: {
+    backgroundColor: COLORS.bgDark,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    paddingTop: 4,
+    ...SHADOWS.md,
+  },
   reactionsBar: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
     paddingVertical: 6,
-    backgroundColor: COLORS.bgCard,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    backgroundColor: 'transparent',
     gap: SPACING.xs,
   },
   reactionBtn: {
     padding: 6,
     borderRadius: RADIUS.sm,
-    backgroundColor: COLORS.bgDark,
+    backgroundColor: COLORS.bgCard,
   },
   reactionEmoji: {
     fontSize: 16,
@@ -536,7 +568,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     marginLeft: 'auto',
-    backgroundColor: COLORS.bgDark,
+    backgroundColor: COLORS.bgCard,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: RADIUS.full,
@@ -556,8 +588,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    backgroundColor: COLORS.bgDark,
+    paddingTop: 2,
+    paddingBottom: 4,
+    backgroundColor: 'transparent',
     gap: SPACING.sm,
   },
   input: {

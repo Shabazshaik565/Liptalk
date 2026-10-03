@@ -132,7 +132,7 @@ async function runSeed() {
     alex = userRepo.create({
       id: 'usr_curr_01',
       email: 'alex.morgan@nexastech.com',
-      phoneNumber: '+91 98765 43210',
+      phoneNumber: '+91 9962786367',
       role: UserRole.BUSINESS,
       status: UserStatus.ACTIVE,
       isEmailVerified: true,
@@ -255,7 +255,7 @@ async function runSeed() {
       userRepo.create({
         id: 'usr_vikram_01',
         email: 'vikram.singh@finflow.io',
-        phoneNumber: '+91 98765 43212',
+        phoneNumber: '+91 7200317219',
         role: UserRole.BUSINESS,
         status: UserStatus.ACTIVE,
         isEmailVerified: true,

@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { COLORS } from '../src/constants/theme';
 import { useAuthStore } from '../src/store/auth.store';
 import { CURRENT_USER } from '../src/api/mockData';
+import { VoIPGlobalManager } from '../src/components/calling/VoIPGlobalManager';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +33,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <StatusBar style="light" />
+        <VoIPGlobalManager />
         <Stack
           screenOptions={{
             headerShown: false,

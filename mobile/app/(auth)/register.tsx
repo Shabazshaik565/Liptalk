@@ -95,7 +95,7 @@ export default function RegisterScreen() {
             label="Phone Number (Optional)"
             value={phone}
             onChangeText={setPhone}
-            placeholder="+91 98765 43210"
+            placeholder="+91 9962786367"
             keyboardType="phone-pad"
             icon={<Phone size={18} color={COLORS.textDim} />}
           />

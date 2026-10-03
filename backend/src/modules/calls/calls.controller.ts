@@ -30,4 +30,17 @@ export class CallsController {
     const userId = req.user?.id || 'usr_curr_01';
     return this.callsService.endCall(callId, userId, body.durationSeconds || 0);
   }
+
+  @Post('pstn-bridge')
+  async initiatePstnBridge(
+    @Body() body: { callerNumber?: string; receiverNumber: string },
+    @Request() req: any,
+  ) {
+    const callerId = req.user?.id || 'usr_curr_01';
+    return this.callsService.initiatePstnBridge(
+      callerId,
+      body.callerNumber || '+91 9962786367',
+      body.receiverNumber || '+91 7200317219',
+    );
+  }
 }

@@ -71,6 +71,15 @@ export class CallsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     data: { callerId: string; callerName: string; callerAvatar?: string; receiverId: string; callType: 'VOICE' | 'VIDEO' },
     @ConnectedSocket() client: Socket,
   ) {
+    // Check if receiver is already in another call
+    if (this.userPresence.get(data.receiverId) === 'IN_CALL') {
+      const callerSocketId = this.userSockets.get(data.callerId);
+      if (callerSocketId) {
+        this.server.to(callerSocketId).emit('call_busy', { receiverId: data.receiverId });
+      }
+      return { status: 'busy' };
+    }
+
     const call = await this.callsService.initiateCall(
       data.callerId,
       data.receiverId,
@@ -120,11 +129,53 @@ export class CallsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { callId: string; callerId: string; reason?: string },
     @ConnectedSocket() client: Socket,
   ) {
+    await this.callsService.declineCall(data.callId, data.callerId, data.reason);
+
     const callerSocketId = this.userSockets.get(data.callerId);
     if (callerSocketId) {
       this.server.to(callerSocketId).emit('call_declined', { callId: data.callId, reason: data.reason });
     }
     return { status: 'declined' };
+  }
+
+  @SubscribeMessage('call_cancel')
+  async handleCallCancel(
+    @MessageBody() data: { callId: string; callerId: string; receiverId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    await this.callsService.cancelCall(data.callId, data.callerId);
+
+    const receiverSocketId = this.userSockets.get(data.receiverId);
+    if (receiverSocketId) {
+      this.server.to(receiverSocketId).emit('call_cancelled', { callId: data.callId });
+    }
+    return { status: 'cancelled' };
+  }
+
+  @SubscribeMessage('call_mute')
+  handleCallMute(
+    @MessageBody() data: { callId: string; targetUserId: string; isMuted: boolean },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const targetSocketId = this.userSockets.get(data.targetUserId);
+    if (targetSocketId) {
+      this.server.to(targetSocketId).emit('call_peer_mute', { isMuted: data.isMuted });
+    }
+    return { status: 'ok' };
+  }
+
+  @SubscribeMessage('call_missed')
+  async handleCallMissed(
+    @MessageBody() data: { callId: string; receiverId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    await this.callsService.markMissed(data.callId);
+
+    const receiverSocketId = this.userSockets.get(data.receiverId);
+    if (receiverSocketId) {
+      this.server.to(receiverSocketId).emit('call_missed', { callId: data.callId });
+    }
+    return { status: 'missed' };
   }
 
   @SubscribeMessage('call_signal')

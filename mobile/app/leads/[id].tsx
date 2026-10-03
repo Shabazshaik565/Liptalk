@@ -6,6 +6,7 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  Linking,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -13,6 +14,7 @@ import {
   MessageSquare,
   Plus,
   Clock,
+  Phone,
 } from 'lucide-react-native';
 import { leadsApi } from '../../src/api/domain.api';
 import { LeadStatus } from '../../src/types';
@@ -98,6 +100,34 @@ export default function LeadDetailScreen() {
             <View style={styles.sourceRow}>
               <Text style={styles.sourceBadge}>SOURCE: {lead.source}</Text>
             </View>
+            <TouchableOpacity
+              style={styles.leadPhonePill}
+              onPress={() =>
+                router.push({
+                  pathname: '/call/active' as any,
+                  params: {
+                    callId: 'call_' + Date.now(),
+                    peerName: lead.contactName || 'Vikram Singh',
+                    peerAvatar:
+                      lead.contactAvatar ||
+                      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+                    callType: 'VOICE',
+                    peerId: lead.contactUserId || 'usr_vikram_singh',
+                    peerPhone: '+91 7200317219',
+                    isIncoming: 'false',
+                  },
+                })
+              }
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="Call Vikram Singh directly at +91 7200317219"
+            >
+              <Phone size={11} color={COLORS.accent} />
+              <Text style={styles.leadPhoneText}>+91 7200317219</Text>
+              <View style={styles.leadPhoneBadge}>
+                <Text style={styles.leadPhoneBadgeText}>IN-APP</Text>
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -109,13 +139,37 @@ export default function LeadDetailScreen() {
               ₹{lead.estimatedValue ? lead.estimatedValue.toLocaleString('en-IN') : '100,000'}
             </Text>
           </View>
-          <Button
-            title="Open Chat"
-            variant="glass"
-            size="sm"
-            icon={<MessageSquare size={14} color={COLORS.primaryLight} />}
-            onPress={() => router.push('/chat' as any)}
-          />
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <Button
+              title="Call Lead"
+              variant="primary"
+              size="sm"
+              icon={<Phone size={14} color="#FFF" />}
+              onPress={() =>
+                router.push({
+                  pathname: '/call/active' as any,
+                  params: {
+                    callId: 'call_' + Date.now(),
+                    peerName: lead.contactName || 'Vikram Singh',
+                    peerAvatar:
+                      lead.contactAvatar ||
+                      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+                    callType: 'VOICE',
+                    peerId: lead.contactUserId || 'usr_vikram_singh',
+                    peerPhone: '+91 7200317219',
+                    isIncoming: 'false',
+                  },
+                })
+              }
+            />
+            <Button
+              title="Open Chat"
+              variant="glass"
+              size="sm"
+              icon={<MessageSquare size={14} color={COLORS.primaryLight} />}
+              onPress={() => router.push('/chat/conv_01' as any)}
+            />
+          </View>
         </View>
 
         {/* Pipeline Stage Transition Stepper */}
@@ -330,5 +384,35 @@ const styles = StyleSheet.create({
   noteDate: {
     color: COLORS.textDim,
     fontSize: 11,
+  },
+  leadPhonePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    paddingHorizontal: 8,
+    paddingVertical: 4.5,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+    marginTop: 6,
+    alignSelf: 'flex-start',
+  },
+  leadPhoneText: {
+    color: COLORS.accent,
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  leadPhoneBadge: {
+    backgroundColor: 'rgba(16, 185, 129, 0.25)',
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 3,
+  },
+  leadPhoneBadgeText: {
+    color: COLORS.accent,
+    fontSize: 7.5,
+    fontWeight: '900',
+    letterSpacing: 0.3,
   },
 });

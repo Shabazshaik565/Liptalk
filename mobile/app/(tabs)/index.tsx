@@ -7,9 +7,10 @@ import {
   TouchableOpacity,
   RefreshControl,
   Image,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Sparkles,
   Briefcase,
@@ -17,17 +18,27 @@ import {
   PlusCircle,
   Users,
   Compass,
-  Zap,
-  ShieldCheck,
-  Award,
+  Radio,
   ShoppingBag,
   Coins,
   Crown,
-  Bookmark,
   Search,
-  Bot,
-  Radio,
+  ShieldCheck,
+  ChevronRight,
+  Plus,
   ArrowRight,
+  FileText,
+  MessageSquare,
+  Trash2,
+  Edit3,
+  Calendar,
+  IndianRupee,
+  MapPin,
+  Lightbulb,
+  Building2,
+  Layers,
+  MessagesSquare,
+  Bot,
 } from 'lucide-react-native';
 import { Header } from '../../src/components/common/Header';
 import { SectionHeader } from '../../src/components/common/SectionHeader';
@@ -37,72 +48,103 @@ import { MatchCard } from '../../src/components/match/MatchCard';
 import { OpportunityCard } from '../../src/components/opportunity/OpportunityCard';
 import { PartnerCard } from '../../src/components/partner/PartnerCard';
 import { AskLipTalkSheet } from '../../src/components/ai/AskLipTalkSheet';
-import { matchesApi, opportunitiesApi, partnersApi, liveRoomsApi } from '../../src/api/domain.api';
+import {
+  matchesApi,
+  opportunitiesApi,
+  partnersApi,
+  leadsApi,
+  liveRoomsApi,
+} from '../../src/api/domain.api';
 import { COLORS, SPACING, RADIUS, SHADOWS } from '../../src/constants/theme';
 import { useAuthStore } from '../../src/store/auth.store';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { user } = useAuthStore();
   const [refreshing, setRefreshing] = useState(false);
   const [assistantVisible, setAssistantVisible] = useState(false);
 
-  const { data: liveRooms = [], isLoading: loadingRooms, refetch: refetchRooms } = useQuery({
-    queryKey: ['live-rooms-discover'],
-    queryFn: () => liveRoomsApi.getRooms(),
+  // 1. My Published Posts
+  const {
+    data: myPosts = [],
+    isLoading: loadingMyPosts,
+    refetch: refetchMyPosts,
+  } = useQuery({
+    queryKey: ['my-opportunities-home'],
+    queryFn: () => opportunitiesApi.getMyOpportunities(),
   });
 
-  const { data: matches, isLoading: loadingMatches, refetch: refetchMatches } = useQuery({
-    queryKey: ['matches'],
-    queryFn: matchesApi.getMatches,
-  });
-
-  const { data: opportunities, isLoading: loadingOpps, refetch: refetchOpportunities } = useQuery({
-    queryKey: ['opportunities'],
+  // 2. Active Open Demands
+  const {
+    data: opportunities = [],
+    isLoading: loadingOpps,
+    refetch: refetchOpportunities,
+  } = useQuery({
+    queryKey: ['opportunities-home'],
     queryFn: () => opportunitiesApi.getOpportunities(),
   });
 
-  const { data: partners, isLoading: loadingPartners, refetch: refetchPartners } = useQuery({
-    queryKey: ['partners'],
+  // 3. CRM Deals & Leads
+  const { data: leads = [], refetch: refetchLeads } = useQuery({
+    queryKey: ['leads-home'],
+    queryFn: leadsApi.getLeads,
+  });
+
+  // 4. Synergy Matches
+  const {
+    data: matches = [],
+    isLoading: loadingMatches,
+    refetch: refetchMatches,
+  } = useQuery({
+    queryKey: ['matches-home'],
+    queryFn: matchesApi.getMatches,
+  });
+
+  // 5. Partners
+  const {
+    data: partners = [],
+    isLoading: loadingPartners,
+    refetch: refetchPartners,
+  } = useQuery({
+    queryKey: ['partners-home'],
     queryFn: partnersApi.getPartners,
   });
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([refetchRooms(), refetchMatches(), refetchOpportunities(), refetchPartners()]);
+    await Promise.all([
+      refetchMyPosts(),
+      refetchOpportunities(),
+      refetchLeads(),
+      refetchMatches(),
+      refetchPartners(),
+    ]);
     setRefreshing(false);
   };
 
-  const highMatchCount = (matches || []).filter((m) => m.matchScore >= 85).length;
+  const handleDeleteMyPost = (id: string, title: string) => {
+    Alert.alert(
+      'Withdraw Requirement',
+      `Are you sure you want to withdraw "${title}"? This will close it to new proposals.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Withdraw',
+          style: 'destructive',
+          onPress: async () => {
+            await opportunitiesApi.deleteOpportunity(id);
+            queryClient.invalidateQueries({ queryKey: ['my-opportunities-home'] });
+            queryClient.invalidateQueries({ queryKey: ['opportunities-home'] });
+          },
+        },
+      ]
+    );
+  };
 
-  const defaultRooms = [
-    {
-      id: 'room_1',
-      title: 'Scaling Your Business Globally',
-      host: { name: 'Arjun Mehta', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100' },
-      category: 'Business & Growth',
-      audienceCount: 256,
-      status: 'LIVE',
-    },
-    {
-      id: 'room_2',
-      title: 'Fintech & B2B Escrow in India',
-      host: { name: 'Priya Sharma', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100' },
-      category: 'Fintech',
-      audienceCount: 184,
-      status: 'LIVE',
-    },
-    {
-      id: 'room_3',
-      title: 'Public Speaking & Personal Brand Masterclass',
-      host: { name: 'Vikram Malhotra', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100' },
-      category: 'Personal Growth',
-      audienceCount: 142,
-      status: 'LIVE',
-    },
-  ];
-
-  const displayRooms = liveRooms.length > 0 ? liveRooms : defaultRooms;
+  const userName = user?.profile?.firstName
+    ? `${user.profile.firstName} ${user.profile.lastName || ''}`.trim()
+    : 'Alex Morgan';
 
   return (
     <View style={styles.container}>
@@ -121,142 +163,371 @@ export default function HomeScreen() {
           />
         }
       >
-        {/* Ask LipTalk Intelligent Search Trigger */}
-        <TouchableOpacity
-          style={styles.aiSearchBar}
-          onPress={() => router.push('/search' as any)}
-          activeOpacity={0.85}
-        >
-          <Search size={16} color={COLORS.primaryLight} />
-          <Text style={styles.aiSearchPlaceholder}>
-            Search anything (e.g. React Native developers, B2B leads, Audio Rooms)...
-          </Text>
-          <View style={styles.aiSearchBadge}>
-            <Sparkles size={11} color={COLORS.accent} />
-            <Text style={styles.aiSearchBadgeText}>AI</Text>
+        {/* 1. PERSONAL WELCOME & EXECUTIVE STATUS HERO */}
+        <View style={styles.welcomeHeroCard}>
+          <View style={styles.heroTopRow}>
+            <View style={styles.statusPulsePill}>
+              <View style={styles.pulseDot} />
+              <Text style={styles.statusPulseText}>SYNERGY ENGINE ACTIVE</Text>
+            </View>
+            <View style={styles.verifiedBadge}>
+              <ShieldCheck size={12} color={COLORS.accent} />
+              <Text style={styles.verifiedBadgeText}>Tier 1 Verified</Text>
+            </View>
           </View>
-        </TouchableOpacity>
 
-        {/* Section 1: Live Now Audio Stages */}
+          <Text style={styles.heroGreeting}>Welcome back, {userName}</Text>
+          <Text style={styles.heroRole}>Nexas Digital Solutions • Technology & Product Studio</Text>
+
+          <View style={styles.heroSummaryBox}>
+            <Sparkles size={16} color={COLORS.primaryLight} style={{ marginTop: 2 }} />
+            <Text style={styles.heroSummaryText}>
+              You have <Text style={styles.heroHighlight}>{leads.length || 3} CRM deals</Text> in
+              discussion, <Text style={styles.heroHighlight}>{opportunities.length || 5} active demands</Text> matching your stack, and{' '}
+              <Text style={styles.heroHighlight}>{myPosts.length || 2} published requirements</Text> receiving proposals.
+            </Text>
+          </View>
+
+          <View style={styles.heroActionRow}>
+            <TouchableOpacity
+              style={styles.heroPrimaryBtn}
+              onPress={() => router.push('/opportunities/create' as any)}
+              activeOpacity={0.82}
+            >
+              <PlusCircle size={15} color="#FFFFFF" />
+              <Text style={styles.heroPrimaryBtnText}>Post Requirement</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.heroSecondaryBtn}
+              onPress={() => router.push('/(tabs)/opportunities' as any)}
+              activeOpacity={0.82}
+            >
+              <Search size={15} color={COLORS.textSecondary} />
+              <Text style={styles.heroSecondaryBtnText}>Explore Demands</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* 2. KEY DASHBOARD METRICS (Spacious & Minimalist 2x2 Grid) */}
+        <View style={styles.dashboardGrid}>
+          {/* Deals / CRM Pipeline */}
+          <TouchableOpacity
+            style={styles.metricCard}
+            onPress={() => router.push('/leads' as any)}
+            activeOpacity={0.85}
+          >
+            <View style={styles.metricHeader}>
+              <View style={[styles.metricIconWrap, { backgroundColor: 'rgba(16, 185, 129, 0.15)' }]}>
+                <TrendingUp size={18} color={COLORS.accent} />
+              </View>
+              <View style={styles.metricTrendBadge}>
+                <Text style={styles.metricTrendText}>+12%</Text>
+              </View>
+            </View>
+            <Text style={styles.metricValue}>{leads.length || 3} Deals</Text>
+            <Text style={styles.metricTitle}>CRM Pipeline</Text>
+            <Text style={styles.metricSub}>₹7.3L in active discussion</Text>
+          </TouchableOpacity>
+
+          {/* Active Open Demands */}
+          <TouchableOpacity
+            style={styles.metricCard}
+            onPress={() => router.push('/(tabs)/opportunities' as any)}
+            activeOpacity={0.85}
+          >
+            <View style={styles.metricHeader}>
+              <View style={[styles.metricIconWrap, { backgroundColor: 'rgba(139, 92, 246, 0.15)' }]}>
+                <Briefcase size={18} color={COLORS.primaryLight} />
+              </View>
+              <ChevronRight size={14} color={COLORS.textDim} />
+            </View>
+            <Text style={styles.metricValue}>{opportunities.length || 5} Active</Text>
+            <Text style={styles.metricTitle}>Open Demands</Text>
+            <Text style={styles.metricSub}>Matching your tech stack</Text>
+          </TouchableOpacity>
+
+          {/* Network Connections */}
+          <TouchableOpacity
+            style={styles.metricCard}
+            onPress={() => router.push('/(tabs)/network' as any)}
+            activeOpacity={0.85}
+          >
+            <View style={styles.metricHeader}>
+              <View style={[styles.metricIconWrap, { backgroundColor: 'rgba(245, 158, 11, 0.15)' }]}>
+                <Users size={18} color="#FBBF24" />
+              </View>
+              <ChevronRight size={14} color={COLORS.textDim} />
+            </View>
+            <Text style={styles.metricValue}>64 Network</Text>
+            <Text style={styles.metricTitle}>Connections</Text>
+            <Text style={styles.metricSub}>Verified founders & CTOs</Text>
+          </TouchableOpacity>
+
+          {/* Rewards & Wallet */}
+          <TouchableOpacity
+            style={styles.metricCard}
+            onPress={() => router.push('/rewards' as any)}
+            activeOpacity={0.85}
+          >
+            <View style={styles.metricHeader}>
+              <View style={[styles.metricIconWrap, { backgroundColor: 'rgba(168, 85, 247, 0.15)' }]}>
+                <Coins size={18} color="#C084FC" />
+              </View>
+              <ChevronRight size={14} color={COLORS.textDim} />
+            </View>
+            <Text style={styles.metricValue}>1,250 Coins</Text>
+            <Text style={styles.metricTitle}>Wallet & Points</Text>
+            <Text style={styles.metricSub}>₹500 redeemable cash</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 3. REDIRECTS TO DIFFERENT TABS & SUBSYSTEMS (Spacious Quick Hub) */}
         <SectionHeader
-          title="Live Audio Stages"
-          subtitle="Real-time discussions, pitch stages & masterclasses"
-          icon={<Radio size={18} color={COLORS.danger} />}
-          actionText="Explore All"
-          onAction={() => router.push('/live' as any)}
+          title="Quick Navigation Hub"
+          subtitle="One-tap access to live stages, marketplace & innovation tools"
         />
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.liveRoomsScroll}
-        >
-          {displayRooms.map((room) => (
-            <TouchableOpacity
-              key={room.id}
-              style={styles.liveRoomCard}
-              onPress={() => router.push(`/live/${room.id}` as any)}
-              activeOpacity={0.85}
-            >
-              <View style={styles.liveRoomHeader}>
-                <View style={styles.livePill}>
-                  <View style={styles.livePulseDot} />
-                  <Text style={styles.livePillText}>LIVE</Text>
+        <View style={styles.quickHubGrid}>
+          {/* Discover Tab */}
+          <TouchableOpacity
+            style={styles.hubTile}
+            onPress={() => router.push('/(tabs)/discover' as any)}
+            activeOpacity={0.82}
+          >
+            <View style={[styles.hubTileIcon, { backgroundColor: 'rgba(56, 189, 248, 0.15)' }]}>
+              <Compass size={18} color="#38BDF8" />
+            </View>
+            <Text style={styles.hubTileTitle}>Discover</Text>
+            <Text style={styles.hubTileSub}>Stages & Trends</Text>
+          </TouchableOpacity>
+
+          {/* Live Audio Stages */}
+          <TouchableOpacity
+            style={styles.hubTile}
+            onPress={() => router.push('/live' as any)}
+            activeOpacity={0.82}
+          >
+            <View style={[styles.hubTileIcon, { backgroundColor: 'rgba(239, 68, 68, 0.15)' }]}>
+              <Radio size={18} color={COLORS.danger} />
+            </View>
+            <Text style={styles.hubTileTitle}>Live Stages</Text>
+            <Text style={styles.hubTileSub}>Audio Rooms</Text>
+          </TouchableOpacity>
+
+          {/* B2B Marketplace */}
+          <TouchableOpacity
+            style={styles.hubTile}
+            onPress={() => router.push('/marketplace' as any)}
+            activeOpacity={0.82}
+          >
+            <View style={[styles.hubTileIcon, { backgroundColor: 'rgba(139, 92, 246, 0.15)' }]}>
+              <ShoppingBag size={18} color={COLORS.primaryLight} />
+            </View>
+            <Text style={styles.hubTileTitle}>Marketplace</Text>
+            <Text style={styles.hubTileSub}>B2B Services</Text>
+          </TouchableOpacity>
+
+          {/* Rewards & Earnings */}
+          <TouchableOpacity
+            style={styles.hubTile}
+            onPress={() => router.push('/rewards' as any)}
+            activeOpacity={0.82}
+          >
+            <View style={[styles.hubTileIcon, { backgroundColor: 'rgba(16, 185, 129, 0.15)' }]}>
+              <Coins size={18} color={COLORS.accent} />
+            </View>
+            <Text style={styles.hubTileTitle}>Rewards</Text>
+            <Text style={styles.hubTileSub}>Earn & Redeem</Text>
+          </TouchableOpacity>
+
+          {/* Idea Incubator */}
+          <TouchableOpacity
+            style={styles.hubTile}
+            onPress={() => router.push('/ideas' as any)}
+            activeOpacity={0.82}
+          >
+            <View style={[styles.hubTileIcon, { backgroundColor: 'rgba(245, 158, 11, 0.15)' }]}>
+              <Lightbulb size={18} color="#FBBF24" />
+            </View>
+            <Text style={styles.hubTileTitle}>Incubator</Text>
+            <Text style={styles.hubTileSub}>Validate Ideas</Text>
+          </TouchableOpacity>
+
+          {/* Guilds / Communities */}
+          <TouchableOpacity
+            style={styles.hubTile}
+            onPress={() => router.push('/(tabs)/communities' as any)}
+            activeOpacity={0.82}
+          >
+            <View style={[styles.hubTileIcon, { backgroundColor: 'rgba(168, 85, 247, 0.15)' }]}>
+              <MessagesSquare size={18} color="#C084FC" />
+            </View>
+            <Text style={styles.hubTileTitle}>Guilds</Text>
+            <Text style={styles.hubTileSub}>Communities</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 4. DEDICATED "MY POSTS & REQUIREMENTS" (On Home Page as Requested) */}
+        <SectionHeader
+          title="My Published Requirements"
+          subtitle="Track bids, manage scopes, and review agency proposals"
+          badgeCount={myPosts.length}
+          actionText="+ Post Need"
+          onAction={() => router.push('/opportunities/create' as any)}
+          style={{ marginTop: SPACING.xl }}
+        />
+
+        {loadingMyPosts ? (
+          <CardSkeleton />
+        ) : myPosts.length > 0 ? (
+          myPosts.map((post) => (
+            <View key={post.id} style={styles.myPostCard}>
+              <View style={styles.myPostHeader}>
+                <View style={styles.categoryBadge}>
+                  <Text style={styles.categoryBadgeText}>{post.categoryName}</Text>
                 </View>
-                <View style={styles.listenerBadge}>
-                  <Users size={12} color={COLORS.textSecondary} />
-                  <Text style={styles.listenerCount}>{room.audienceCount || 132} listening</Text>
+                <View style={styles.statusPill}>
+                  <View style={styles.statusDot} />
+                  <Text style={styles.statusPillText}>{post.status || 'OPEN'}</Text>
                 </View>
               </View>
 
-              <Text style={styles.liveRoomTitle} numberOfLines={2}>
-                {room.title}
+              <Text style={styles.myPostTitle}>{post.title}</Text>
+              <Text style={styles.myPostDesc} numberOfLines={2}>
+                {post.description}
               </Text>
 
-              <View style={styles.liveRoomFooter}>
-                <Image
-                  source={{ uri: room.host?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100' }}
-                  style={styles.hostAvatar}
-                />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.hostName} numberOfLines={1}>
-                    {room.host?.name || 'Arjun Mehta'}
-                  </Text>
-                  <Text style={styles.roomCategory}>{room.category || 'Live Room'}</Text>
+              {post.tags && post.tags.length > 0 && (
+                <View style={styles.tagsRow}>
+                  {post.tags.map((tag, idx) => (
+                    <View key={idx} style={styles.tagChip}>
+                      <Text style={styles.tagChipText}>#{tag}</Text>
+                    </View>
+                  ))}
                 </View>
+              )}
 
-                <View style={styles.joinStageBtn}>
-                  <Text style={styles.joinStageText}>Join</Text>
-                  <ArrowRight size={12} color="#FFF" />
-                </View>
+              <View style={styles.metaRow}>
+                {post.budgetAmount && (
+                  <View style={styles.metaItem}>
+                    <IndianRupee size={13} color={COLORS.accent} />
+                    <Text style={styles.metaText}>₹{post.budgetAmount.toLocaleString('en-IN')}</Text>
+                  </View>
+                )}
+                {post.city && (
+                  <View style={styles.metaItem}>
+                    <MapPin size={13} color={COLORS.textDim} />
+                    <Text style={styles.metaText}>{post.city}</Text>
+                  </View>
+                )}
+                {post.deadline && (
+                  <View style={styles.metaItem}>
+                    <Calendar size={13} color={COLORS.textDim} />
+                    <Text style={styles.metaText}>{post.deadline}</Text>
+                  </View>
+                )}
               </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
 
-        {/* Section 2: Recommended Synergy Matches */}
-        <SectionHeader
-          title="Intelligent Synergy Matches"
-          subtitle="Direct 1-to-1 alignments with your published needs & offers"
-          icon={<Sparkles size={18} color={COLORS.accent} />}
-          badgeCount={matches?.length}
-          actionText="View All"
-          onAction={() => router.push('/(tabs)/network' as any)}
-          style={{ marginTop: SPACING.md }}
-        />
+              {/* Proposals Received Highlight */}
+              <View style={styles.responsesBanner}>
+                <View style={styles.responsesLeft}>
+                  <Users size={14} color={COLORS.accent} />
+                  <Text style={styles.responsesText}>
+                    <Text style={styles.responsesCount}>{post.interestsCount || 0}</Text> Proposals / Pitches Received
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.viewPitchesBtn}
+                  onPress={() => router.push('/leads' as any)}
+                  activeOpacity={0.8}
+                >
+                  <MessageSquare size={12} color="#000000" />
+                  <Text style={styles.viewPitchesBtnText}>View Inquiries</Text>
+                </TouchableOpacity>
+              </View>
 
-        {loadingMatches ? (
-          <>
-            <CardSkeleton />
-            <CardSkeleton />
-          </>
-        ) : matches && matches.length > 0 ? (
-          matches.map((match) => <MatchCard key={match.id} match={match} />)
+              {/* Action Controls */}
+              <View style={styles.postActionsFooter}>
+                <TouchableOpacity
+                  style={styles.deletePostBtn}
+                  onPress={() => handleDeleteMyPost(post.id, post.title)}
+                  activeOpacity={0.8}
+                >
+                  <Trash2 size={13} color={COLORS.danger} />
+                  <Text style={styles.deletePostBtnText}>Withdraw</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.editPostBtn}
+                  onPress={() => router.push('/opportunities/create' as any)}
+                  activeOpacity={0.8}
+                >
+                  <Edit3 size={13} color={COLORS.primaryLight} />
+                  <Text style={styles.editPostBtnText}>Edit Scope</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))
         ) : (
           <EmptyState
-            icon={<Sparkles size={24} color={COLORS.accent} />}
-            title="Discover Your First Match"
-            description="Add your active requirements and service capabilities to unlock instant business recommendations."
-            actionTitle="Post a Need"
+            icon={<FileText size={24} color={COLORS.primaryLight} />}
+            title="No Published Requirements Yet"
+            description="Broadcast your business requirement to get matched with verified agencies and specialists across India."
+            actionTitle="Post Your First Requirement"
             onAction={() => router.push('/opportunities/create' as any)}
           />
         )}
 
-        {/* Section 2: Opportunities For You */}
+        {/* 5. ACTIVE OPEN DEMANDS (Live Market Demands) */}
         <SectionHeader
-          title="Open Project Requirements"
-          subtitle="Direct client inquiries and contracts seeking your services"
-          icon={<Briefcase size={18} color={COLORS.primaryLight} />}
-          badgeCount={opportunities?.length}
-          actionText="Browse All"
+          title="Active Open Demands"
+          subtitle="Commercial contracts & client projects matching your capabilities"
+          badgeCount={opportunities.length}
+          actionText="View All Demands"
           onAction={() => router.push('/(tabs)/opportunities' as any)}
-          style={{ marginTop: SPACING.lg }}
+          style={{ marginTop: SPACING.xl }}
         />
 
         {loadingOpps ? (
           <CardSkeleton />
         ) : opportunities && opportunities.length > 0 ? (
-          opportunities.map((opp) => (
+          opportunities.slice(0, 3).map((opp) => (
             <OpportunityCard key={opp.id} opportunity={opp} />
           ))
         ) : (
           <EmptyState
             icon={<Briefcase size={24} color={COLORS.primaryLight} />}
-            title="No Open Requirements"
-            description="Check back later or broadcast your own project opportunity to the network."
-            actionTitle="Post Opportunity"
+            title="No Open Demands"
+            description="Check back shortly or post a new contract demand to the network."
+            actionTitle="Post Demand"
             onAction={() => router.push('/opportunities/create' as any)}
           />
         )}
 
-        {/* Section 3: Verified Partner Perks */}
+        {/* 6. INTELLIGENT SYNERGY MATCHES */}
+        <SectionHeader
+          title="Intelligent Synergy Matches"
+          subtitle="Direct 1-to-1 alignments with your published capabilities"
+          badgeCount={matches.length}
+          actionText="View All"
+          onAction={() => router.push('/(tabs)/network' as any)}
+          style={{ marginTop: SPACING.xl }}
+        />
+
+        {loadingMatches ? (
+          <CardSkeleton />
+        ) : matches && matches.length > 0 ? (
+          matches.slice(0, 2).map((match) => <MatchCard key={match.id} match={match} />)
+        ) : null}
+
+        {/* 7. VERIFIED PARTNER PERKS */}
         <SectionHeader
           title="Ecosystem Partner Perks"
-          subtitle="Corporate credits, logistics & tools negotiated for members"
-          icon={<ShieldCheck size={18} color={COLORS.warning} />}
+          subtitle="Corporate credits, cloud tooling & logistics negotiated for members"
           actionText="Directory"
           onAction={() => router.push('/(tabs)/partners' as any)}
-          style={{ marginTop: SPACING.lg }}
+          style={{ marginTop: SPACING.xl }}
         />
 
         {loadingPartners ? (
@@ -267,7 +538,7 @@ export default function HomeScreen() {
         )}
       </ScrollView>
 
-      {/* Slide-Up AI Assistant Sheet (Triggered from Top Header / Search) */}
+      {/* Slide-Up AI Assistant Sheet */}
       <AskLipTalkSheet
         visible={assistantVisible}
         onClose={() => setAssistantVisible(false)}
@@ -288,134 +559,402 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     paddingBottom: SPACING.tabBarClearance,
   },
-  aiSearchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
+
+  // 1. Welcome & Status Hero Card (Spacious & Minimalist)
+  welcomeHeroCard: {
     backgroundColor: COLORS.bgCard,
-    borderRadius: RADIUS.xl,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 11,
+    borderRadius: RADIUS.xxl,
+    padding: SPACING.xl,
     borderWidth: 1,
-    borderColor: COLORS.primaryDark,
-    marginBottom: SPACING.lg,
-    gap: SPACING.sm,
-    ...SHADOWS.sm,
+    borderColor: 'rgba(139, 92, 246, 0.22)',
+    marginBottom: SPACING.xl,
+    ...SHADOWS.md,
   },
-  aiSearchPlaceholder: {
-    color: COLORS.textDim,
-    fontSize: 12.5,
-    flex: 1,
-  },
-  aiSearchBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    borderRadius: RADIUS.sm,
-  },
-  aiSearchBadgeText: {
-    color: COLORS.accent,
-    fontSize: 9.5,
-    fontWeight: '900',
-  },
-  liveRoomsScroll: {
-    paddingBottom: SPACING.sm,
-    gap: SPACING.md,
-    marginBottom: SPACING.md,
-  },
-  liveRoomCard: {
-    width: 255,
-    backgroundColor: COLORS.bgCard,
-    borderRadius: RADIUS.xl,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOWS.sm,
-  },
-  liveRoomHeader: {
+  heroTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: SPACING.sm,
   },
-  livePill: {
+  statusPulsePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
-    paddingHorizontal: 7,
-    paddingVertical: 3,
+    gap: 6,
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: RADIUS.sm,
     borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.3)',
+    borderColor: 'rgba(16, 185, 129, 0.25)',
   },
-  livePulseDot: {
+  pulseDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: COLORS.danger,
+    backgroundColor: COLORS.accent,
   },
-  livePillText: {
-    color: COLORS.danger,
+  statusPulseText: {
+    color: COLORS.accent,
     fontSize: 9.5,
     fontWeight: '900',
-    letterSpacing: 0.5,
+    letterSpacing: 0.6,
   },
-  listenerBadge: {
+  verifiedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: RADIUS.sm,
   },
-  listenerCount: {
+  verifiedBadgeText: {
     color: COLORS.textMuted,
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 10.5,
+    fontWeight: '700',
   },
-  liveRoomTitle: {
+  heroGreeting: {
     color: COLORS.textPrimary,
-    fontSize: 13.5,
-    fontWeight: '800',
-    lineHeight: 18,
-    minHeight: 36,
+    fontSize: 22,
+    fontWeight: '900',
+    marginTop: 4,
+    letterSpacing: -0.4,
+  },
+  heroRole: {
+    color: COLORS.textDim,
+    fontSize: 12.5,
+    marginTop: 2,
     marginBottom: SPACING.md,
   },
-  liveRoomFooter: {
+  heroSummaryBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    backgroundColor: COLORS.bgElevated,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+  },
+  heroSummaryText: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    lineHeight: 19,
+    flex: 1,
+  },
+  heroHighlight: {
+    color: COLORS.accent,
+    fontWeight: '800',
+  },
+  heroActionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
   },
-  hostAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: COLORS.primaryLight,
+  heroPrimaryBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 12,
+    borderRadius: RADIUS.md,
+    ...SHADOWS.glowPrimary,
   },
-  hostName: {
+  heroPrimaryBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  heroSecondaryBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: COLORS.bgElevated,
+    paddingVertical: 12,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+  },
+  heroSecondaryBtnText: {
+    color: COLORS.textPrimary,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+
+  // 2. Dashboard Grid (Roomy 2x2 Layout)
+  dashboardGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.md,
+    marginBottom: SPACING.xl,
+  },
+  metricCard: {
+    width: '47.5%',
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.sm,
+  },
+  metricHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.sm,
+  },
+  metricIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  metricTrendBadge: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: RADIUS.xs,
+  },
+  metricTrendText: {
+    color: COLORS.accent,
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  metricValue: {
+    color: COLORS.textPrimary,
+    fontSize: 18,
+    fontWeight: '900',
+    letterSpacing: -0.3,
+  },
+  metricTitle: {
+    color: COLORS.textSecondary,
+    fontSize: 12.5,
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  metricSub: {
+    color: COLORS.textDim,
+    fontSize: 10.5,
+    marginTop: 2,
+  },
+
+  // 3. Quick Navigation Hub (Roomy 3-column / 2-row Grid)
+  quickHubGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+    marginBottom: SPACING.lg,
+  },
+  hubTile: {
+    width: '31%',
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.lg,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xs,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  hubTileIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  hubTileTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 11.5,
+    fontWeight: '800',
+  },
+  hubTileSub: {
+    color: COLORS.textDim,
+    fontSize: 9,
+    marginTop: 1,
+    textAlign: 'center',
+  },
+
+  // 4. My Published Posts (Spacious Roomy Cards)
+  myPostCard: {
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: SPACING.md,
+    ...SHADOWS.sm,
+  },
+  myPostHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.sm,
+  },
+  categoryBadge: {
+    backgroundColor: COLORS.purpleSoft,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: RADIUS.sm,
+  },
+  categoryBadgeText: {
+    color: COLORS.primaryLight,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.accent,
+  },
+  statusPillText: {
+    color: COLORS.accent,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  myPostTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 15.5,
+    fontWeight: '800',
+    lineHeight: 21,
+    marginBottom: 4,
+  },
+  myPostDesc: {
+    color: COLORS.textSecondary,
+    fontSize: 12.5,
+    lineHeight: 18,
+    marginBottom: SPACING.sm,
+  },
+  tagsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: SPACING.sm,
+  },
+  tagChip: {
+    backgroundColor: COLORS.bgElevated,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: RADIUS.xs,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+  },
+  tagChipText: {
+    color: COLORS.textDim,
+    fontSize: 10.5,
+    fontWeight: '600',
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.borderLight,
+    marginBottom: SPACING.sm,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  metaText: {
     color: COLORS.textPrimary,
     fontSize: 11.5,
     fontWeight: '700',
   },
-  roomCategory: {
-    color: COLORS.textDim,
-    fontSize: 9.5,
-    marginTop: 1,
-  },
-  joinStageBtn: {
+  responsesBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
-    backgroundColor: COLORS.primary,
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.2)',
+    borderRadius: RADIUS.lg,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 8,
+    marginBottom: SPACING.sm,
+  },
+  responsesLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  responsesText: {
+    color: COLORS.textPrimary,
+    fontSize: 11.5,
+    fontWeight: '600',
+  },
+  responsesCount: {
+    color: COLORS.accent,
+    fontWeight: '900',
+  },
+  viewPitchesBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: COLORS.accent,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: RADIUS.sm,
+  },
+  viewPitchesBtnText: {
+    color: '#000000',
+    fontSize: 10.5,
+    fontWeight: '800',
+  },
+  postActionsFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: SPACING.sm,
+    paddingTop: 4,
+  },
+  deletePostBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: RADIUS.md,
-    ...SHADOWS.glowPrimary,
+    borderRadius: RADIUS.sm,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
   },
-  joinStageText: {
-    color: '#FFF',
+  deletePostBtnText: {
+    color: COLORS.danger,
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '700',
+  },
+  editPostBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: RADIUS.sm,
+    backgroundColor: COLORS.purpleSoft,
+  },
+  editPostBtnText: {
+    color: COLORS.primaryLight,
+    fontSize: 11,
+    fontWeight: '700',
   },
 });

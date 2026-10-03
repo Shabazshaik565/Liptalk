@@ -11,7 +11,7 @@ import { useAuthStore } from '../../src/store/auth.store';
 export default function OtpVerifyScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const phone = (params.phone as string) || '+91 98765 43210';
+  const phone = (params.phone as string) || '+91 9962786367';
   const { setAuth } = useAuthStore();
   const [otp, setOtp] = useState('123456');
   const [loading, setLoading] = useState(false);

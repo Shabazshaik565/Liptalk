@@ -57,7 +57,7 @@ import {
 export const CURRENT_USER: User = {
   id: 'usr_curr_01',
   email: 'alex.morgan@nexastech.com',
-  phoneNumber: '+91 98765 43210',
+  phoneNumber: '+91 9962786367',
   role: 'BUSINESS',
   isPhoneVerified: true,
   isEmailVerified: true,
@@ -385,6 +385,7 @@ export const CONVERSATIONS_DATA: ConversationItem[] = [
       name: 'Vikram Singh',
       avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
       role: 'BUSINESS',
+      phoneNumber: '+91 7200317219',
       isOnline: true,
     },
     lastMessage: {
@@ -1139,6 +1140,7 @@ export const CALL_HISTORY_DATA: CallSession[] = [
     receiver: {
       id: 'usr_vikram_01',
       email: 'vikram@finflow.io',
+      phoneNumber: '+91 7200317219',
       role: 'BUSINESS',
       isPhoneVerified: true,
       isEmailVerified: true,
@@ -1437,7 +1439,7 @@ export const TRUST_SCORE_DATA: TrustScoreReport = {
       score: 25,
       maxScore: 25,
       status: 'VERIFIED',
-      details: 'Both phone (+91 98765 43210) and corporate email verified',
+      details: 'Both phone (+91 9962786367) and corporate email verified',
     },
     {
       name: 'Profile Completeness & Bio Clarity',

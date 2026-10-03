@@ -148,6 +148,18 @@ class SocketService {
     }
   }
 
+  cancelCall(payload: { callId: string; callerId: string; receiverId: string }) {
+    if (this.socket && this.socket.connected) {
+      this.socket.emit('call_cancel', payload);
+    }
+  }
+
+  sendMuteState(payload: { callId: string; targetUserId: string; isMuted: boolean }) {
+    if (this.socket && this.socket.connected) {
+      this.socket.emit('call_mute', payload);
+    }
+  }
+
   sendCallSignal(payload: { targetUserId: string; signal: any }) {
     if (this.socket && this.socket.connected) {
       this.socket.emit('call_signal', payload);
@@ -178,6 +190,34 @@ class SocketService {
     if (this.socket) {
       this.socket.off('call_declined');
       this.socket.on('call_declined', callback);
+    }
+  }
+
+  onCallCancelled(callback: (data: any) => void) {
+    if (this.socket) {
+      this.socket.off('call_cancelled');
+      this.socket.on('call_cancelled', callback);
+    }
+  }
+
+  onCallBusy(callback: (data: any) => void) {
+    if (this.socket) {
+      this.socket.off('call_busy');
+      this.socket.on('call_busy', callback);
+    }
+  }
+
+  onCallPeerMute(callback: (data: { isMuted: boolean }) => void) {
+    if (this.socket) {
+      this.socket.off('call_peer_mute');
+      this.socket.on('call_peer_mute', callback);
+    }
+  }
+
+  onCallMissed(callback: (data: any) => void) {
+    if (this.socket) {
+      this.socket.off('call_missed');
+      this.socket.on('call_missed', callback);
     }
   }
 

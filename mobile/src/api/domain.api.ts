@@ -475,7 +475,7 @@ export const chatApi = {
       const res = await apiClient.get(`/chat/conversations/${convId}/messages`);
       return res.data;
     } catch {
-      return CHAT_MESSAGES_DATA[convId] || [];
+      return CHAT_MESSAGES_DATA[convId] || CHAT_MESSAGES_DATA['conv_01'] || [];
     }
   },
   sendMessage: async (convId: string, text: string): Promise<ChatMessage> => {
