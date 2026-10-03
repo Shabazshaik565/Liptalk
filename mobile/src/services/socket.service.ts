@@ -7,6 +7,72 @@ const WS_URL = process.env.EXPO_PUBLIC_WS_URL || 'http://localhost:3000';
 class SocketService {
   private socket: Socket | null = null;
   private isConnecting: boolean = false;
+  private interTabChannel: any = null;
+
+  // Listeners for calling mesh
+  private incomingCallListeners: Set<(data: any) => void> = new Set();
+  private callAcceptedListeners: Set<(data: any) => void> = new Set();
+  private callDeclinedListeners: Set<(data: any) => void> = new Set();
+  private callCancelledListeners: Set<(data: any) => void> = new Set();
+  private callBusyListeners: Set<(data: any) => void> = new Set();
+  private callPeerMuteListeners: Set<(data: any) => void> = new Set();
+  private callSignalListeners: Set<(data: any) => void> = new Set();
+  private callEndedListeners: Set<(data: any) => void> = new Set();
+
+  constructor() {
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      try {
+        this.interTabChannel = new (window as any).BroadcastChannel('liptalk_call_mesh');
+        this.interTabChannel.onmessage = (event: any) => {
+          this.handleInterTabMessage(event.data);
+        };
+      } catch (_) {}
+    }
+  }
+
+  private handleInterTabMessage(msg: any) {
+    if (!msg || !msg.type) return;
+    const currentUser = useAuthStore.getState().user;
+    const currentUserId = currentUser?.id || 'usr_curr_01';
+
+    switch (msg.type) {
+      case 'call_initiate':
+        if (msg.payload.receiverId === currentUserId) {
+          this.incomingCallListeners.forEach((cb) => cb(msg.payload));
+        }
+        break;
+      case 'call_accept':
+        if (msg.payload.callerId === currentUserId) {
+          this.callAcceptedListeners.forEach((cb) => cb(msg.payload));
+        }
+        break;
+      case 'call_decline':
+        if (msg.payload.callerId === currentUserId) {
+          this.callDeclinedListeners.forEach((cb) => cb(msg.payload));
+        }
+        break;
+      case 'call_cancel':
+        if (msg.payload.receiverId === currentUserId) {
+          this.callCancelledListeners.forEach((cb) => cb(msg.payload));
+        }
+        break;
+      case 'call_signal':
+        if (msg.payload.targetUserId === currentUserId) {
+          this.callSignalListeners.forEach((cb) => cb(msg.payload));
+        }
+        break;
+      case 'call_mute':
+        if (msg.payload.targetUserId === currentUserId) {
+          this.callPeerMuteListeners.forEach((cb) => cb(msg.payload));
+        }
+        break;
+      case 'call_end':
+        if (msg.payload.peerId === currentUserId) {
+          this.callEndedListeners.forEach((cb) => cb(msg.payload));
+        }
+        break;
+    }
+  }
 
   async connect(): Promise<Socket> {
     if (this.socket && this.socket.connected) {
@@ -134,45 +200,75 @@ class SocketService {
     if (this.socket && this.socket.connected) {
       this.socket.emit('call_initiate', payload);
     }
+    this.interTabChannel?.postMessage({
+      type: 'call_initiate',
+      payload: { ...payload, callId: 'call_' + Date.now() },
+    });
   }
 
   acceptCall(payload: { callId: string; userId: string; callerId: string }) {
     if (this.socket && this.socket.connected) {
       this.socket.emit('call_accept', payload);
     }
+    this.interTabChannel?.postMessage({
+      type: 'call_accept',
+      payload,
+    });
   }
 
   declineCall(payload: { callId: string; callerId: string; reason?: string }) {
     if (this.socket && this.socket.connected) {
       this.socket.emit('call_decline', payload);
     }
+    this.interTabChannel?.postMessage({
+      type: 'call_decline',
+      payload,
+    });
   }
 
   cancelCall(payload: { callId: string; callerId: string; receiverId: string }) {
     if (this.socket && this.socket.connected) {
       this.socket.emit('call_cancel', payload);
     }
+    this.interTabChannel?.postMessage({
+      type: 'call_cancel',
+      payload,
+    });
   }
 
   sendMuteState(payload: { callId: string; targetUserId: string; isMuted: boolean }) {
     if (this.socket && this.socket.connected) {
       this.socket.emit('call_mute', payload);
     }
+    this.interTabChannel?.postMessage({
+      type: 'call_mute',
+      payload,
+    });
   }
 
   sendCallSignal(payload: { targetUserId: string; signal: any }) {
     if (this.socket && this.socket.connected) {
       this.socket.emit('call_signal', payload);
     }
+    const currentUserId = useAuthStore.getState().user?.id || 'usr_curr_01';
+    this.interTabChannel?.postMessage({
+      type: 'call_signal',
+      payload: { ...payload, senderId: currentUserId },
+    });
   }
 
   endCall(payload: { callId: string; userId: string; peerId: string; durationSeconds?: number }) {
     if (this.socket && this.socket.connected) {
       this.socket.emit('call_end', payload);
     }
+    this.interTabChannel?.postMessage({
+      type: 'call_end',
+      payload,
+    });
   }
 
   onIncomingCall(callback: (data: any) => void) {
+    this.incomingCallListeners.add(callback);
     if (this.socket) {
       this.socket.off('call_incoming');
       this.socket.on('call_incoming', callback);
@@ -180,6 +276,7 @@ class SocketService {
   }
 
   onCallAccepted(callback: (data: any) => void) {
+    this.callAcceptedListeners.add(callback);
     if (this.socket) {
       this.socket.off('call_accepted');
       this.socket.on('call_accepted', callback);
@@ -187,6 +284,7 @@ class SocketService {
   }
 
   onCallDeclined(callback: (data: any) => void) {
+    this.callDeclinedListeners.add(callback);
     if (this.socket) {
       this.socket.off('call_declined');
       this.socket.on('call_declined', callback);
@@ -194,6 +292,7 @@ class SocketService {
   }
 
   onCallCancelled(callback: (data: any) => void) {
+    this.callCancelledListeners.add(callback);
     if (this.socket) {
       this.socket.off('call_cancelled');
       this.socket.on('call_cancelled', callback);
@@ -201,6 +300,7 @@ class SocketService {
   }
 
   onCallBusy(callback: (data: any) => void) {
+    this.callBusyListeners.add(callback);
     if (this.socket) {
       this.socket.off('call_busy');
       this.socket.on('call_busy', callback);
@@ -208,6 +308,7 @@ class SocketService {
   }
 
   onCallPeerMute(callback: (data: { isMuted: boolean }) => void) {
+    this.callPeerMuteListeners.add(callback);
     if (this.socket) {
       this.socket.off('call_peer_mute');
       this.socket.on('call_peer_mute', callback);
@@ -222,6 +323,7 @@ class SocketService {
   }
 
   onCallSignal(callback: (data: any) => void) {
+    this.callSignalListeners.add(callback);
     if (this.socket) {
       this.socket.off('call_signal');
       this.socket.on('call_signal', callback);
@@ -229,6 +331,7 @@ class SocketService {
   }
 
   onCallEnded(callback: (data: any) => void) {
+    this.callEndedListeners.add(callback);
     if (this.socket) {
       this.socket.off('call_ended');
       this.socket.on('call_ended', callback);

@@ -35,3 +35,5 @@ Thumbs.db
 .idea/
 WhatsApp*.jpeg
 WhatsApp*.jpg
+*.tsbuildinfo
+

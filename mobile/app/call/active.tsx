@@ -29,6 +29,8 @@ import {
 } from 'lucide-react-native';
 import { socketService } from '../../src/services/socket.service';
 import { voipAudioEngine } from '../../src/services/voipAudioEngine';
+import { webrtcService, WebRTCConnectionState } from '../../src/services/webrtc.service';
+import { RTCStreamView } from '../../src/components/calling/RTCStreamView';
 import { callsApi } from '../../src/api/domain.api';
 import { useAuthStore } from '../../src/store/auth.store';
 import { COLORS, SPACING, RADIUS, SHADOWS } from '../../src/constants/theme';
@@ -71,6 +73,11 @@ export default function ActiveCallScreen() {
   const [isFrontCamera, setIsFrontCamera] = useState(true);
   const [durationSeconds, setDurationSeconds] = useState(0);
 
+  // WebRTC real media state
+  const [localStream, setLocalStream] = useState<any>(null);
+  const [remoteStream, setRemoteStream] = useState<any>(null);
+  const [rtcState, setRtcState] = useState<WebRTCConnectionState>('new');
+
   // Concentric WhatsApp-style radar pulse animations
   const pulseAnim1 = useRef(new Animated.Value(0)).current;
   const pulseAnim2 = useRef(new Animated.Value(0)).current;
@@ -94,7 +101,49 @@ export default function ActiveCallScreen() {
 
   useEffect(() => {
     // -------------------------------------------------------------
-    // CALL INITIALIZATION & AUDIO SIGNALING
+    // WEBRTC PEER CONNECTION & MEDIA INITIALIZATION
+    // -------------------------------------------------------------
+    webrtcService
+      .initializeCall({
+        peerId,
+        isInitiator: !isIncoming,
+        callType,
+      })
+      .then(({ localStream: stream }) => {
+        if (stream) setLocalStream(stream);
+      })
+      .catch((err) => {
+        console.warn('WebRTC initialization warning:', err);
+      });
+
+    const unsubLocal = webrtcService.onLocalStream((stream) => {
+      setLocalStream(stream);
+    });
+
+    const unsubRemote = webrtcService.onRemoteStream((stream) => {
+      setRemoteStream(stream);
+    });
+
+    const unsubRtcState = webrtcService.onConnectionStateChange((state) => {
+      setRtcState(state);
+      if (state === 'connected') {
+        setStatusMessage('Connected');
+      } else if (state === 'connecting') {
+        setStatusMessage('Connecting media...');
+      } else if (state === 'failed' || state === 'disconnected') {
+        setStatusMessage('Poor connection');
+      }
+    });
+
+    // Handle incoming WebRTC signal relay from peer
+    socketService.onCallSignal((payload: any) => {
+      if (payload && payload.signal) {
+        webrtcService.handleSignalingMessage(payload.signal);
+      }
+    });
+
+    // -------------------------------------------------------------
+    // CALL INITIALIZATION & AUDIO FEEDBACK
     // -------------------------------------------------------------
     if (isIncoming) {
       setCallState('CONNECTED');
@@ -106,17 +155,22 @@ export default function ActiveCallScreen() {
       setStatusMessage('Ringing...');
       voipAudioEngine.playRingback();
 
-      // 3.5s realistic ringing cadence then in-app audio connects
+      // 45s ringing timeout for unanswered calls
       timeoutRef.current = setTimeout(() => {
-        setCallState('CONNECTED');
-        setStatusMessage('Connected');
-        voipAudioEngine.playConnectedChime();
-        startDurationTimer();
-      }, 3500);
+        setCallState('NO_ANSWER');
+        setStatusMessage('No Answer');
+        voipAudioEngine.playBusyTone();
+        socketService.cancelCall({
+          callId,
+          callerId: user?.id || 'usr_curr_01',
+          receiverId: peerId,
+        });
+        setTimeout(() => exitScreen(), 1600);
+      }, 45000);
     }
 
     // -------------------------------------------------------------
-    // WEBRTC SIGNALING LISTENERS
+    // SIGNALING EVENT LISTENERS
     // -------------------------------------------------------------
     socketService.onCallAccepted(() => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -152,6 +206,7 @@ export default function ActiveCallScreen() {
 
     socketService.onCallEnded(() => {
       voipAudioEngine.playHangupChime();
+      webrtcService.cleanup();
       setCallState('ENDED');
       setStatusMessage('Call Ended');
       setTimeout(() => {
@@ -164,6 +219,10 @@ export default function ActiveCallScreen() {
 
     return () => {
       voipAudioEngine.stopAll();
+      webrtcService.cleanup();
+      unsubLocal();
+      unsubRemote();
+      unsubRtcState();
       if (timerRef.current) clearInterval(timerRef.current);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
@@ -231,6 +290,7 @@ export default function ActiveCallScreen() {
   const handleToggleMute = () => {
     const nextMuted = !isMuted;
     setIsMuted(nextMuted);
+    webrtcService.toggleMute(nextMuted);
     voipAudioEngine.playMuteFeedback(nextMuted);
     socketService.sendMuteState({
       callId,
@@ -243,9 +303,11 @@ export default function ActiveCallScreen() {
     if (callType === 'VOICE') {
       setCallType('VIDEO');
       setIsCameraOff(false);
+      webrtcService.toggleVideo(false);
     } else {
       const nextState = !isCameraOff;
       setIsCameraOff(nextState);
+      webrtcService.toggleVideo(nextState);
       if (nextState) {
         setCallType('VOICE');
       }
@@ -255,6 +317,7 @@ export default function ActiveCallScreen() {
   const handleSwitchToVideo = () => {
     setCallType('VIDEO');
     setIsCameraOff(false);
+    webrtcService.toggleVideo(false);
   };
 
   const handleToggleSpeaker = () => {
@@ -263,11 +326,13 @@ export default function ActiveCallScreen() {
 
   const handleFlipCamera = () => {
     setIsFrontCamera(!isFrontCamera);
+    webrtcService.switchCamera();
   };
 
   const handleEndCall = async () => {
     voipAudioEngine.stopAll();
     voipAudioEngine.playHangupChime();
+    webrtcService.cleanup();
 
     if (callState === 'RINGING' || callState === 'DIALING') {
       socketService.cancelCall({
@@ -290,6 +355,7 @@ export default function ActiveCallScreen() {
 
   const exitScreen = () => {
     voipAudioEngine.stopAll();
+    webrtcService.cleanup();
     if (timerRef.current) clearInterval(timerRef.current);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     router.back();
@@ -328,7 +394,15 @@ export default function ActiveCallScreen() {
       {/* ========================================================= */}
       {isVideoMode && (
         <View style={StyleSheet.absoluteFill}>
-          <Image source={{ uri: peerAvatar }} style={styles.remoteVideoImage} />
+          {remoteStream ? (
+            <RTCStreamView
+              stream={remoteStream}
+              style={StyleSheet.absoluteFill}
+              objectFit="cover"
+            />
+          ) : (
+            <Image source={{ uri: peerAvatar }} style={styles.remoteVideoImage} />
+          )}
           <View style={styles.videoDarkOverlay} />
 
           {/* Picture-in-Picture (PiP) Window for Self Camera */}
@@ -339,14 +413,23 @@ export default function ActiveCallScreen() {
             accessibilityRole="button"
             accessibilityLabel="Tap to flip camera"
           >
-            <Image
-              source={{
-                uri:
-                  user?.profile?.avatarUrl ||
-                  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-              }}
-              style={styles.pipImage}
-            />
+            {localStream && !isCameraOff ? (
+              <RTCStreamView
+                stream={localStream}
+                mirror={isFrontCamera}
+                style={styles.pipImage}
+                objectFit="cover"
+              />
+            ) : (
+              <Image
+                source={{
+                  uri:
+                    user?.profile?.avatarUrl ||
+                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+                }}
+                style={styles.pipImage}
+              />
+            )}
             <View style={styles.pipBadge}>
               <Text style={styles.pipBadgeText}>You • {isFrontCamera ? 'Front' : 'Back'}</Text>
             </View>

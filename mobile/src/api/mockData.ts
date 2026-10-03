@@ -96,6 +96,48 @@ export const CURRENT_USER: User = {
   },
 };
 
+export const VIKRAM_USER: User = {
+  id: 'usr_vikram_01',
+  email: 'vikram.singh@finflow.io',
+  phoneNumber: '+91 7200317219',
+  role: 'BUSINESS',
+  isPhoneVerified: true,
+  isEmailVerified: true,
+  needsOnboarding: false,
+  createdAt: '2026-02-10T10:00:00Z',
+  profile: {
+    id: 'prof_vikram',
+    userId: 'usr_vikram_01',
+    firstName: 'Vikram',
+    lastName: 'Singh',
+    fullName: 'Vikram Singh',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+    headline: 'Co-Founder & COO @ FinFlow Logistics Tech',
+    bio: 'Pioneering smart supply chain automation, cold chain monitoring, and intercity freight logistics.',
+    city: 'Bangalore',
+    country: 'India',
+    skills: ['Logistics', 'Supply Chain', 'Fleet Management', 'Cold Chain', 'Enterprise Sales'],
+    interests: ['Smart Warehousing', 'IoT Telematics', 'B2B Sourcing', 'Cross-border Trade'],
+    profileCompletionPercentage: 92,
+  },
+  business: {
+    id: 'biz_finflow',
+    ownerUserId: 'usr_vikram_01',
+    businessName: 'FinFlow Logistics Tech',
+    logoUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=150',
+    categoryId: 'cat_logistics',
+    categoryName: 'Logistics & Supply Chain',
+    description: 'Autonomous freight distribution and intercity cargo routing platform connecting shippers with vetted fleet operators.',
+    websiteUrl: 'https://finflow.io',
+    city: 'Bangalore',
+    country: 'India',
+    isVerified: true,
+    employeeCountRange: '51-200 employees',
+    services: ['Fleet Aggregation', 'Intercity Logistics', 'Cold Chain Delivery', 'Warehouse Automation'],
+    products: ['FinFlow Fleet Tracking SaaS', 'Smart Cargo Dispatch API'],
+  },
+};
+
 export const INITIAL_NEEDS: NeedItem[] = [
   {
     id: 'need_01',

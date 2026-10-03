@@ -35,7 +35,14 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "@config-plugins/react-native-webrtc",
+        {
+          "cameraPermission": "Allow LipTalk to access your camera for high-definition video calls.",
+          "microphonePermission": "Allow LipTalk to access your microphone for crystal-clear voice and video calls."
+        }
+      ]
     ],
     "scheme": "liptalk",
     "experiments": {

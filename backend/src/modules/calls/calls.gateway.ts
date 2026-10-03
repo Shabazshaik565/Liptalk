@@ -183,9 +183,13 @@ export class CallsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { targetUserId: string; signal: any },
     @ConnectedSocket() client: Socket,
   ) {
+    const senderUserId = this.socketUsers.get(client.id);
     const targetSocketId = this.userSockets.get(data.targetUserId);
     if (targetSocketId) {
-      this.server.to(targetSocketId).emit('call_signal', { signal: data.signal });
+      this.server.to(targetSocketId).emit('call_signal', {
+        senderId: senderUserId,
+        signal: data.signal,
+      });
     }
   }
 

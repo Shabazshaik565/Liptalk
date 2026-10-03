@@ -17,7 +17,7 @@ import { Input } from '../../src/components/common/Input';
 import { Button } from '../../src/components/common/Button';
 import { authApi } from '../../src/api/auth.api';
 import { useAuthStore } from '../../src/store/auth.store';
-import { CURRENT_USER } from '../../src/api/mockData';
+import { CURRENT_USER, VIKRAM_USER } from '../../src/api/mockData';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -51,10 +51,20 @@ export default function LoginScreen() {
     }
   };
 
-  const handleDemoLogin = async () => {
+  const handleAlexDemoLogin = async () => {
     setLoading(true);
     try {
       await setAuth(CURRENT_USER, 'demo_token_alex_morgan');
+      router.replace('/(tabs)' as any);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVikramDemoLogin = async () => {
+    setLoading(true);
+    try {
+      await setAuth(VIKRAM_USER, 'demo_token_vikram_singh');
       router.replace('/(tabs)' as any);
     } finally {
       setLoading(false);
@@ -161,15 +171,27 @@ export default function LoginScreen() {
             style={{ marginTop: SPACING.md }}
           />
 
-          <Button
-            title="1-Tap Demo Sign In (Executive Pro)"
-            onPress={handleDemoLogin}
-            loading={loading}
-            size="md"
-            variant="glass"
-            icon={<Sparkles size={16} color={COLORS.primaryLight} />}
-            style={{ marginTop: SPACING.sm }}
-          />
+          <View style={{ marginTop: SPACING.md, gap: SPACING.xs }}>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: COLORS.textMuted, textAlign: 'center', marginBottom: 2 }}>
+              DEMO CALLING PROFILES (WHATSAPP CALLING TEST)
+            </Text>
+            <Button
+              title="Sign In as Alex (+91 9962786367)"
+              onPress={handleAlexDemoLogin}
+              loading={loading}
+              size="sm"
+              variant="glass"
+              icon={<Sparkles size={14} color={COLORS.primaryLight} />}
+            />
+            <Button
+              title="Sign In as Vikram (+91 7200317219)"
+              onPress={handleVikramDemoLogin}
+              loading={loading}
+              size="sm"
+              variant="glass"
+              icon={<Phone size={14} color="#25D366" />}
+            />
+          </View>
 
           {/* Footer Links */}
           <View style={styles.footer}>
