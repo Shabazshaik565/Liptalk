@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { User, UserRole } from '../types';
 import { secureStorage } from '../utils/secureStorage';
+import { socketService } from '../services/socket.service';
 
 interface AuthState {
   user: User | null;
@@ -34,14 +35,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       isHydrated: true,
       activeRole: user.role || 'BUSINESS',
     });
+    if (user?.id) {
+      socketService.registerUser(user.id);
+    }
   },
 
   setUser: async (user) => {
     await secureStorage.saveUser(user);
     set({ user, activeRole: user.role || get().activeRole });
+    if (user?.id) {
+      socketService.registerUser(user.id);
+    }
   },
 
   logout: async () => {
+    socketService.disconnect();
     await secureStorage.clearAll();
     set({
       user: null,
@@ -75,6 +83,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           isHydrated: true,
           activeRole: user.role || 'BUSINESS',
         });
+        if (user?.id) {
+          socketService.registerUser(user.id);
+        }
         return true;
       }
     } catch (e) {

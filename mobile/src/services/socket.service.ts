@@ -2,7 +2,18 @@ import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../store/auth.store';
 import { secureStorage } from '../utils/secureStorage';
 
-const WS_URL = process.env.EXPO_PUBLIC_WS_URL || 'http://localhost:3000';
+const getWsUrl = () => {
+  if (process.env.EXPO_PUBLIC_WS_URL) {
+    return process.env.EXPO_PUBLIC_WS_URL;
+  }
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    if (window.location.port === '8080' || window.location.protocol === 'https:') {
+      return `${window.location.protocol}//${window.location.host}`;
+    }
+    return `http://${window.location.hostname}:3000`;
+  }
+  return 'http://localhost:3000';
+};
 
 class SocketService {
   private socket: Socket | null = null;
@@ -18,6 +29,7 @@ class SocketService {
   private callPeerMuteListeners: Set<(data: any) => void> = new Set();
   private callSignalListeners: Set<(data: any) => void> = new Set();
   private callEndedListeners: Set<(data: any) => void> = new Set();
+  private pendingCallSignals: any[] = [];
 
   constructor() {
     if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
@@ -33,7 +45,7 @@ class SocketService {
   private handleInterTabMessage(msg: any) {
     if (!msg || !msg.type) return;
     const currentUser = useAuthStore.getState().user;
-    const currentUserId = currentUser?.id || 'usr_curr_01';
+    const currentUserId = currentUser?.id || '';
 
     switch (msg.type) {
       case 'call_initiate':
@@ -58,9 +70,12 @@ class SocketService {
         break;
       case 'call_signal':
         if (msg.payload.targetUserId === currentUserId) {
-          // If socket is disconnected/offline, use interTab mesh fallback
           if (!this.socket || !this.socket.connected) {
-            this.callSignalListeners.forEach((cb) => cb(msg.payload));
+            if (this.callSignalListeners.size > 0) {
+              this.callSignalListeners.forEach((cb) => cb(msg.payload));
+            } else {
+              this.pendingCallSignals.push(msg.payload);
+            }
           }
         }
         break;
@@ -79,8 +94,17 @@ class SocketService {
     }
   }
 
+  registerUser(userId: string) {
+    if (!userId) return;
+    if (this.socket && this.socket.connected) {
+      this.socket.emit('register_user', { userId });
+    }
+  }
+
   async connect(): Promise<Socket> {
     if (this.socket && this.socket.connected) {
+      const user = useAuthStore.getState().user;
+      if (user?.id) this.registerUser(user.id);
       return this.socket;
     }
 
@@ -92,7 +116,7 @@ class SocketService {
     const token = (await secureStorage.getToken()) || useAuthStore.getState().token;
     const user = useAuthStore.getState().user;
 
-    this.socket = io(WS_URL, {
+    this.socket = io(getWsUrl(), {
       transports: ['websocket', 'polling'],
       autoConnect: true,
       reconnection: true,
@@ -100,16 +124,29 @@ class SocketService {
       reconnectionDelay: 1500,
       auth: {
         token: token || '',
-        userId: user?.id || 'usr_curr_01',
+        userId: user?.id || '',
       },
     });
 
     this.socket.on('connect', () => {
       this.isConnecting = false;
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser?.id) {
+        this.registerUser(currentUser.id);
+      }
     });
 
     this.socket.on('connect_error', (err) => {
       this.isConnecting = false;
+    });
+
+    // Ensure incoming signals are captured even if screen is still navigating
+    this.socket.on('call_signal', (data) => {
+      if (this.callSignalListeners.size > 0) {
+        this.callSignalListeners.forEach((cb) => cb(data));
+      } else {
+        this.pendingCallSignals.push(data);
+      }
     });
 
     return this.socket;
@@ -350,9 +387,16 @@ class SocketService {
 
   onCallSignal(callback: (data: any) => void) {
     this.callSignalListeners.add(callback);
-    if (this.socket) {
-      this.socket.off('call_signal');
-      this.socket.on('call_signal', callback);
+    if (this.pendingCallSignals.length > 0) {
+      const queued = [...this.pendingCallSignals];
+      this.pendingCallSignals = [];
+      queued.forEach((sig) => {
+        try {
+          callback(sig);
+        } catch (e) {
+          console.warn('Error processing queued signal:', e);
+        }
+      });
     }
   }
 

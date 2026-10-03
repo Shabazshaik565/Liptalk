@@ -52,6 +52,29 @@ export class CallsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  @SubscribeMessage('register_user')
+  handleRegisterUser(
+    @MessageBody() data: { userId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    if (data?.userId) {
+      const oldUserId = this.socketUsers.get(client.id);
+      if (oldUserId && oldUserId !== data.userId) {
+        if (this.userSockets.get(oldUserId) === client.id) {
+          this.userSockets.delete(oldUserId);
+        }
+      }
+
+      this.userSockets.set(data.userId, client.id);
+      this.socketUsers.set(client.id, data.userId);
+      this.userPresence.set(data.userId, 'ONLINE');
+
+      this.server.emit('presence_status', { userId: data.userId, status: 'ONLINE' });
+      this.logger.log(`RegisterUser: User ${data.userId} bound to socket ${client.id}`);
+    }
+    return { status: 'registered', userId: data?.userId };
+  }
+
   @SubscribeMessage('presence_set')
   handleSetPresence(
     @MessageBody() data: { userId: string; status: PresenceStatus },

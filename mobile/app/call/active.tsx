@@ -194,6 +194,11 @@ export default function ActiveCallScreen() {
       setStatusMessage('Connected');
       voipAudioEngine.playConnectedChime();
       startDurationTimer();
+
+      // Handshake: Dispatch fresh SDP Offer to the receiver who is now confirmed ready on screen
+      if (!isIncoming) {
+        webrtcService.createAndSendOffer();
+      }
     });
 
     socketService.onCallDeclined((data) => {

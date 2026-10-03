@@ -3,10 +3,21 @@ import { useAuthStore } from '../store/auth.store';
 import { secureStorage } from '../utils/secureStorage';
 import { parseApiError } from '../utils/errorHandler';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+const getApiBaseUrl = () => {
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
+  }
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    if (window.location.port === '8080' || window.location.protocol === 'https:') {
+      return `${window.location.protocol}//${window.location.host}/api/v1`;
+    }
+    return `http://${window.location.hostname}:3000/api/v1`;
+  }
+  return 'http://localhost:3000/api/v1';
+};
 
 export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: getApiBaseUrl(),
   timeout: 12000,
   headers: {
     'Content-Type': 'application/json',

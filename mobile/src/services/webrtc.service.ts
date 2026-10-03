@@ -18,11 +18,31 @@ export interface RTCIceServerConfig {
 }
 
 export const DEFAULT_ICE_SERVERS: RTCIceServerConfig[] = [
-  { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] },
   {
-    urls: 'turn:turn.liptalk.app:3478',
-    username: 'liptalk',
-    credential: 'liptalk_turn_secret_2026',
+    urls: [
+      'stun:stun.l.google.com:19302',
+      'stun:stun1.l.google.com:19302',
+      'stun:stun2.l.google.com:19302',
+      'stun:stun3.l.google.com:19302',
+      'stun:stun4.l.google.com:19302',
+      'stun:global.stun.twilio.com:3478',
+      'stun:openrelay.metered.ca:80',
+    ],
+  },
+  {
+    urls: 'turn:openrelay.metered.ca:80',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
+  },
+  {
+    urls: 'turn:openrelay.metered.ca:443',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
+  },
+  {
+    urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
   },
 ];
 
@@ -215,7 +235,7 @@ class WebRTCService {
   /**
    * Create and send SDP Offer
    */
-  private async createAndSendOffer() {
+  public async createAndSendOffer() {
     if (!this.pc || !this.peerId) return;
 
     try {
