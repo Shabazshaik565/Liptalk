@@ -247,153 +247,346 @@ async function runSeed() {
   const leadNoteRepo = AppDataSource.getRepository(LeadNote);
   const partnerRepo = AppDataSource.getRepository(Partner);
   const partnerOfferRepo = AppDataSource.getRepository(PartnerOffer);
+  const convRepo = AppDataSource.getRepository(Conversation);
+  const msgRepo = AppDataSource.getRepository(Message);
 
-  // Helper: Create demo partner users & businesses if they don't exist
-  let vikram = await userRepo.findOne({ where: { email: 'vikram.singh@finflow.io' } });
+  // 1. Vikram Singh (FinFlow Logistics Tech)
+  let vikram = await userRepo.findOne({
+    where: [{ id: 'usr_vikram_01' }, { id: 'usr_vikram_singh' }, { email: 'vikram.singh@finflow.io' }],
+    relations: ['profile'],
+  });
   if (!vikram) {
-    vikram = await userRepo.save(
-      userRepo.create({
-        id: 'usr_vikram_01',
-        email: 'vikram.singh@finflow.io',
-        phoneNumber: '+91 7200317219',
-        role: UserRole.BUSINESS,
-        status: UserStatus.ACTIVE,
-        isEmailVerified: true,
-        isPhoneVerified: true,
-        needsOnboarding: false,
-        passwordHash: await bcrypt.hash('password123', 10),
-      }),
-    );
-    await profileRepo.save(
-      profileRepo.create({
-        user: vikram,
-        firstName: 'Vikram',
-        lastName: 'Singh',
-        avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
-        headline: 'Co-Founder & COO @ FinFlow Logistics Tech',
-        city: 'Bangalore',
-        skills: ['Logistics', 'Supply Chain', 'FinTech', 'Fleet Operations'],
-        interests: ['React Native', 'B2B Logistics', 'SaaS'],
-      }),
-    );
-    const vikramBiz = await bizRepo.save(
-      bizRepo.create({
-        id: 'biz_finflow',
-        owner: vikram,
-        businessName: 'FinFlow Logistics Tech',
-        logoUrl: 'https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=150',
-        categoryName: 'IT & Software Development',
-        description: 'Next-gen dispatch and cross-docking tracking platform for commercial fleets.',
-        city: 'Bangalore',
-        isVerified: true,
-      }),
-    );
-
-    // Seed Open Opportunities
-    await oppRepo.save([
-      oppRepo.create({
-        creator: vikram,
-        business: vikramBiz,
-        title: 'Looking for React Native Dev Team to build B2B Delivery App',
-        description: 'We are seeking an experienced mobile development agency to build our driver dispatch and proof-of-delivery cross-platform app. Must have real-time GPS tracking and offline sync capabilities.',
-        categoryName: 'IT & Software Development',
-        tags: ['React Native', 'TypeScript', 'Offline Sync', 'GPS Tracking', 'Mobile App'],
-        budgetAmount: 350000,
-        currency: 'INR',
-        deadline: '2026-09-30',
-        city: 'Bangalore',
-        status: OpportunityStatus.OPEN,
-      }),
-      oppRepo.create({
-        creator: vikram,
-        business: vikramBiz,
-        title: 'Regional B2B Grain Discovery Engine & Supply Chain Gateway',
-        description: 'Enterprise integration requirement connecting 500+ grain mills with regional Kirana merchant networks.',
-        categoryName: 'IT & Software Development',
-        tags: ['Supply Chain', 'API Integration', 'Full-Stack', 'NestJS'],
-        budgetAmount: 280000,
-        currency: 'INR',
-        deadline: '2026-10-15',
-        city: 'Bangalore',
-        status: OpportunityStatus.OPEN,
-      }),
-    ]);
+    vikram = userRepo.create({
+      id: 'usr_vikram_01',
+      email: 'vikram.singh@finflow.io',
+      phoneNumber: '+91 7200317219',
+      role: UserRole.BUSINESS,
+      status: UserStatus.ACTIVE,
+      isEmailVerified: true,
+      isPhoneVerified: true,
+      needsOnboarding: false,
+      passwordHash: await bcrypt.hash('password123', 10),
+    });
+    vikram = await userRepo.save(vikram);
   }
 
-  let priya = await userRepo.findOne({ where: { email: 'priya.nair@healthfirst.io' } });
+  let vikramProfile = await profileRepo.findOne({ where: { user: { id: vikram.id } } });
+  if (!vikramProfile) {
+    vikramProfile = profileRepo.create({
+      user: vikram,
+      firstName: 'Vikram',
+      lastName: 'Singh',
+      avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+      headline: 'Co-Founder & COO @ FinFlow Logistics Tech',
+      bio: 'Pioneering smart supply chain automation, cold chain monitoring, and intercity freight logistics.',
+      city: 'Bangalore',
+      skills: ['Logistics', 'Supply Chain', 'Fleet Management', 'Cold Chain', 'Enterprise Sales'],
+      interests: ['Smart Warehousing', 'IoT Telematics', 'B2B Sourcing', 'Cross-border Trade'],
+      profileCompletionPercentage: 92,
+    });
+  } else {
+    vikramProfile.firstName = 'Vikram';
+    vikramProfile.lastName = 'Singh';
+    vikramProfile.avatarUrl = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150';
+    vikramProfile.headline = 'Co-Founder & COO @ FinFlow Logistics Tech';
+    vikramProfile.city = 'Bangalore';
+  }
+  await profileRepo.save(vikramProfile);
+
+  let vikramBiz = await bizRepo.findOne({ where: { id: 'biz_finflow' } });
+  if (!vikramBiz) {
+    vikramBiz = bizRepo.create({
+      id: 'biz_finflow',
+      owner: vikram,
+      businessName: 'FinFlow Logistics Tech',
+      logoUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=150',
+      categoryName: 'Logistics & Supply Chain',
+      description: 'Autonomous freight distribution and intercity cargo routing platform connecting shippers with vetted fleet operators.',
+      websiteUrl: 'https://finflow.io',
+      city: 'Bangalore',
+      isVerified: true,
+      services: ['Fleet Aggregation', 'Intercity Logistics', 'Cold Chain Delivery', 'Warehouse Automation'],
+      products: ['FinFlow Fleet Tracking SaaS', 'Smart Cargo Dispatch API'],
+    });
+  } else {
+    vikramBiz.owner = vikram;
+    vikramBiz.businessName = 'FinFlow Logistics Tech';
+    vikramBiz.logoUrl = 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=150';
+  }
+  await bizRepo.save(vikramBiz);
+
+  // 2. Kavita Menon (GrowthPulse Media) - matches mockData usr_growthpulse_founder
+  // Clean up legacy rohan if exists
+  try {
+    await AppDataSource.query("DELETE FROM users WHERE email = 'rohan.mehta@growthpulse.io'");
+  } catch {}
+
+  try {
+    await AppDataSource.query(
+      "UPDATE users SET id = 'usr_growthpulse_founder' WHERE email = 'kavita.menon@growthpulse.io' OR phoneNumber = '+91 98765 43214'",
+    );
+  } catch {}
+
+  let kavita = await userRepo.findOne({
+    where: { id: 'usr_growthpulse_founder' },
+    relations: ['profile'],
+  });
+  if (!kavita) {
+    kavita = userRepo.create({
+      id: 'usr_growthpulse_founder',
+      email: 'kavita.menon@growthpulse.io',
+      phoneNumber: '+91 98765 43214',
+      role: UserRole.BUSINESS,
+      status: UserStatus.ACTIVE,
+      isEmailVerified: true,
+      isPhoneVerified: true,
+      needsOnboarding: false,
+      passwordHash: await bcrypt.hash('password123', 10),
+    });
+    kavita = await userRepo.save(kavita);
+  }
+
+  let kavitaProfile = await profileRepo.findOne({ where: { user: { id: kavita.id } } });
+  if (!kavitaProfile) {
+    kavitaProfile = profileRepo.create({
+      user: kavita,
+      firstName: 'Kavita',
+      lastName: 'Menon',
+      avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+      headline: 'Managing Director @ GrowthPulse Media',
+      bio: 'B2B Performance Marketing & Lead Acquisition Agency scaling high-growth SaaS pipelines.',
+      city: 'Bangalore',
+      skills: ['B2B Marketing', 'Google Ads', 'LinkedIn Outbound', 'Growth Hacking'],
+      profileCompletionPercentage: 95,
+    });
+  } else {
+    kavitaProfile.firstName = 'Kavita';
+    kavitaProfile.lastName = 'Menon';
+    kavitaProfile.avatarUrl = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150';
+    kavitaProfile.headline = 'Managing Director @ GrowthPulse Media';
+  }
+  await profileRepo.save(kavitaProfile);
+
+  let kavitaBiz = await bizRepo.findOne({ where: { id: 'biz_growth_pulse' } });
+  if (!kavitaBiz) {
+    kavitaBiz = bizRepo.create({
+      id: 'biz_growth_pulse',
+      owner: kavita,
+      businessName: 'GrowthPulse Media',
+      logoUrl: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=150',
+      categoryName: 'Digital Marketing & Growth',
+      description: 'B2B Performance Marketing & Lead Acquisition Agency scaling SaaS pipelines.',
+      city: 'Bangalore',
+      isVerified: true,
+      services: ['B2B Growth & Multi-Channel Lead Campaigns', 'LinkedIn Outbound Automation'],
+      products: ['GrowthPulse Lead Funnel CRM'],
+    });
+  } else {
+    kavitaBiz.owner = kavita;
+    kavitaBiz.businessName = 'GrowthPulse Media';
+    kavitaBiz.logoUrl = 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=150';
+  }
+  await bizRepo.save(kavitaBiz);
+
+  // 3. Priya Nair (HealthFirst Telemed)
+  let priya = await userRepo.findOne({
+    where: [{ id: 'usr_priya_nair' }, { email: 'priya.nair@healthfirst.io' }],
+    relations: ['profile'],
+  });
   if (!priya) {
-    priya = await userRepo.save(
+    priya = userRepo.create({
+      id: 'usr_priya_nair',
+      email: 'priya.nair@healthfirst.io',
+      phoneNumber: '+91 98765 43213',
+      role: UserRole.BUSINESS,
+      status: UserStatus.ACTIVE,
+      isEmailVerified: true,
+      isPhoneVerified: true,
+      needsOnboarding: false,
+      passwordHash: await bcrypt.hash('password123', 10),
+    });
+    priya = await userRepo.save(priya);
+  }
+
+  let priyaProfile = await profileRepo.findOne({ where: { user: { id: priya.id } } });
+  if (!priyaProfile) {
+    priyaProfile = profileRepo.create({
+      user: priya,
+      firstName: 'Priya',
+      lastName: 'Nair',
+      avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150',
+      headline: 'VP Product @ HealthFirst Telemed',
+      city: 'Mumbai',
+      skills: ['HealthTech', 'Product Design', 'Telemedicine', 'UI/UX'],
+    });
+    await profileRepo.save(priyaProfile);
+  }
+
+  let priyaBiz = await bizRepo.findOne({ where: { id: 'biz_health_first' } });
+  if (!priyaBiz) {
+    priyaBiz = bizRepo.create({
+      id: 'biz_health_first',
+      owner: priya,
+      businessName: 'HealthFirst Telemed',
+      logoUrl: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=150',
+      categoryName: 'UI/UX & Product Design',
+      description: 'Modern telemedicine consultation and clinical management software.',
+      city: 'Mumbai',
+      isVerified: true,
+    });
+    await bizRepo.save(priyaBiz);
+  }
+
+  // 4. Adv. Rajesh Verma (LexTech Advisors LLP)
+  let rajesh = await userRepo.findOne({ where: { email: 'rajesh.verma@lextech.in' } });
+  if (!rajesh) {
+    rajesh = await userRepo.save(
       userRepo.create({
-        id: 'usr_priya_nair',
-        email: 'priya.nair@healthfirst.io',
-        phoneNumber: '+91 98765 43213',
+        id: 'usr_rajesh_01',
+        email: 'rajesh.verma@lextech.in',
+        phoneNumber: '+91 98765 43215',
         role: UserRole.BUSINESS,
         status: UserStatus.ACTIVE,
         isEmailVerified: true,
         isPhoneVerified: true,
-        needsOnboarding: false,
         passwordHash: await bcrypt.hash('password123', 10),
       }),
     );
     await profileRepo.save(
       profileRepo.create({
-        user: priya,
-        firstName: 'Priya',
-        lastName: 'Nair',
-        avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150',
-        headline: 'VP Product @ HealthFirst Telemed',
-        city: 'Mumbai',
-        skills: ['HealthTech', 'Product Design', 'Telemedicine'],
+        user: rajesh,
+        firstName: 'Rajesh',
+        lastName: 'Verma',
+        avatarUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=150',
+        headline: 'Managing Partner @ LexTech Advisors LLP',
+        city: 'Bangalore',
+        skills: ['Technology Law', 'IP Protection', 'Tech Contracts', 'DPDP Compliance'],
       }),
     );
-    const priyaBiz = await bizRepo.save(
+  }
+  let rajeshBiz = await bizRepo.findOne({ where: { id: 'biz_lex_tech' } });
+  if (!rajeshBiz) {
+    rajeshBiz = await bizRepo.save(
       bizRepo.create({
-        id: 'biz_health_first',
-        owner: priya,
-        businessName: 'HealthFirst Telemed',
-        logoUrl: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=150',
-        categoryName: 'UI/UX & Product Design',
-        description: 'Modern telemedicine consultation and clinical management software.',
-        city: 'Mumbai',
+        id: 'biz_lex_tech',
+        owner: rajesh,
+        businessName: 'LexTech Advisors LLP',
+        logoUrl: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?w=150',
+        categoryName: 'Legal & Corporate Compliance',
+        description: 'Technology Law, Startup IP Protection & Enterprise SaaS Contracts.',
+        city: 'Bangalore',
         isVerified: true,
       }),
     );
-
-    await oppRepo.save([
-      oppRepo.create({
-        creator: priya,
-        business: priyaBiz,
-        title: 'Senior UI/UX Designer for Patient Health Dashboard',
-        description: 'Complete redesign of our patient consultation mobile app and clinic scheduling web portal. Seeking high-fidelity Figma components and user testing experience.',
-        categoryName: 'UI/UX & Product Design',
-        tags: ['UI/UX Design', 'Figma', 'Healthcare', 'Design Systems'],
-        budgetAmount: 180000,
-        currency: 'INR',
-        deadline: '2026-09-15',
-        city: 'Mumbai',
-        status: OpportunityStatus.OPEN,
-      }),
-      oppRepo.create({
-        creator: priya,
-        business: priyaBiz,
-        title: 'Enterprise ISO 27001 Security Audit & Cloud Hardening',
-        description: 'Need certified compliance consultant to audit HIPAA and ISO 27001 telemetry for clinical mobile apps.',
-        categoryName: 'Legal & Corporate Compliance',
-        tags: ['ISO 27001', 'Security', 'Compliance', 'Audit'],
-        budgetAmount: 220000,
-        currency: 'INR',
-        deadline: '2026-10-30',
-        city: 'Mumbai',
-        status: OpportunityStatus.OPEN,
-      }),
-    ]);
   }
 
-  // Seed Alex's Needs & Offers for live matching algorithm
-  const alexNeedsCount = await needRepo.count({ where: { user: { id: alex.id } } });
-  if (alexNeedsCount === 0) {
+  // 5. Ananya Desai (PixelCraft Design Studio)
+  let ananya = await userRepo.findOne({ where: { email: 'ananya.desai@pixelcraft.design' } });
+  if (!ananya) {
+    ananya = await userRepo.save(
+      userRepo.create({
+        id: 'usr_ananya_01',
+        email: 'ananya.desai@pixelcraft.design',
+        phoneNumber: '+91 98765 43216',
+        role: UserRole.BUSINESS,
+        status: UserStatus.ACTIVE,
+        isEmailVerified: true,
+        isPhoneVerified: true,
+        passwordHash: await bcrypt.hash('password123', 10),
+      }),
+    );
+    await profileRepo.save(
+      profileRepo.create({
+        user: ananya,
+        firstName: 'Ananya',
+        lastName: 'Desai',
+        avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+        headline: 'Lead Product Designer @ PixelCraft Studio',
+        city: 'Bangalore',
+        skills: ['UI/UX Design', 'Figma Tokens', 'Design Systems', 'Mobile Interaction'],
+      }),
+    );
+  }
+  let ananyaBiz = await bizRepo.findOne({ where: { id: 'biz_pixel_craft' } });
+  if (!ananyaBiz) {
+    ananyaBiz = await bizRepo.save(
+      bizRepo.create({
+        id: 'biz_pixel_craft',
+        owner: ananya,
+        businessName: 'PixelCraft Design Studio',
+        logoUrl: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=150',
+        categoryName: 'UI/UX & Product Design',
+        description: 'Award-winning product design and tokenized design systems agency.',
+        city: 'Bangalore',
+        isVerified: true,
+      }),
+    );
+  }
+
+  // 6. Seed Opportunities (opp_01, opp_02, opp_03 matching mockData exactly)
+  let opp1 = await oppRepo.findOne({ where: { id: 'opp_01' } });
+  if (!opp1) {
+    opp1 = oppRepo.create({
+      id: 'opp_01',
+      creator: vikram,
+      business: vikramBiz,
+      title: 'Looking for React Native Dev Team to build B2B Delivery App',
+      description: 'We are seeking an experienced mobile development agency to build our driver dispatch and proof-of-delivery cross-platform app. Must have real-time GPS tracking and offline sync capabilities.',
+      categoryName: 'IT & Software Development',
+      tags: ['React Native', 'TypeScript', 'Offline Sync', 'GPS Tracking', 'Mobile App'],
+      budgetAmount: 350000,
+      currency: 'INR',
+      deadline: '2026-09-30',
+      city: 'Bangalore',
+      status: OpportunityStatus.OPEN,
+    });
+    opp1 = await oppRepo.save(opp1);
+  }
+
+  let opp2 = await oppRepo.findOne({ where: { id: 'opp_02' } });
+  if (!opp2) {
+    opp2 = oppRepo.create({
+      id: 'opp_02',
+      creator: priya,
+      business: priyaBiz,
+      title: 'Senior UI/UX Designer for Patient Health Dashboard',
+      description: 'Complete redesign of our patient consultation mobile app and clinic scheduling web portal. Seeking high-fidelity Figma components and user testing experience.',
+      categoryName: 'UI/UX & Product Design',
+      tags: ['UI/UX Design', 'Figma', 'Healthcare', 'Design Systems'],
+      budgetAmount: 180000,
+      currency: 'INR',
+      deadline: '2026-09-15',
+      city: 'Mumbai (Remote OK)',
+      status: OpportunityStatus.OPEN,
+    });
+    opp2 = await oppRepo.save(opp2);
+  }
+
+  let opp3 = await oppRepo.findOne({ where: { id: 'opp_03' } });
+  if (!opp3) {
+    opp3 = oppRepo.create({
+      id: 'opp_03',
+      creator: ananya,
+      business: ananyaBiz,
+      title: 'Seeking B2B Content Writer & SEO Specialist',
+      description: 'Need long-form technical blogs and whitepapers for AI fintech product launch over the next 3 months.',
+      categoryName: 'Digital Marketing & Growth',
+      tags: ['Content Marketing', 'SEO', 'Technical Writing', 'Fintech'],
+      budgetAmount: 60000,
+      currency: 'INR/mo',
+      deadline: '2026-09-01',
+      city: 'Remote',
+      status: OpportunityStatus.IN_DISCUSSION,
+    });
+    opp3 = await oppRepo.save(opp3);
+  }
+
+  // 7. Seed Alex's Needs & Offers
+  const alexNeeds = await needRepo.find({ where: { user: { id: alex.id } } });
+  if (alexNeeds.length === 0) {
     await needRepo.save([
       needRepo.create({
+        id: 'need_01',
         user: alex,
         ownerType: 'BUSINESS',
         ownerId: 'biz_01',
@@ -406,6 +599,7 @@ async function runSeed() {
         status: NeedStatus.ACTIVE,
       }),
       needRepo.create({
+        id: 'need_02',
         user: alex,
         ownerType: 'BUSINESS',
         ownerId: 'biz_01',
@@ -418,9 +612,13 @@ async function runSeed() {
         status: NeedStatus.ACTIVE,
       }),
     ]);
+  }
 
+  const alexOffers = await offerRepo.find({ where: { user: { id: alex.id } } });
+  if (alexOffers.length === 0) {
     await offerRepo.save([
       offerRepo.create({
+        id: 'off_01',
         user: alex,
         ownerType: 'BUSINESS',
         ownerId: 'biz_01',
@@ -433,6 +631,7 @@ async function runSeed() {
         status: OfferStatus.ACTIVE,
       }),
       offerRepo.create({
+        id: 'off_02',
         user: alex,
         ownerType: 'BUSINESS',
         ownerId: 'biz_01',
@@ -447,55 +646,329 @@ async function runSeed() {
     ]);
   }
 
-  // Seed CRM Leads for Alex
-  const alexBiz = await bizRepo.findOne({ where: { owner: { id: alex.id } } });
-  if (alexBiz && vikram && priya) {
-    const alexLeadsCount = await leadRepo.count({ where: { business: { id: alexBiz.id } } });
-    if (alexLeadsCount === 0) {
-      const l1 = await leadRepo.save(
+  // Kavita's Reciprocal Offer & Need (match_01 synergy)
+  const kavitaOffers = await offerRepo.find({ where: { user: { id: kavita.id } } });
+  if (kavitaOffers.length === 0) {
+    await offerRepo.save(
+      offerRepo.create({
+        user: kavita,
+        ownerType: 'BUSINESS',
+        ownerId: kavitaBiz.id,
+        title: 'B2B Growth & Multi-Channel Lead Campaigns',
+        description: 'High-converting inbound funnels, Google Search Ads, and targeted LinkedIn outbound campaigns.',
+        categoryName: 'Digital Marketing & Growth',
+        tags: ['B2B Marketing', 'Google Ads', 'LinkedIn Campaigns', 'Lead Generation'],
+        pricingModel: OfferPricing.RETAINER,
+        city: 'Bangalore',
+        status: OfferStatus.ACTIVE,
+      }),
+    );
+    await needRepo.save(
+      needRepo.create({
+        user: kavita,
+        ownerType: 'BUSINESS',
+        ownerId: kavitaBiz.id,
+        title: 'React Native Mobile App Architecture',
+        description: 'Seeking a verified mobile engineering team to develop our proprietary marketing attribution app.',
+        categoryName: 'IT & Software Development',
+        tags: ['React Native', 'Mobile Apps', 'TypeScript'],
+        priority: NeedPriority.HIGH,
+        city: 'Bangalore',
+        status: NeedStatus.ACTIVE,
+      }),
+    );
+  }
+
+  // 8. CRM Leads & Notes for Alex (lead_01, lead_02, lead_03 matching mockData exactly)
+  const alexBiz = await bizRepo.findOne({ where: { id: 'biz_01' } });
+  if (alexBiz) {
+    // Lead 01: Vikram Singh (FinFlow)
+    let lead1 = await leadRepo.findOne({ where: { id: 'lead_01' } });
+    if (!lead1) {
+      lead1 = await leadRepo.save(
         leadRepo.create({
+          id: 'lead_01',
           business: alexBiz,
           contactUser: vikram,
-          title: 'B2B Fleet Mobile App Architecture',
+          opportunity: opp1,
+          title: 'FinFlow Driver Dispatch App Project',
           status: LeadStatus.QUALIFIED,
-          source: LeadSource.MATCH,
+          source: LeadSource.OPPORTUNITY,
           estimatedValue: 350000,
           currency: 'INR',
+          lastContactedAt: new Date('2026-08-18T14:30:00Z'),
         }),
       );
-      await leadNoteRepo.save(
+      await leadNoteRepo.save([
         leadNoteRepo.create({
-          lead: l1,
+          lead: lead1,
           author: alex,
-          noteText: 'Shared architecture wireframes and milestone timeline. Client agreed on 45-day deliverable scope.',
+          noteText: 'Reviewed technical requirements for offline SQLite caching and real-time telemetry.',
+        }),
+        leadNoteRepo.create({
+          lead: lead1,
+          author: alex,
+          noteText: 'Client confirmed budget allocation of ₹3,50,000 for milestone 1 & 2.',
+        }),
+        leadNoteRepo.create({
+          lead: lead1,
+          author: alex,
+          noteText: 'Discussed foreground service battery optimization for delivery drivers.',
+        }),
+        leadNoteRepo.create({
+          lead: lead1,
+          author: alex,
+          noteText: 'Discovery call scheduled for tomorrow at 3 PM.',
+        }),
+      ]);
+    }
+
+    // Lead 02: Kavita Menon (GrowthPulse)
+    let lead2 = await leadRepo.findOne({ where: { id: 'lead_02' } });
+    if (!lead2) {
+      lead2 = await leadRepo.save(
+        leadRepo.create({
+          id: 'lead_02',
+          business: alexBiz,
+          contactUser: kavita,
+          title: 'Reciprocal Growth & Client App Build Partnership',
+          status: LeadStatus.IN_DISCUSSION,
+          source: LeadSource.MATCH,
+          estimatedValue: 200000,
+          currency: 'INR',
+          lastContactedAt: new Date('2026-08-17T17:00:00Z'),
         }),
       );
+      await leadNoteRepo.save([
+        leadNoteRepo.create({
+          lead: lead2,
+          author: alex,
+          noteText: 'Initial match verified at 94% synergy between digital marketing and mobile app engineering.',
+        }),
+        leadNoteRepo.create({
+          lead: lead2,
+          author: alex,
+          noteText: 'Kavita shared draft LinkedIn campaign deck over email.',
+        }),
+      ]);
+    }
 
-      const l2 = await leadRepo.save(
+    // Lead 03: Priya Nair (HealthFirst)
+    let lead3 = await leadRepo.findOne({ where: { id: 'lead_03' } });
+    if (!lead3) {
+      lead3 = await leadRepo.save(
         leadRepo.create({
+          id: 'lead_03',
           business: alexBiz,
           contactUser: priya,
-          title: 'Patient Portal Figma Design System',
-          status: LeadStatus.IN_DISCUSSION,
+          opportunity: opp2,
+          title: 'Telemedicine Dashboard Redesign Contract',
+          status: LeadStatus.CONVERTED,
           source: LeadSource.OPPORTUNITY,
           estimatedValue: 180000,
           currency: 'INR',
+          lastContactedAt: new Date('2026-08-18T10:15:00Z'),
         }),
       );
-      await leadNoteRepo.save(
+      await leadNoteRepo.save([
         leadNoteRepo.create({
-          lead: l2,
+          lead: lead3,
           author: alex,
-          noteText: 'Introductory design sync call completed. Preparing Figma component tokens sample.',
+          noteText: 'Expressed interest in patient consultation portal redesign.',
         }),
-      );
+        leadNoteRepo.create({
+          lead: lead3,
+          author: alex,
+          noteText: 'Portfolio presentation reviewed by clinical UX committee.',
+        }),
+        leadNoteRepo.create({
+          lead: lead3,
+          author: alex,
+          noteText: 'Milestone scope agreed for Figma design system with tokens.',
+        }),
+        leadNoteRepo.create({
+          lead: lead3,
+          author: alex,
+          noteText: 'Contract drafted and legal review completed.',
+        }),
+        leadNoteRepo.create({
+          lead: lead3,
+          author: alex,
+          noteText: 'Master Service Agreement signed by VP Product.',
+        }),
+        leadNoteRepo.create({
+          lead: lead3,
+          author: alex,
+          noteText: 'Kickoff sprint scheduled for next Monday.',
+        }),
+      ]);
     }
   }
 
-  // Seed Ecosystem Partners
-  const partnerCount = await partnerRepo.count();
-  if (partnerCount === 0) {
-    const p1 = await partnerRepo.save(
+  // 9. Pre-Initiated Contextual Conversations & Messages (conv_01, conv_02)
+  let conv1 = await convRepo.findOne({ where: { id: 'conv_01' } });
+  if (!conv1) {
+    conv1 = await convRepo.save(
+      convRepo.create({
+        id: 'conv_01',
+        contextType: ConversationContextType.OPPORTUNITY,
+        contextId: 'opp_01',
+        contextTitle: 'Opportunity: React Native B2B Delivery App',
+        participantIds: ['usr_curr_01', vikram.id],
+        createdAt: new Date('2026-08-16T14:00:00Z'),
+        updatedAt: new Date('2026-08-18T14:30:00Z'),
+      }),
+    );
+
+    await msgRepo.save([
+      msgRepo.create({
+        id: 'msg_01',
+        conversation: conv1,
+        sender: alex,
+        text: 'Hi Vikram, saw your requirement for the B2B Delivery App. At Nexas, we have built 4 production logistics apps with background GPS and SQLite offline caching.',
+        isRead: true,
+        createdAt: new Date('2026-08-16T14:00:00Z'),
+      }),
+      msgRepo.create({
+        id: 'msg_02',
+        conversation: conv1,
+        sender: vikram,
+        text: 'Hi Alex! That matches our exact tech stack need. Do you support Android background location policies and low-power battery optimization?',
+        isRead: true,
+        createdAt: new Date('2026-08-16T14:15:00Z'),
+      }),
+      msgRepo.create({
+        id: 'msg_03',
+        conversation: conv1,
+        sender: alex,
+        text: 'Yes, we use native foreground services with batched geofence alerts to ensure compliance and sub-2% battery drain per 8h shift.',
+        isRead: true,
+        createdAt: new Date('2026-08-16T14:22:00Z'),
+      }),
+      msgRepo.create({
+        id: 'msg_04',
+        conversation: conv1,
+        sender: vikram,
+        text: 'Thanks Alex! We reviewed your team portfolio for offline sync and would like to schedule a technical discovery call tomorrow at 3 PM.',
+        isRead: false,
+        createdAt: new Date('2026-08-18T14:30:00Z'),
+      }),
+    ]);
+  }
+
+  let conv2 = await convRepo.findOne({ where: { id: 'conv_02' } });
+  if (!conv2) {
+    conv2 = await convRepo.save(
+      convRepo.create({
+        id: 'conv_02',
+        contextType: ConversationContextType.NEED_OFFER_MATCH,
+        contextId: 'match_01',
+        contextTitle: 'Match (94%): B2B Lead Gen & Web App Development',
+        participantIds: ['usr_curr_01', kavita.id],
+        createdAt: new Date('2026-08-17T10:00:00Z'),
+        updatedAt: new Date('2026-08-17T17:00:00Z'),
+      }),
+    );
+
+    await msgRepo.save(
+      msgRepo.create({
+        id: 'msg_05',
+        conversation: conv2,
+        sender: kavita,
+        text: 'Our team is ready with the LinkedIn campaign pitch deck for Nexas. Shared the draft over email.',
+        isRead: true,
+        createdAt: new Date('2026-08-17T17:00:00Z'),
+      }),
+    );
+  }
+
+  // 10. Ecosystem Partners (Rapido, Blinkit, RedBus matching mockData PARTNERS_DATA)
+  let p1 = await partnerRepo.findOne({ where: { name: 'Rapido Enterprise Logistics' } });
+  if (!p1) {
+    p1 = await partnerRepo.save(
+      partnerRepo.create({
+        id: 'ptn_01',
+        name: 'Rapido Enterprise Logistics',
+        logoUrl: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=150',
+        categoryName: 'Intra-City Logistics & Fleet',
+        description: 'On-demand corporate parcel and express delivery fleet for local businesses and retail stores.',
+        coverageArea: 'Pan-India (40+ Cities)',
+        websiteUrl: 'https://rapido.bike',
+        exclusiveBadge: 'Eco Partner',
+      }),
+    );
+    await partnerOfferRepo.save(
+      partnerOfferRepo.create({
+        id: 'poff_01',
+        partner: p1,
+        title: '30% Off First 100 Business Deliveries',
+        description: 'Exclusive B2B introductory credit for Lip Talk verified businesses.',
+        discountCode: 'LIPTALK30',
+        discountValue: '30% OFF',
+        validUntil: '2026-12-31',
+        ctaUrl: 'https://rapido.bike/business',
+      }),
+    );
+  }
+
+  let p2 = await partnerRepo.findOne({ where: { name: 'Blinkit Commerce For Work' } });
+  if (!p2) {
+    p2 = await partnerRepo.save(
+      partnerRepo.create({
+        id: 'ptn_02',
+        name: 'Blinkit Commerce For Work',
+        logoUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=150',
+        categoryName: 'Instant Office Supplies & Pantry',
+        description: '10-minute office pantry restocking, printer supplies, and team event essentials.',
+        coverageArea: 'Metro Tier-1 & Tier-2',
+        websiteUrl: 'https://blinkit.com',
+        exclusiveBadge: 'Priority Supply',
+      }),
+    );
+    await partnerOfferRepo.save(
+      partnerOfferRepo.create({
+        id: 'poff_02',
+        partner: p2,
+        title: '₹2,500 Monthly Office Pantry Credits',
+        description: 'Complimentary restocking credits on quarterly enterprise agreements.',
+        discountCode: 'LIPBIZ2500',
+        discountValue: '₹2,500 Credits',
+        validUntil: '2026-11-30',
+        ctaUrl: 'https://blinkit.com/b2b',
+      }),
+    );
+  }
+
+  let p3 = await partnerRepo.findOne({ where: { name: 'RedBus Corporate Commute' } });
+  if (!p3) {
+    p3 = await partnerRepo.save(
+      partnerRepo.create({
+        id: 'ptn_03',
+        name: 'RedBus Corporate Commute',
+        logoUrl: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=150',
+        categoryName: 'Corporate Travel & Shuttles',
+        description: 'Dedicated business employee commute passes and chartered inter-city buses for corporate retreats.',
+        coverageArea: 'Nationwide',
+        websiteUrl: 'https://redbus.in',
+      }),
+    );
+    await partnerOfferRepo.save(
+      partnerOfferRepo.create({
+        id: 'poff_03',
+        partner: p3,
+        title: '15% Cashback on Executive Shuttle Passes',
+        description: 'Available for team bookings above 10 members.',
+        discountCode: 'LIPTRAVEL15',
+        discountValue: '15% Cashback',
+        validUntil: '2026-10-31',
+        ctaUrl: 'https://redbus.in/corporate',
+      }),
+    );
+  }
+
+  let p4 = await partnerRepo.findOne({ where: { name: 'Amazon Web Services (AWS Activate)' } });
+  if (!p4) {
+    p4 = await partnerRepo.save(
       partnerRepo.create({
         name: 'Amazon Web Services (AWS Activate)',
         logoUrl: 'https://images.unsplash.com/photo-1523474253243-401a6949753f?w=150',
@@ -507,32 +980,11 @@ async function runSeed() {
     );
     await partnerOfferRepo.save(
       partnerOfferRepo.create({
-        partner: p1,
+        partner: p4,
         title: '$5,000 AWS Cloud Credits Package',
         description: 'Valid for 2 years across all EC2, RDS, and S3 resources for LipTalk member startups.',
         discountCode: 'LIPTALK-AWS-5K',
         discountValue: '$5,000 USD',
-        validUntil: '2027-12-31',
-      }),
-    );
-
-    const p2 = await partnerRepo.save(
-      partnerRepo.create({
-        name: 'Razorpay Rize Founder Program',
-        logoUrl: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=150',
-        categoryName: 'Payments & Banking',
-        description: 'Instant corporate banking accounts, zero setup fees, and priority merchant onboarding.',
-        websiteUrl: 'https://razorpay.com/rize/',
-        exclusiveBadge: 'FEATURED',
-      }),
-    );
-    await partnerOfferRepo.save(
-      partnerOfferRepo.create({
-        partner: p2,
-        title: 'Zero Gateway Transaction Fees on first ₹2,00,000',
-        description: 'Full waiver on payment gateway fees for all UPI, Netbanking, and Credit Card payments.',
-        discountCode: 'LIPTALK-RIZE',
-        discountValue: '100% Fee Waiver',
         validUntil: '2027-12-31',
       }),
     );

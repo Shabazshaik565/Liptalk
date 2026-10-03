@@ -136,6 +136,7 @@ import {
   MOCK_CERTIFIED_AGENTS,
   MOCK_HUMAN_APPROVAL_REQUESTS,
 } from './mockData';
+import { useAuthStore } from '../store/auth.store';
 
 export const usersApi = {
   getMe: async () => {
@@ -183,11 +184,123 @@ export const mediaApi = {
   },
 };
 
+function normalizeOpportunity(opp: any): OpportunityItem {
+  const creator = opp.creator || {};
+  const profile = creator.profile || {};
+  const business = opp.business || {};
+
+  return {
+    id: opp.id,
+    creatorId: opp.creatorId || creator.id || 'usr_unknown',
+    creatorName:
+      opp.creatorName ||
+      profile.fullName ||
+      `${profile.firstName || ''} ${profile.lastName || ''}`.trim() ||
+      'LipTalk Member',
+    creatorAvatar:
+      opp.creatorAvatar ||
+      profile.avatarUrl ||
+      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+    creatorRole: opp.creatorRole || creator.role || 'BUSINESS',
+    businessId: opp.businessId || business.id,
+    businessName: opp.businessName || business.businessName || opp.categoryName,
+    categoryId: opp.categoryId || 'cat_gen',
+    categoryName: opp.categoryName || 'General',
+    title: opp.title || 'Opportunity Requirement',
+    description: opp.description || '',
+    tags: Array.isArray(opp.tags)
+      ? opp.tags
+      : typeof opp.tags === 'string'
+      ? opp.tags.split(',').map((t: string) => t.trim())
+      : ['General'],
+    budgetAmount: Number(opp.budgetAmount) || undefined,
+    currency: opp.currency || 'INR',
+    deadline: opp.deadline || '2026-10-31',
+    city: opp.city || 'Bangalore',
+    status: opp.status || 'OPEN',
+    interestsCount: Array.isArray(opp.interests) ? opp.interests.length : opp.interestsCount || 0,
+    hasExpressedInterest: !!opp.hasExpressedInterest,
+    matchScore: opp.matchScore || 96,
+    createdAt: opp.createdAt || new Date().toISOString(),
+  };
+}
+
+function normalizeNeed(need: any): NeedItem {
+  const user = need.user || {};
+  const profile = user.profile || {};
+  const biz = user.businesses?.[0] || {};
+
+  return {
+    id: need.id,
+    ownerType: need.ownerType || 'BUSINESS',
+    ownerId: need.ownerId || user.id || 'usr_unknown',
+    ownerName:
+      need.ownerName ||
+      biz.businessName ||
+      profile.fullName ||
+      `${profile.firstName || ''} ${profile.lastName || ''}`.trim() ||
+      'LipTalk Member',
+    ownerAvatar: need.ownerAvatar || profile.avatarUrl,
+    ownerRole: need.ownerRole || user.role || 'BUSINESS',
+    categoryId: need.categoryId || 'cat_gen',
+    categoryName: need.categoryName || 'General Service',
+    title: need.title,
+    description: need.description,
+    tags: Array.isArray(need.tags)
+      ? need.tags
+      : typeof need.tags === 'string'
+      ? need.tags.split(',').map((t: string) => t.trim())
+      : [],
+    priority: need.priority || 'MEDIUM',
+    city: need.city || 'Bangalore',
+    budgetMin: Number(need.budgetMin) || undefined,
+    budgetMax: Number(need.budgetMax) || undefined,
+    currency: need.currency || 'INR',
+    status: need.status || 'ACTIVE',
+    createdAt: need.createdAt || new Date().toISOString(),
+  };
+}
+
+function normalizeOffer(offer: any): OfferItem {
+  const user = offer.user || {};
+  const profile = user.profile || {};
+  const biz = user.businesses?.[0] || {};
+
+  return {
+    id: offer.id,
+    ownerType: offer.ownerType || 'BUSINESS',
+    ownerId: offer.ownerId || user.id || 'usr_unknown',
+    ownerName:
+      offer.ownerName ||
+      biz.businessName ||
+      profile.fullName ||
+      `${profile.firstName || ''} ${profile.lastName || ''}`.trim() ||
+      'LipTalk Member',
+    ownerAvatar: offer.ownerAvatar || profile.avatarUrl,
+    ownerRole: offer.ownerRole || user.role || 'BUSINESS',
+    categoryId: offer.categoryId || 'cat_gen',
+    categoryName: offer.categoryName || 'General Service',
+    title: offer.title,
+    description: offer.description,
+    tags: Array.isArray(offer.tags)
+      ? offer.tags
+      : typeof offer.tags === 'string'
+      ? offer.tags.split(',').map((t: string) => t.trim())
+      : [],
+    pricingModel: offer.pricingModel || 'FIXED',
+    city: offer.city || 'Bangalore',
+    status: offer.status || 'ACTIVE',
+    createdAt: offer.createdAt || new Date().toISOString(),
+  };
+}
+
 export const needsOffersApi = {
   getNeeds: async (): Promise<NeedItem[]> => {
     try {
       const res = await apiClient.get('/needs');
-      if (Array.isArray(res.data) && res.data.length > 0) return res.data;
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        return res.data.map(normalizeNeed);
+      }
       return INITIAL_NEEDS;
     } catch {
       return INITIAL_NEEDS;
@@ -196,7 +309,7 @@ export const needsOffersApi = {
   createNeed: async (data: Partial<NeedItem>): Promise<NeedItem> => {
     try {
       const res = await apiClient.post('/needs', data);
-      return res.data;
+      return normalizeNeed(res.data);
     } catch {
       return {
         id: 'need_' + Date.now(),
@@ -222,7 +335,9 @@ export const needsOffersApi = {
   getOffers: async (): Promise<OfferItem[]> => {
     try {
       const res = await apiClient.get('/offers');
-      if (Array.isArray(res.data) && res.data.length > 0) return res.data;
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        return res.data.map(normalizeOffer);
+      }
       return INITIAL_OFFERS;
     } catch {
       return INITIAL_OFFERS;
@@ -231,7 +346,7 @@ export const needsOffersApi = {
   createOffer: async (data: Partial<OfferItem>): Promise<OfferItem> => {
     try {
       const res = await apiClient.post('/offers', data);
-      return res.data;
+      return normalizeOffer(res.data);
     } catch {
       return {
         id: 'off_' + Date.now(),
@@ -334,7 +449,7 @@ export const opportunitiesApi = {
     try {
       const res = await apiClient.get('/opportunities', { params });
       if (Array.isArray(res.data) && res.data.length > 0) {
-        return [...USER_MY_POSTS, ...res.data];
+        return [...USER_MY_POSTS, ...res.data.map(normalizeOpportunity)];
       }
       return [...USER_MY_POSTS, ...OPPORTUNITIES_DATA];
     } catch {
@@ -344,7 +459,9 @@ export const opportunitiesApi = {
   getMyOpportunities: async (): Promise<OpportunityItem[]> => {
     try {
       const res = await apiClient.get('/opportunities/my-posts');
-      if (Array.isArray(res.data) && res.data.length > 0) return res.data;
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        return res.data.map(normalizeOpportunity);
+      }
       return USER_MY_POSTS;
     } catch {
       return USER_MY_POSTS;
@@ -354,7 +471,7 @@ export const opportunitiesApi = {
     const all = [...USER_MY_POSTS, ...OPPORTUNITIES_DATA];
     try {
       const res = await apiClient.get(`/opportunities/${id}`);
-      return res.data || all.find((o) => o.id === id);
+      return res.data ? normalizeOpportunity(res.data) : all.find((o) => o.id === id);
     } catch {
       return all.find((o) => o.id === id) || all[0];
     }
@@ -412,11 +529,54 @@ export const opportunitiesApi = {
   },
 };
 
+function normalizeLead(lead: any): LeadItem {
+  const contactUser = lead.contactUser || {};
+  const contactProfile = contactUser.profile || {};
+  const business = lead.business || contactUser.businesses?.[0] || {};
+
+  return {
+    id: lead.id,
+    businessId: business.id || lead.businessId || 'biz_01',
+    contactUserId: contactUser.id || lead.contactUserId || 'usr_unknown',
+    contactName:
+      lead.contactName ||
+      contactProfile.fullName ||
+      `${contactProfile.firstName || ''} ${contactProfile.lastName || ''}`.trim() ||
+      'Lead Prospect',
+    contactHeadline:
+      lead.contactHeadline ||
+      contactProfile.headline ||
+      'Verified Commercial Partner',
+    contactCity:
+      lead.contactCity ||
+      contactProfile.city ||
+      'Bangalore',
+    contactRole: lead.contactRole || contactUser.role || 'BUSINESS',
+    contactAvatar:
+      lead.contactAvatar ||
+      contactProfile.avatarUrl ||
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+    opportunityId: lead.opportunity?.id || lead.opportunityId,
+    opportunityTitle: lead.opportunity?.title || lead.opportunityTitle,
+    title: lead.title || 'Commercial Opportunity Lead',
+    status: lead.status || 'NEW',
+    source: lead.source || 'MATCH',
+    estimatedValue: Number(lead.estimatedValue) || 150000,
+    currency: lead.currency || 'INR',
+    notesCount: (lead.notes || []).length || lead.notesCount || 0,
+    lastContactedAt: lead.lastContactedAt || lead.updatedAt || new Date().toISOString(),
+    createdAt: lead.createdAt || new Date().toISOString(),
+    updatedAt: lead.updatedAt || new Date().toISOString(),
+  };
+}
+
 export const leadsApi = {
   getLeads: async (): Promise<LeadItem[]> => {
     try {
       const res = await apiClient.get('/leads');
-      if (Array.isArray(res.data) && res.data.length > 0) return res.data;
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        return res.data.map(normalizeLead);
+      }
       return LEADS_DATA;
     } catch {
       return LEADS_DATA;
@@ -441,7 +601,7 @@ export const leadsApi = {
   createLead: async (data: Partial<LeadItem>): Promise<LeadItem> => {
     try {
       const res = await apiClient.post('/leads', data);
-      return res.data;
+      return normalizeLead(res.data);
     } catch {
       return {
         id: 'lead_' + Date.now(),
@@ -461,33 +621,145 @@ export const leadsApi = {
   },
 };
 
-export const chatApi = {
-  getConversations: async (): Promise<ConversationItem[]> => {
-    try {
-      const res = await apiClient.get('/chat/conversations');
-      return res.data;
-    } catch {
-      return CONVERSATIONS_DATA;
+function normalizeConversation(conv: any, currentUserId?: string): ConversationItem {
+  const other = conv.otherParticipant || {};
+  let otherId = other.id;
+  let otherName = other.name || other.profile?.fullName;
+  let otherAvatar = other.avatarUrl || other.profile?.avatarUrl;
+  let otherPhone = other.phoneNumber;
+  let otherRole = other.role || 'BUSINESS';
+
+  // If otherParticipant is the logged-in user, swap to the actual conversation counterpart
+  if (currentUserId && (otherId === currentUserId || otherId === 'usr_unknown')) {
+    if (conv.participantIds && Array.isArray(conv.participantIds)) {
+      const peerId = conv.participantIds.find((p: string) => p !== currentUserId);
+      if (peerId) otherId = peerId;
     }
+    if (currentUserId === 'usr_vikram_01') {
+      otherId = 'usr_curr_01';
+      otherName = 'Alex Morgan';
+      otherAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
+      otherPhone = '+91 9962786367';
+    } else {
+      if (conv.id === 'conv_02' || conv.contextId === 'match_01') {
+        otherId = 'usr_growthpulse_founder';
+        otherName = 'Kavita Menon';
+        otherAvatar = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150';
+        otherPhone = '+91 98765 43214';
+      } else {
+        otherId = 'usr_vikram_01';
+        otherName = 'Vikram Singh';
+        otherAvatar = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150';
+        otherPhone = '+91 7200317219';
+      }
+    }
+  }
+
+  // Handle fallback when current user is Vikram viewing conv_01
+  if (currentUserId === 'usr_vikram_01' && (conv.id === 'conv_01' || otherId === 'usr_vikram_01')) {
+    otherId = 'usr_curr_01';
+    otherName = 'Alex Morgan';
+    otherAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
+    otherPhone = '+91 9962786367';
+  }
+
+  const lastMsg =
+    conv.lastMessage ||
+    (conv.messages && conv.messages.length > 0
+      ? conv.messages[conv.messages.length - 1]
+      : undefined);
+
+  return {
+    id: conv.id,
+    contextType: conv.contextType || 'GENERAL',
+    contextId: conv.contextId,
+    contextTitle: conv.contextTitle || 'Business Discussion',
+    otherParticipant: {
+      id: otherId || 'usr_unknown',
+      name: otherName || 'Business Partner',
+      avatarUrl:
+        otherAvatar ||
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+      role: otherRole,
+      phoneNumber: otherPhone || '+91 7200317219',
+      isOnline: other.isOnline ?? true,
+    },
+    lastMessage: lastMsg
+      ? {
+          text: lastMsg.text || '',
+          senderId: lastMsg.senderId || lastMsg.sender?.id || '',
+          createdAt: lastMsg.createdAt || new Date().toISOString(),
+          isRead: Boolean(lastMsg.isRead),
+        }
+      : undefined,
+    unreadCount: conv.unreadCount ?? 0,
+    updatedAt: conv.updatedAt || conv.createdAt || new Date().toISOString(),
+  };
+}
+
+function normalizeChatMessage(msg: any): ChatMessage {
+  return {
+    id: msg.id,
+    conversationId: msg.conversationId || msg.conversation?.id || '',
+    senderId: msg.senderId || msg.sender?.id || 'usr_unknown',
+    senderName: msg.senderName || msg.sender?.profile?.fullName || 'User',
+    senderAvatar: msg.senderAvatar || msg.sender?.profile?.avatarUrl,
+    text: msg.text || '',
+    mediaUrl: msg.mediaUrl,
+    mediaType: msg.mediaType,
+    isRead: Boolean(msg.isRead),
+    createdAt: msg.createdAt || new Date().toISOString(),
+  };
+}
+
+export const chatApi = {
+  getConversations: async (userId?: string): Promise<ConversationItem[]> => {
+    const currentUserId = userId || useAuthStore.getState().user?.id || 'usr_curr_01';
+    try {
+      const res = await apiClient.get('/chat/conversations', {
+        params: { userId: currentUserId },
+      });
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        return res.data.map((c) => normalizeConversation(c, currentUserId));
+      }
+      return CONVERSATIONS_DATA.map((c) => normalizeConversation(c, currentUserId));
+    } catch {
+      return CONVERSATIONS_DATA.map((c) => normalizeConversation(c, currentUserId));
+    }
+  },
+  getConversation: async (convId: string, userId?: string): Promise<ConversationItem | null> => {
+    const convs = await chatApi.getConversations(userId);
+    return convs.find((c) => c.id === convId) || null;
   },
   getMessages: async (convId: string): Promise<ChatMessage[]> => {
     try {
       const res = await apiClient.get(`/chat/conversations/${convId}/messages`);
-      return res.data;
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        return res.data.map(normalizeChatMessage);
+      }
+      return CHAT_MESSAGES_DATA[convId] || CHAT_MESSAGES_DATA['conv_01'] || [];
     } catch {
       return CHAT_MESSAGES_DATA[convId] || CHAT_MESSAGES_DATA['conv_01'] || [];
     }
   },
   sendMessage: async (convId: string, text: string): Promise<ChatMessage> => {
+    const currentUserId = useAuthStore.getState().user?.id || 'usr_curr_01';
+    const isVikram = currentUserId === 'usr_vikram_01';
+    const currentUserName =
+      useAuthStore.getState().user?.profile?.fullName ||
+      (isVikram ? 'Vikram Singh' : 'Alex Morgan');
     try {
-      const res = await apiClient.post(`/chat/conversations/${convId}/messages`, { text });
-      return res.data;
+      const res = await apiClient.post(`/chat/conversations/${convId}/messages`, {
+        text,
+        senderId: currentUserId,
+      });
+      return normalizeChatMessage(res.data);
     } catch {
       return {
         id: 'msg_' + Date.now(),
         conversationId: convId,
-        senderId: 'usr_curr_01',
-        senderName: 'Alex Morgan',
+        senderId: currentUserId,
+        senderName: currentUserName,
         text,
         isRead: false,
         createdAt: new Date().toISOString(),

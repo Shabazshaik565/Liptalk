@@ -52,12 +52,28 @@ export default function ActiveCallScreen() {
     isIncoming?: string;
   }>();
 
+  const currentUserId = user?.id || 'usr_curr_01';
+  const isVikram = currentUserId === 'usr_vikram_01';
+
+  const defaultPeer = isVikram
+    ? {
+        id: 'usr_curr_01',
+        name: 'Alex Morgan',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
+        phone: '+91 9962786367',
+      }
+    : {
+        id: 'usr_vikram_01',
+        name: 'Vikram Singh',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+        phone: '+91 7200317219',
+      };
+
   const callId = params.callId || 'call_01';
-  const peerName = params.peerName || 'Vikram Singh';
-  const peerAvatar =
-    params.peerAvatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200';
-  const peerId = params.peerId || 'usr_vikram_01';
-  const peerPhone = params.peerPhone || '+91 7200317219';
+  const peerName = params.peerName || defaultPeer.name;
+  const peerAvatar = params.peerAvatar || defaultPeer.avatar;
+  const peerId = params.peerId || defaultPeer.id;
+  const peerPhone = params.peerPhone || defaultPeer.phone;
   const initialCallType = (params.callType || 'VOICE') as 'VOICE' | 'VIDEO';
   const isIncoming = params.isIncoming === 'true';
 
@@ -299,25 +315,27 @@ export default function ActiveCallScreen() {
     });
   };
 
-  const handleToggleCamera = () => {
+  const handleToggleCamera = async () => {
     if (callType === 'VOICE') {
       setCallType('VIDEO');
       setIsCameraOff(false);
-      webrtcService.toggleVideo(false);
+      const stream = await webrtcService.enableVideoCamera();
+      if (stream) setLocalStream(stream);
     } else {
       const nextState = !isCameraOff;
       setIsCameraOff(nextState);
-      webrtcService.toggleVideo(nextState);
+      await webrtcService.toggleVideo(nextState);
       if (nextState) {
         setCallType('VOICE');
       }
     }
   };
 
-  const handleSwitchToVideo = () => {
+  const handleSwitchToVideo = async () => {
     setCallType('VIDEO');
     setIsCameraOff(false);
-    webrtcService.toggleVideo(false);
+    const stream = await webrtcService.enableVideoCamera();
+    if (stream) setLocalStream(stream);
   };
 
   const handleToggleSpeaker = () => {
@@ -397,6 +415,13 @@ export default function ActiveCallScreen() {
           {remoteStream ? (
             <RTCStreamView
               stream={remoteStream}
+              style={StyleSheet.absoluteFill}
+              objectFit="cover"
+            />
+          ) : localStream ? (
+            <RTCStreamView
+              stream={localStream}
+              mirror={isFrontCamera}
               style={StyleSheet.absoluteFill}
               objectFit="cover"
             />

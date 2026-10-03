@@ -58,12 +58,17 @@ class SocketService {
         break;
       case 'call_signal':
         if (msg.payload.targetUserId === currentUserId) {
-          this.callSignalListeners.forEach((cb) => cb(msg.payload));
+          // If socket is disconnected/offline, use interTab mesh fallback
+          if (!this.socket || !this.socket.connected) {
+            this.callSignalListeners.forEach((cb) => cb(msg.payload));
+          }
         }
         break;
       case 'call_mute':
         if (msg.payload.targetUserId === currentUserId) {
-          this.callPeerMuteListeners.forEach((cb) => cb(msg.payload));
+          if (!this.socket || !this.socket.connected) {
+            this.callPeerMuteListeners.forEach((cb) => cb(msg.payload));
+          }
         }
         break;
       case 'call_end':
@@ -190,6 +195,17 @@ class SocketService {
     }
   }
 
+  private safePostMessage(message: any) {
+    if (!this.interTabChannel) return;
+    try {
+      // Serialize to plain JSON first to prevent Structured Clone Algorithm errors on native WebRTC objects
+      const cleanMessage = JSON.parse(JSON.stringify(message));
+      this.interTabChannel.postMessage(cleanMessage);
+    } catch (err) {
+      console.warn('InterTabChannel postMessage serialization error handled:', err);
+    }
+  }
+
   initiateCall(payload: {
     callerId: string;
     callerName: string;
@@ -200,7 +216,7 @@ class SocketService {
     if (this.socket && this.socket.connected) {
       this.socket.emit('call_initiate', payload);
     }
-    this.interTabChannel?.postMessage({
+    this.safePostMessage({
       type: 'call_initiate',
       payload: { ...payload, callId: 'call_' + Date.now() },
     });
@@ -210,7 +226,7 @@ class SocketService {
     if (this.socket && this.socket.connected) {
       this.socket.emit('call_accept', payload);
     }
-    this.interTabChannel?.postMessage({
+    this.safePostMessage({
       type: 'call_accept',
       payload,
     });
@@ -220,7 +236,7 @@ class SocketService {
     if (this.socket && this.socket.connected) {
       this.socket.emit('call_decline', payload);
     }
-    this.interTabChannel?.postMessage({
+    this.safePostMessage({
       type: 'call_decline',
       payload,
     });
@@ -230,7 +246,7 @@ class SocketService {
     if (this.socket && this.socket.connected) {
       this.socket.emit('call_cancel', payload);
     }
-    this.interTabChannel?.postMessage({
+    this.safePostMessage({
       type: 'call_cancel',
       payload,
     });
@@ -240,20 +256,30 @@ class SocketService {
     if (this.socket && this.socket.connected) {
       this.socket.emit('call_mute', payload);
     }
-    this.interTabChannel?.postMessage({
+    this.safePostMessage({
       type: 'call_mute',
       payload,
     });
   }
 
   sendCallSignal(payload: { targetUserId: string; signal: any }) {
+    let cleanSignal = payload.signal;
+    try {
+      if (cleanSignal?.candidate && typeof cleanSignal.candidate.toJSON === 'function') {
+        cleanSignal = { ...cleanSignal, candidate: cleanSignal.candidate.toJSON() };
+      }
+      cleanSignal = JSON.parse(JSON.stringify(cleanSignal));
+    } catch (_) {}
+
+    const cleanPayload = { ...payload, signal: cleanSignal };
+
     if (this.socket && this.socket.connected) {
-      this.socket.emit('call_signal', payload);
+      this.socket.emit('call_signal', cleanPayload);
     }
     const currentUserId = useAuthStore.getState().user?.id || 'usr_curr_01';
-    this.interTabChannel?.postMessage({
+    this.safePostMessage({
       type: 'call_signal',
-      payload: { ...payload, senderId: currentUserId },
+      payload: { ...cleanPayload, senderId: currentUserId },
     });
   }
 
@@ -261,7 +287,7 @@ class SocketService {
     if (this.socket && this.socket.connected) {
       this.socket.emit('call_end', payload);
     }
-    this.interTabChannel?.postMessage({
+    this.safePostMessage({
       type: 'call_end',
       payload,
     });

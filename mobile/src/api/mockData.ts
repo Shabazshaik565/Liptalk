@@ -288,7 +288,7 @@ export const MATCHES_DATA: MatchResult[] = [
 export const OPPORTUNITIES_DATA: OpportunityItem[] = [
   {
     id: 'opp_01',
-    creatorId: 'usr_vikram_singh',
+    creatorId: 'usr_vikram_01',
     creatorName: 'Vikram Singh',
     creatorAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
     creatorRole: 'BUSINESS',
@@ -359,7 +359,7 @@ export const LEADS_DATA: LeadItem[] = [
   {
     id: 'lead_01',
     businessId: 'biz_01',
-    contactUserId: 'usr_vikram_singh',
+    contactUserId: 'usr_vikram_01',
     contactName: 'Vikram Singh (FinFlow)',
     contactAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
     contactHeadline: 'Founder @ FinFlow Logistics Tech',
@@ -423,7 +423,7 @@ export const CONVERSATIONS_DATA: ConversationItem[] = [
     contextId: 'opp_01',
     contextTitle: 'Opportunity: React Native B2B Delivery App',
     otherParticipant: {
-      id: 'usr_vikram_singh',
+      id: 'usr_vikram_01',
       name: 'Vikram Singh',
       avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
       role: 'BUSINESS',
@@ -432,7 +432,7 @@ export const CONVERSATIONS_DATA: ConversationItem[] = [
     },
     lastMessage: {
       text: 'Thanks Alex! We reviewed your team portfolio for offline sync and would like to schedule a technical discovery call tomorrow at 3 PM.',
-      senderId: 'usr_vikram_singh',
+      senderId: 'usr_vikram_01',
       createdAt: '2026-08-18T14:30:00Z',
       isRead: false,
     },
@@ -476,7 +476,7 @@ export const CHAT_MESSAGES_DATA: Record<string, ChatMessage[]> = {
     {
       id: 'msg_02',
       conversationId: 'conv_01',
-      senderId: 'usr_vikram_singh',
+      senderId: 'usr_vikram_01',
       senderName: 'Vikram Singh',
       text: 'Hi Alex! That matches our exact tech stack need. Do you support Android background location policies and low-power battery optimization?',
       isRead: true,
@@ -494,7 +494,7 @@ export const CHAT_MESSAGES_DATA: Record<string, ChatMessage[]> = {
     {
       id: 'msg_04',
       conversationId: 'conv_01',
-      senderId: 'usr_vikram_singh',
+      senderId: 'usr_vikram_01',
       senderName: 'Vikram Singh',
       text: 'Thanks Alex! We reviewed your team portfolio for offline sync and would like to schedule a technical discovery call tomorrow at 3 PM.',
       isRead: false,

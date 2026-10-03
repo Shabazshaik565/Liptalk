@@ -49,6 +49,62 @@ export default function ContextualChatScreen() {
   const { user } = useAuthStore();
   const convId = id || 'conv_01';
   const currentUserId = user?.id || 'usr_curr_01';
+  const isVikram = currentUserId === 'usr_vikram_01';
+  const isKavita = currentUserId === 'usr_growthpulse_founder';
+
+  const defaultPeer =
+    convId === 'conv_02'
+      ? (isKavita
+          ? {
+              id: 'usr_curr_01',
+              name: 'Alex Morgan',
+              phone: '+91 9962786367',
+              avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+              headline: 'Founder & Head of Tech @ Nexas Digital',
+              businessName: 'Nexas Digital Solutions',
+            }
+          : {
+              id: 'usr_growthpulse_founder',
+              name: 'Kavita Menon',
+              phone: '+91 98765 43214',
+              avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+              headline: 'Managing Director @ GrowthPulse Media',
+              businessName: 'GrowthPulse Media',
+            })
+      : (isVikram
+          ? {
+              id: 'usr_curr_01',
+              name: 'Alex Morgan',
+              phone: '+91 9962786367',
+              avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+              headline: 'Founder & Head of Tech @ Nexas Digital',
+              businessName: 'Nexas Digital Solutions',
+            }
+          : {
+              id: 'usr_vikram_01',
+              name: 'Vikram Singh',
+              phone: '+91 7200317219',
+              avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+              headline: 'Co-Founder & COO @ FinFlow Logistics Tech',
+              businessName: 'FinFlow Logistics Tech',
+            });
+
+  const { data: conversation } = useQuery({
+    queryKey: ['conversation', convId, currentUserId],
+    queryFn: () => chatApi.getConversation(convId, currentUserId),
+  });
+
+  const peerId = conversation?.otherParticipant?.id || defaultPeer.id;
+  const peerName = conversation?.otherParticipant?.name || defaultPeer.name;
+  const peerPhone = conversation?.otherParticipant?.phoneNumber || defaultPeer.phone;
+  const peerAvatar = conversation?.otherParticipant?.avatarUrl || defaultPeer.avatarUrl;
+  const peerHeadline = defaultPeer.headline;
+  const peerBusiness = defaultPeer.businessName;
+  const contextTitle =
+    conversation?.contextTitle ||
+    (convId === 'conv_02'
+      ? 'Match (94%): B2B Lead Gen & Web App Development'
+      : 'Opportunity: React Native B2B Delivery App');
 
   const { viewportHeight, viewportOffsetTop, keyboardInset, isKeyboardVisible, isDesktop } =
     useKeyboardViewport();
@@ -58,7 +114,6 @@ export default function ContextualChatScreen() {
   const [aiAssisting, setAiAssisting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [showCallOptions, setShowCallOptions] = useState(false);
-  const peerPhone = '+91 7200317219';
   const [chatLog, setChatLog] = useState<any[]>(
     () => CHAT_MESSAGES_DATA[convId] || CHAT_MESSAGES_DATA['conv_01'] || []
   );
@@ -194,7 +249,7 @@ export default function ContextualChatScreen() {
       id: tempId,
       conversationId: convId,
       senderId: currentUserId,
-      senderName: user?.profile?.fullName || 'Alex Morgan',
+      senderName: user?.profile?.fullName || (isVikram ? 'Vikram Singh' : 'Alex Morgan'),
       text: outgoingText,
       isRead: false,
       status: 'sending',
@@ -238,9 +293,9 @@ export default function ContextualChatScreen() {
   const handleConvertToLead = async () => {
     await leadsApi.createLead({
       businessId: 'biz_01',
-      contactUserId: 'usr_vikram_singh',
-      contactName: 'Vikram Singh (FinFlow)',
-      title: 'FinFlow Delivery App Contract',
+      contactUserId: peerId,
+      contactName: `${peerName} (${peerBusiness})`,
+      title: `${peerBusiness} Contract`,
       estimatedValue: 350000,
       source: 'MATCH',
     });
@@ -263,13 +318,10 @@ export default function ContextualChatScreen() {
 
   const handleStartCall = async (type: 'VOICE' | 'VIDEO') => {
     const newCallId = 'call_' + Date.now();
-    const peerId = 'usr_vikram_01';
-    const peerName = 'Vikram Singh';
-    const peerAvatar = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200';
 
     socketService.initiateCall({
       callerId: currentUserId,
-      callerName: user?.profile?.fullName || 'Alex Morgan',
+      callerName: user?.profile?.fullName || (isVikram ? 'Vikram Singh' : 'Alex Morgan'),
       callerAvatar: user?.profile?.avatarUrl,
       receiverId: peerId,
       callType: type,
@@ -307,8 +359,8 @@ export default function ContextualChatScreen() {
       keyboardVerticalOffset={0}
     >
       <Header
-        title="BUSINESS DISCUSSION"
-        subtitle="VERIFIED DIRECT CHANNEL"
+        title={peerName.toUpperCase()}
+        subtitle={peerHeadline ? peerHeadline.toUpperCase() : 'VERIFIED DIRECT CHANNEL'}
         showBack
         onBack={() => router.back()}
         rightAction={
@@ -344,7 +396,7 @@ export default function ContextualChatScreen() {
             <Text style={styles.contextTagText}>CONTEXT OPPORTUNITY</Text>
           </View>
           <Text style={styles.contextTitle} numberOfLines={1}>
-            Mobile App & Cloud Architecture Deliverables
+            {contextTitle}
           </Text>
         </View>
 
@@ -388,11 +440,12 @@ export default function ContextualChatScreen() {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
-        {chatLog.map((msg) => {
+        {chatLog.map((msg, index) => {
           const isMe = msg.senderId === currentUserId;
+          const messageKey = msg.id ? `msg_${msg.id}_${index}` : `msg_idx_${index}`;
           return (
             <View
-              key={msg.id}
+              key={messageKey}
               style={[
                 styles.bubbleWrapper,
                 isMe ? styles.bubbleWrapperMe : styles.bubbleWrapperOther,
@@ -405,7 +458,7 @@ export default function ContextualChatScreen() {
                 ]}
               >
                 {!isMe && (
-                  <Text style={styles.otherSenderTitle}>{msg.senderName || 'Vikram Singh'}</Text>
+                  <Text style={styles.otherSenderTitle}>{msg.senderName || peerName}</Text>
                 )}
                 <Text
                   style={[
@@ -441,7 +494,7 @@ export default function ContextualChatScreen() {
         {isOtherTyping && (
           <View style={styles.typingIndicatorRow}>
             <View style={styles.typingDot} />
-            <Text style={styles.typingText}>Vikram is typing...</Text>
+            <Text style={styles.typingText}>{peerName} is typing...</Text>
           </View>
         )}
       </ScrollView>
@@ -596,8 +649,8 @@ export default function ContextualChatScreen() {
                 <Phone size={20} color={COLORS.primaryLight} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.modalTitle}>Connect with Vikram Singh</Text>
-                <Text style={styles.modalSub}>{peerPhone} • FinFlow Logistics</Text>
+                <Text style={styles.modalTitle}>Connect with {peerName}</Text>
+                <Text style={styles.modalSub}>{peerPhone} • {peerBusiness}</Text>
               </View>
             </View>
 

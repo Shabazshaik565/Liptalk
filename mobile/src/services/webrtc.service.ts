@@ -147,11 +147,21 @@ class WebRTCService {
     // 4. Handle ICE Candidates
     this.pc.onicecandidate = (event: any) => {
       if (event.candidate && this.peerId) {
+        const candidatePayload =
+          typeof event.candidate.toJSON === 'function'
+            ? event.candidate.toJSON()
+            : {
+                candidate: event.candidate.candidate,
+                sdpMid: event.candidate.sdpMid,
+                sdpMLineIndex: event.candidate.sdpMLineIndex,
+                usernameFragment: event.candidate.usernameFragment,
+              };
+
         socketService.sendCallSignal({
           targetUserId: this.peerId,
           signal: {
             type: 'candidate',
-            candidate: event.candidate,
+            candidate: candidatePayload,
           },
         });
       }
@@ -240,6 +250,17 @@ class WebRTCService {
 
     try {
       if (signal.type === 'offer' && SessionDescription) {
+        // Only accept remote offer if in stable state or handling remote offer update
+        if (this.pc.signalingState !== 'stable') {
+          if (this.pc.signalingState === 'have-local-offer' && this.isInitiator) {
+            // Glare tie-breaker: keep local initiator offer
+            return;
+          }
+          try {
+            await this.pc.setLocalDescription({ type: 'rollback' });
+          } catch (_) {}
+        }
+
         const desc = new SessionDescription({
           type: 'offer',
           sdp: signal.sdp,
@@ -263,6 +284,12 @@ class WebRTCService {
           });
         }
       } else if (signal.type === 'answer' && SessionDescription) {
+        // Validate that peer connection is actively waiting for an answer
+        if (this.pc.signalingState !== 'have-local-offer') {
+          // Already in stable state or duplicate answer packet received; safely ignore
+          return;
+        }
+
         const desc = new SessionDescription({
           type: 'answer',
           sdp: signal.sdp,
@@ -273,14 +300,18 @@ class WebRTCService {
         await this.flushQueuedIceCandidates();
       } else if (signal.type === 'candidate' && IceCandidate && signal.candidate) {
         const candidate = new IceCandidate(signal.candidate);
-        if (this.isRemoteDescriptionSet) {
-          await this.pc.addIceCandidate(candidate);
+        if (this.isRemoteDescriptionSet && this.pc.remoteDescription) {
+          try {
+            await this.pc.addIceCandidate(candidate);
+          } catch (e) {
+            // Duplicate/stale ICE candidate safely ignored
+          }
         } else {
           this.iceCandidateQueue.push(candidate);
         }
       }
     } catch (err) {
-      console.error('Error processing WebRTC signaling message:', err);
+      console.warn('Handled WebRTC signaling state transition:', err);
     }
   }
 
@@ -312,14 +343,72 @@ class WebRTCService {
   }
 
   /**
+   * Dynamically acquire and attach camera stream if not already active
+   */
+  async enableVideoCamera(): Promise<any> {
+    const mediaDev = this.getMediaDevices();
+    if (!mediaDev) return null;
+
+    try {
+      if (!this.localStream) {
+        this.localStream = await mediaDev.getUserMedia({
+          audio: true,
+          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+        });
+      } else {
+        const existingVideoTracks = this.localStream.getVideoTracks();
+        if (existingVideoTracks.length === 0) {
+          const videoOnlyStream = await mediaDev.getUserMedia({
+            video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+          });
+          const newVideoTrack = videoOnlyStream.getVideoTracks()[0];
+          if (newVideoTrack) {
+            this.localStream.addTrack(newVideoTrack);
+            if (this.pc) {
+              try {
+                this.pc.addTrack(newVideoTrack, this.localStream);
+                if (this.isInitiator) {
+                  this.createAndSendOffer();
+                }
+              } catch (_) {}
+            }
+          }
+        } else {
+          existingVideoTracks.forEach((t: any) => {
+            t.enabled = true;
+          });
+        }
+      }
+      this.callType = 'VIDEO';
+      this.notifyLocalStream(this.localStream);
+      return this.localStream;
+    } catch (err) {
+      console.warn('Could not acquire video camera:', err);
+      return null;
+    }
+  }
+
+  /**
    * Enable / Disable local video camera track
    */
-  toggleVideo(isCameraOff: boolean): boolean {
-    if (!this.localStream) return false;
+  async toggleVideo(isCameraOff: boolean): Promise<boolean> {
+    if (!this.localStream) {
+      if (!isCameraOff) {
+        await this.enableVideoCamera();
+      }
+      return isCameraOff;
+    }
+
     const videoTracks = this.localStream.getVideoTracks();
+    if (videoTracks.length === 0 && !isCameraOff) {
+      await this.enableVideoCamera();
+      return false;
+    }
+
     videoTracks.forEach((track: any) => {
       track.enabled = !isCameraOff;
     });
+    this.notifyLocalStream(this.localStream);
     return isCameraOff;
   }
 

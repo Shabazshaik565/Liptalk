@@ -30,14 +30,32 @@ export default function IncomingCallScreen() {
     callerPhone?: string;
   }>();
 
+  const currentUserId = user?.id || 'usr_curr_01';
+  const isVikram = currentUserId === 'usr_vikram_01';
+
+  const defaultCaller = isVikram
+    ? {
+        id: 'usr_curr_01',
+        name: 'Alex Morgan',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
+        phone: '+91 9962786367',
+        headline: 'Founder & Head of Tech @ Nexas Digital',
+      }
+    : {
+        id: 'usr_vikram_01',
+        name: 'Vikram Singh',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+        phone: '+91 7200317219',
+        headline: 'Founder & CEO @ FinFlow Logistics Tech',
+      };
+
   const callId = params.callId || 'call_01';
-  const callerId = params.callerId || 'usr_vikram_01';
-  const callerName = params.callerName || 'Vikram Singh';
-  const callerAvatar =
-    params.callerAvatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200';
-  const callerPhone = params.callerPhone || '+91 7200317219';
+  const callerId = params.callerId || defaultCaller.id;
+  const callerName = params.callerName || defaultCaller.name;
+  const callerAvatar = params.callerAvatar || defaultCaller.avatar;
+  const callerPhone = params.callerPhone || defaultCaller.phone;
   const callType = (params.callType || 'VOICE') as 'VOICE' | 'VIDEO';
-  const callerHeadline = params.callerHeadline || 'Founder & CEO @ FinFlow Logistics Tech';
+  const callerHeadline = params.callerHeadline || defaultCaller.headline;
 
   // WhatsApp-style concentric expanding radar rings
   const pulseAnim1 = useRef(new Animated.Value(0)).current;

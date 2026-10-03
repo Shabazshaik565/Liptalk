@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { MessageSquare, Sparkles, Briefcase, ChevronRight } from 'lucide-react-native';
 import { chatApi } from '../../src/api/domain.api';
+import { useAuthStore } from '../../src/store/auth.store';
 import { Header } from '../../src/components/common/Header';
 import { Badge } from '../../src/components/common/Badge';
 import { EmptyState } from '../../src/components/common/EmptyState';
@@ -12,11 +13,13 @@ import { COLORS, SPACING, RADIUS, SHADOWS } from '../../src/constants/theme';
 
 export default function ChatListScreen() {
   const router = useRouter();
+  const { user } = useAuthStore();
+  const currentUserId = user?.id || 'usr_curr_01';
   const [refreshing, setRefreshing] = useState(false);
 
   const { data: conversations = [], isLoading, refetch } = useQuery({
-    queryKey: ['conversations'],
-    queryFn: () => chatApi.getConversations(),
+    queryKey: ['conversations', currentUserId],
+    queryFn: () => chatApi.getConversations(currentUserId),
   });
 
   const onRefresh = async () => {

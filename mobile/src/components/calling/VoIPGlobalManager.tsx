@@ -100,6 +100,9 @@ export const VoIPGlobalManager: React.FC = () => {
       callerId: call.callerId,
     });
 
+    const isVikram = user?.id === 'usr_vikram_01';
+    const defaultPeerPhone = isVikram ? '+91 9962786367' : '+91 7200317219';
+
     router.push({
       pathname: '/call/active' as any,
       params: {
@@ -107,7 +110,7 @@ export const VoIPGlobalManager: React.FC = () => {
         peerId: call.callerId,
         peerName: call.callerName,
         peerAvatar: call.callerAvatar,
-        peerPhone: call.callerPhone || '+91 7200317219',
+        peerPhone: call.callerPhone || defaultPeerPhone,
         callType: call.callType,
         isIncoming: 'true',
       },
@@ -130,6 +133,9 @@ export const VoIPGlobalManager: React.FC = () => {
   const handleOpenFullscreen = () => {
     if (!incomingCall) return;
     const call = incomingCall;
+    const isVikram = user?.id === 'usr_vikram_01';
+    const defaultCallerPhone = isVikram ? '+91 9962786367' : '+91 7200317219';
+
     router.push({
       pathname: '/call/incoming' as any,
       params: {
@@ -138,7 +144,7 @@ export const VoIPGlobalManager: React.FC = () => {
         callerName: call.callerName,
         callerAvatar: call.callerAvatar,
         callerHeadline: call.callerHeadline,
-        callerPhone: call.callerPhone || '+91 7200317219',
+        callerPhone: call.callerPhone || defaultCallerPhone,
         callType: call.callType,
       },
     });
@@ -155,50 +161,49 @@ export const VoIPGlobalManager: React.FC = () => {
         },
       ]}
     >
-      <TouchableOpacity
-        style={styles.card}
-        onPress={handleOpenFullscreen}
-        activeOpacity={0.9}
-        accessibilityRole="button"
-        accessibilityLabel="Incoming call banner"
-      >
-        <View style={styles.avatarWrap}>
-          <Image
-            source={{
-              uri:
-                incomingCall.callerAvatar ||
-                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
-            }}
-            style={styles.avatar}
-          />
-          <View style={styles.typeBadge}>
-            {incomingCall.callType === 'VIDEO' ? (
-              <Video size={10} color="#FFF" />
-            ) : (
-              <Phone size={10} color="#FFF" />
-            )}
+      <View style={styles.card}>
+        <TouchableOpacity
+          style={styles.contentPressable}
+          onPress={handleOpenFullscreen}
+          activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="Open incoming call fullscreen"
+        >
+          <View style={styles.avatarWrap}>
+            <Image
+              source={{
+                uri:
+                  incomingCall.callerAvatar ||
+                  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+              }}
+              style={styles.avatar}
+            />
+            <View style={styles.typeBadge}>
+              {incomingCall.callType === 'VIDEO' ? (
+                <Video size={10} color="#FFF" />
+              ) : (
+                <Phone size={10} color="#FFF" />
+              )}
+            </View>
           </View>
-        </View>
 
-        <View style={styles.infoCol}>
-          <Text style={styles.name} numberOfLines={1}>
-            {incomingCall.callerName}
-          </Text>
-          <View style={styles.statusRow}>
-            <Sparkles size={11} color={COLORS.accent} />
-            <Text style={styles.statusText}>
-              Incoming {incomingCall.callType.toLowerCase()} call...
+          <View style={styles.infoCol}>
+            <Text style={styles.name} numberOfLines={1}>
+              {incomingCall.callerName}
             </Text>
+            <View style={styles.statusRow}>
+              <Sparkles size={11} color={COLORS.accent} />
+              <Text style={styles.statusText}>
+                Incoming {incomingCall.callType.toLowerCase()} call...
+              </Text>
+            </View>
           </View>
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.actionsRow}>
           <TouchableOpacity
             style={[styles.btn, styles.declineBtn]}
-            onPress={(e) => {
-              e.stopPropagation();
-              handleDecline();
-            }}
+            onPress={() => handleDecline()}
             accessibilityRole="button"
             accessibilityLabel="Decline call"
           >
@@ -207,17 +212,14 @@ export const VoIPGlobalManager: React.FC = () => {
 
           <TouchableOpacity
             style={[styles.btn, styles.acceptBtn]}
-            onPress={(e) => {
-              e.stopPropagation();
-              handleAccept();
-            }}
+            onPress={() => handleAccept()}
             accessibilityRole="button"
             accessibilityLabel="Accept call"
           >
             <Phone size={16} color="#FFF" />
           </TouchableOpacity>
         </View>
-      </TouchableOpacity>
+      </View>
     </Animated.View>
   );
 };
@@ -241,6 +243,12 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.1)',
     gap: SPACING.sm,
     ...SHADOWS.lg,
+  },
+  contentPressable: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
   },
   avatarWrap: {
     position: 'relative',

@@ -31,6 +31,12 @@ export const RTCStreamView: React.FC<RTCStreamViewProps> = ({
   useEffect(() => {
     if (Platform.OS === 'web' && videoRef.current && stream) {
       videoRef.current.srcObject = stream;
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Autoplay policy handled gracefully
+        });
+      }
     }
   }, [stream]);
 
@@ -52,6 +58,7 @@ export const RTCStreamView: React.FC<RTCStreamViewProps> = ({
             height: '100%',
             objectFit: objectFit,
             transform: mirror ? 'scaleX(-1)' : 'none',
+            backgroundColor: '#000',
           }}
         />
       </View>
